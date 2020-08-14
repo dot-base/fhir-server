@@ -8,6 +8,7 @@ import javax.sql.DataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 
@@ -49,7 +50,8 @@ public class FhirServerConfigR4 extends BaseJavaConfigR4 {
   }
 
   @Bean
-  public JpaTransactionManager transactionManager(
+  @Primary
+  public JpaTransactionManager hapiTransactionManager(
     EntityManagerFactory entityManagerFactory
   ) {
     JpaTransactionManager retVal = new JpaTransactionManager();
