@@ -1,8 +1,5 @@
 package ca.uhn.fhir.jpa.starter;
 
-import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.jpa.empi.config.EmpiConsumerConfig;
-import ca.uhn.fhir.jpa.empi.config.EmpiSubmitterConfig;
 import ca.uhn.fhir.jpa.subscription.channel.config.SubscriptionChannelConfig;
 import ca.uhn.fhir.jpa.subscription.match.config.SubscriptionProcessorConfig;
 import ca.uhn.fhir.jpa.subscription.match.config.WebsocketDispatcherConfig;
@@ -12,18 +9,7 @@ import org.springframework.web.context.support.AnnotationConfigWebApplicationCon
 public class ApplicationContext extends AnnotationConfigWebApplicationContext {
 
   public ApplicationContext() {
-    FhirVersionEnum fhirVersion = HapiProperties.getFhirVersion();
-    if (fhirVersion == FhirVersionEnum.DSTU2) {
-      register(FhirServerConfigDstu2.class, FhirServerConfigCommon.class);
-    } else if (fhirVersion == FhirVersionEnum.DSTU3) {
-      register(FhirServerConfigDstu3.class, FhirServerConfigCommon.class);
-    } else if (fhirVersion == FhirVersionEnum.R4) {
-      register(FhirServerConfigR4.class, FhirServerConfigCommon.class);
-    } else if (fhirVersion == FhirVersionEnum.R5) {
-      register(FhirServerConfigR5.class, FhirServerConfigCommon.class);
-    } else {
-      throw new IllegalStateException();
-    }
+    register(FhirServerConfigR4.class, FhirServerConfigCommon.class);
 
     if (HapiProperties.getSubscriptionWebsocketEnabled()) {
       register(WebsocketDispatcherConfig.class);
@@ -38,10 +24,5 @@ public class ApplicationContext extends AnnotationConfigWebApplicationContext {
       register(SubscriptionProcessorConfig.class);
       register(SubscriptionChannelConfig.class);
     }
-    // if (HapiProperties.getEmpiEnabled()) {
-    //   register(EmpiSubmitterConfig.class);
-    //   register(EmpiConsumerConfig.class);
-    //   register(EmpiConfig.class);
-    // }
   }
 }

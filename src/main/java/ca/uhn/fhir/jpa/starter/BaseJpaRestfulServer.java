@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.starter;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
@@ -85,30 +84,14 @@ public class BaseJpaRestfulServer extends RestfulServer {
     /*
      * ResourceProviders are fetched from the Spring context
      */
-    FhirVersionEnum fhirVersion = HapiProperties.getFhirVersion();
-    ResourceProviderFactory resourceProviders;
-    Object systemProvider;
-    if (fhirVersion == FhirVersionEnum.DSTU2) {
-      resourceProviders =
-        appCtx.getBean("myResourceProvidersDstu2", ResourceProviderFactory.class);
-      systemProvider =
-        appCtx.getBean("mySystemProviderDstu2", JpaSystemProviderDstu2.class);
-    } else if (fhirVersion == FhirVersionEnum.DSTU3) {
-      resourceProviders =
-        appCtx.getBean("myResourceProvidersDstu3", ResourceProviderFactory.class);
-      systemProvider =
-        appCtx.getBean("mySystemProviderDstu3", JpaSystemProviderDstu3.class);
-    } else if (fhirVersion == FhirVersionEnum.R4) {
-      resourceProviders =
-        appCtx.getBean("myResourceProvidersR4", ResourceProviderFactory.class);
-      systemProvider = appCtx.getBean("mySystemProviderR4", JpaSystemProviderR4.class);
-    } else if (fhirVersion == FhirVersionEnum.R5) {
-      resourceProviders =
-        appCtx.getBean("myResourceProvidersR5", ResourceProviderFactory.class);
-      systemProvider = appCtx.getBean("mySystemProviderR5", JpaSystemProviderR5.class);
-    } else {
-      throw new IllegalStateException();
-    }
+    ResourceProviderFactory resourceProviders = appCtx.getBean(
+      "myResourceProvidersR4",
+      ResourceProviderFactory.class
+    );
+    Object systemProvider = appCtx.getBean(
+      "mySystemProviderR4",
+      JpaSystemProviderR4.class
+    );
 
     setFhirContext(appCtx.getBean(FhirContext.class));
 
@@ -125,62 +108,19 @@ public class BaseJpaRestfulServer extends RestfulServer {
      */
     DaoConfig daoConfig = appCtx.getBean(DaoConfig.class);
     ISearchParamRegistry searchParamRegistry = appCtx.getBean(ISearchParamRegistry.class);
-    if (fhirVersion == FhirVersionEnum.DSTU2) {
-      IFhirSystemDao<ca.uhn.fhir.model.dstu2.resource.Bundle, MetaDt> systemDao = appCtx.getBean(
-        "mySystemDaoDstu2",
-        IFhirSystemDao.class
-      );
-      JpaConformanceProviderDstu2 confProvider = new JpaConformanceProviderDstu2(
-        this,
-        systemDao,
-        daoConfig
-      );
-      confProvider.setImplementationDescription("HAPI FHIR DSTU2 Server");
-      setServerConformanceProvider(confProvider);
-    } else {
-      if (fhirVersion == FhirVersionEnum.DSTU3) {
-        IFhirSystemDao<Bundle, Meta> systemDao = appCtx.getBean(
-          "mySystemDaoDstu3",
-          IFhirSystemDao.class
-        );
-        JpaConformanceProviderDstu3 confProvider = new JpaConformanceProviderDstu3(
-          this,
-          systemDao,
-          daoConfig,
-          searchParamRegistry
-        );
-        confProvider.setImplementationDescription("HAPI FHIR DSTU3 Server");
-        setServerConformanceProvider(confProvider);
-      } else if (fhirVersion == FhirVersionEnum.R4) {
-        IFhirSystemDao<org.hl7.fhir.r4.model.Bundle, org.hl7.fhir.r4.model.Meta> systemDao = appCtx.getBean(
-          "mySystemDaoR4",
-          IFhirSystemDao.class
-        );
-        JpaConformanceProviderR4 confProvider = new JpaConformanceProviderR4(
-          this,
-          systemDao,
-          daoConfig,
-          searchParamRegistry
-        );
-        confProvider.setImplementationDescription("HAPI FHIR R4 Server");
-        setServerConformanceProvider(confProvider);
-      } else if (fhirVersion == FhirVersionEnum.R5) {
-        IFhirSystemDao<org.hl7.fhir.r5.model.Bundle, org.hl7.fhir.r5.model.Meta> systemDao = appCtx.getBean(
-          "mySystemDaoR5",
-          IFhirSystemDao.class
-        );
-        JpaConformanceProviderR5 confProvider = new JpaConformanceProviderR5(
-          this,
-          systemDao,
-          daoConfig,
-          searchParamRegistry
-        );
-        confProvider.setImplementationDescription("HAPI FHIR R5 Server");
-        setServerConformanceProvider(confProvider);
-      } else {
-        throw new IllegalStateException();
-      }
-    }
+
+    IFhirSystemDao<org.hl7.fhir.r4.model.Bundle, org.hl7.fhir.r4.model.Meta> systemDao = appCtx.getBean(
+      "mySystemDaoR4",
+      IFhirSystemDao.class
+    );
+    JpaConformanceProviderR4 confProvider = new JpaConformanceProviderR4(
+      this,
+      systemDao,
+      daoConfig,
+      searchParamRegistry
+    );
+    confProvider.setImplementationDescription("HAPI FHIR R4 Server");
+    setServerConformanceProvider(confProvider);
 
     /*
      * ETag Support
@@ -352,9 +292,7 @@ public class BaseJpaRestfulServer extends RestfulServer {
 
     // GraphQL
     if (HapiProperties.getGraphqlEnabled()) {
-      if (fhirVersion.isEqualOrNewerThan(FhirVersionEnum.DSTU3)) {
-        registerProvider(appCtx.getBean(GraphQLProvider.class));
-      }
+      registerProvider(appCtx.getBean(GraphQLProvider.class));
     }
 
     if (!HapiProperties.getAllowedBundleTypes().isEmpty()) {
