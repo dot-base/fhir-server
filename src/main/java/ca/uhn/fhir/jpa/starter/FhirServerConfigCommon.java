@@ -12,7 +12,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.sql.Driver;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.hl7.fhir.dstu2.model.Subscription;
-import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -264,11 +263,10 @@ public class FhirServerConfigCommon {
       retVal.setSmtpServerPort(this.emailPort);
       retVal.setSmtpServerUsername(this.emailUsername);
       retVal.setSmtpServerPassword(this.emailPassword);
-      // TODO KHS add these when HAPI 4.2.0 is released
-      //      retVal.setAuth(this.emailAuth);
-      //      retVal.setStartTlsEnable(this.emailStartTlsEnable);
-      //      retVal.setStartTlsRequired(this.emailStartTlsRequired);
-      //      retVal.setQuitWait(this.emailQuitWait);
+      retVal.setAuth(this.emailAuth);
+      retVal.setStartTlsEnable(this.emailStartTlsEnable);
+      retVal.setStartTlsRequired(this.emailStartTlsRequired);
+      retVal.setQuitWait(this.emailQuitWait);
 
       SubscriptionDeliveryHandlerFactory subscriptionDeliveryHandlerFactory = myAppCtx.getBean(
         SubscriptionDeliveryHandlerFactory.class
