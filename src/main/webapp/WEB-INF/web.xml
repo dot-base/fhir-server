@@ -28,7 +28,7 @@
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>fhirServlet</servlet-name>
-		<url-pattern>/*</url-pattern>
+		<url-pattern>/api/fhir/*</url-pattern>
 	</servlet-mapping>
 
 </web-app>
