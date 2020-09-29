@@ -1,7 +1,7 @@
 version: "3.8"
 services:
   fhir-server:
-    image: "docker.pkg.github.com/dot-base/fhir-server/fhir-server:latest"
+    image: "ghcr.io/dot-base/fhir-server:latest"
     environment:
       HAPI_DATASOURCE_URL: "jdbc:postgresql://fhir-postgres:5432/hapi_r4"
       HAPI_DATASOURCE_USERNAME: "${FHIR_DB_USER:-admin}"
