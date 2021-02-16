@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.starter.moveBase;
+package ca.uhn.fhir.jpa.starter.dotBase;
 
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
@@ -7,13 +7,7 @@ import ca.uhn.fhir.rest.api.server.IPreResourceAccessDetails;
 import ca.uhn.fhir.rest.api.server.IPreResourceShowDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import java.util.Iterator;
-import java.util.ListIterator;
-import java.util.Spliterator;
 import javax.servlet.http.HttpServletRequest;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.HumanName;
-import org.hl7.fhir.r4.model.Patient;
 
 @Interceptor
 public class PatientInterceptor {

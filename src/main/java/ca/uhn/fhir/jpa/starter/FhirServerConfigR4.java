@@ -5,7 +5,7 @@ import ca.uhn.fhir.jpa.api.dao.IDao;
 import ca.uhn.fhir.jpa.config.BaseJavaConfigR4;
 import ca.uhn.fhir.jpa.dao.SearchBuilder;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
-import ca.uhn.fhir.jpa.starter.moveBase.MoveBaseSearchBuilder;
+import ca.uhn.fhir.jpa.starter.moveBase.searchBuilder.DotBaseSearchBuilder;
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -42,7 +42,7 @@ public class FhirServerConfigR4 extends BaseJavaConfigR4 {
     String theResourceName,
     Class<? extends IBaseResource> theResourceType
   ) {
-    return new MoveBaseSearchBuilder(theDao, theResourceName, theResourceType);
+    return new DotBaseSearchBuilder(theDao, theResourceName, theResourceType);
   }
 
   @Override
