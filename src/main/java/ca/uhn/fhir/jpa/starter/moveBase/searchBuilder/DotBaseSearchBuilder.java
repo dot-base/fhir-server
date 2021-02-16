@@ -175,7 +175,7 @@ public class DotBaseSearchBuilder extends SearchBuilder {
         theLastUpdated.getLowerBoundAsInstant() != null ||
         theLastUpdated.getUpperBoundAsInstant() != null
       )
-    ) {
+    )
       return 
         new HashSet<>(
           filterResourceIdsByLastUpdated(
@@ -184,7 +184,7 @@ public class DotBaseSearchBuilder extends SearchBuilder {
             pidsToInclude
           )
         );
-    }
+  return pidsToInclude;
   }
 
   private HashSet<ResourcePersistentId> loadIncludeMatchAll(String findFieldName, String searchFieldName,boolean theReverseMode, EntityManager theEntityManager,Collection<ResourcePersistentId> nextRoundMatches,
@@ -219,20 +219,20 @@ public class DotBaseSearchBuilder extends SearchBuilder {
 
         boolean matchAll = "*".equals(nextInclude.getValue());
         if (matchAll) {
-        return this.loadIncludeMatchAll(findFieldName, searchFieldName, theReverseMode, theEntityManager, nextRoundMatches, pidsToInclude);
+          pidsToInclude.addAll(this.loadIncludeMatchAll(findFieldName, searchFieldName, theReverseMode, theEntityManager, nextRoundMatches, pidsToInclude));
         } else {
           List<String> paths;
           RuntimeSearchParam param;
           String resType = nextInclude.getParamType();
           if (isBlank(resType)) {
-            continue;
+            return pidsToInclude;
           }
           RuntimeResourceDefinition def = theContext.getResourceDefinition(resType);
           if (def == null) {
             ourLog.warn(
               "Unknown resource type in include/revinclude=" + nextInclude.getValue()
             );
-            continue;
+            return pidsToInclude;
           }
 
           String paramName = nextInclude.getParamName();
@@ -245,7 +245,7 @@ public class DotBaseSearchBuilder extends SearchBuilder {
             ourLog.warn(
               "Unknown param name in include/revinclude=" + nextInclude.getValue()
             );
-            continue;
+            return pidsToInclude;
           }
 
           paths = param.getPathsSplit();
@@ -285,6 +285,7 @@ public class DotBaseSearchBuilder extends SearchBuilder {
             }
           }
         }
+        return pidsToInclude;
   }
 
   private List<Collection<ResourcePersistentId>> partition(
