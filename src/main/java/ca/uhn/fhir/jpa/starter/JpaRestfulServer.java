@@ -13,6 +13,7 @@ public class JpaRestfulServer extends BaseJpaRestfulServer {
     // Add your own customization here
 
     registerProvider(new PlainSystemProviderR4());
+    registerInterceptor(new PatientInterceptor());
 
     FhirContext ctx = getFhirContext();
     ctx.getParserOptions().setStripVersionsFromReferences(false);
