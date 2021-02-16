@@ -1,6 +1,8 @@
 package ca.uhn.fhir.jpa.starter;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.starter.moveBase.PatientInterceptor;
+import ca.uhn.fhir.jpa.starter.moveBase.PatientResponseInterceptor;
 import ca.uhn.fhir.jpa.starter.moveBase.PlainSystemProviderR4;
 import javax.servlet.ServletException;
 
@@ -14,6 +16,7 @@ public class JpaRestfulServer extends BaseJpaRestfulServer {
 
     registerProvider(new PlainSystemProviderR4());
     registerInterceptor(new PatientInterceptor());
+    registerInterceptor(new PatientResponseInterceptor());
 
     FhirContext ctx = getFhirContext();
     ctx.getParserOptions().setStripVersionsFromReferences(false);
