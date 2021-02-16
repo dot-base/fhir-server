@@ -42,21 +42,29 @@ import javax.persistence.criteria.Root;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class MoveBaseSearchBuilder extends SearchBuilder {
+/**
+ * Custom SearchBuilder that overrides SearchBuilder.loadIncludes()
+ * Due to using separate FHIR servers for patients and all other clinical data
+ * external references to patients need to be resolved and returned as well.
+ * In general for requests to /Patient or /Patient/id this is handled by using a proxy server
+ * 
+ * Requests with _include params that result in a external reference for a patient are handled 
+ * by this SearchBuilder.
+ */
+public class DotBaseSearchBuilder extends SearchBuilder {
   @Autowired
   private ISearchParamRegistry mySearchParamRegistry;
 
   private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(
-    MoveBaseSearchBuilder.class
+    DotBaseSearchBuilder.class
   );
 
-  public MoveBaseSearchBuilder(
+  public DotBaseSearchBuilder(
     IDao theDao,
     String theResourceName,
     Class<? extends IBaseResource> theResourceType
   ) {
     super(theDao, theResourceName, theResourceType);
-    ourLog.info("MoveBaseSearchBuilder");
   }
 
   @Override
@@ -70,17 +78,6 @@ public class MoveBaseSearchBuilder extends SearchBuilder {
     String theSearchIdOrDescription,
     RequestDetails theRequest
   ) {
-    // HashSet<ResourcePersistentId> addAll = super.loadIncludes(
-    // theContext,
-    // theEntityManager,
-    // theMatches,
-    // theRevIncludes,
-    // theReverseMode,
-    // theLastUpdated,
-    // theSearchIdOrDescription,
-    // theRequest
-    // );
-    // return addAll;
     if (theMatches.size() == 0) {
       return new HashSet<>();
     }
@@ -103,40 +100,126 @@ public class MoveBaseSearchBuilder extends SearchBuilder {
     boolean addedSomeThisRound;
     do {
       roundCounts++;
-
       HashSet<ResourcePersistentId> pidsToInclude = new HashSet<>();
 
-      for (Iterator<Include> iter = includes.iterator(); iter.hasNext();) {
-        Include nextInclude = iter.next();
+      for (Iterator<Include> iter = includes.iterator(); iter.hasNext();)
+        pidsToInclude.addAll(this.loadInclude(findFieldName, searchFieldName, iter, theReverseMode, theContext, theEntityManager, nextRoundMatches, pidsToInclude, theRequest));
+        
+      if (theReverseMode) 
+          pidsToInclude = this.handleReverseMode(theLastUpdated, theEntityManager, pidsToInclude);
+      for (ResourcePersistentId next : pidsToInclude) {
+        if (original.contains(next) == false && allAdded.contains(next) == false) {
+          theMatches.add(next);
+        }
+      }
+
+      addedSomeThisRound = allAdded.addAll(pidsToInclude);
+      nextRoundMatches = pidsToInclude;
+    } while (includes.size() > 0 && nextRoundMatches.size() > 0 && addedSomeThisRound);
+
+    allAdded.removeAll(original);
+
+    ourLog.info(
+      "Loaded {} {} in {} rounds and {} ms for search {}",
+      allAdded.size(),
+      theReverseMode ? "_revincludes" : "_includes",
+      roundCounts,
+      w.getMillisAndRestart(),
+      theSearchIdOrDescription
+    );
+
+    if (allAdded.size() > 0) {
+      List<ResourcePersistentId> includedPidList = new ArrayList<>(allAdded);
+      JpaPreResourceAccessDetails accessDetails = this.callPreAccessResourcesHook(includedPidList,theRequest);
+
+
+      for (int i = includedPidList.size() - 1; i >= 0; i--) {
+        if (accessDetails.isDontReturnResourceAtIndex(i)) {
+          ResourcePersistentId value = includedPidList.remove(i);
+          if (value != null) {
+            theMatches.remove(value);
+          }
+        }
+      }
+
+      allAdded = new HashSet<>(includedPidList);
+    }
+    return allAdded;
+  }
+
+  // Interceptor call: STORAGE_PREACCESS_RESOURCES
+  // This can be used to remove results from the search result details before
+  // the user has a chance to know that they were in the results
+  private JpaPreResourceAccessDetails callPreAccessResourcesHook(List<ResourcePersistentId> includedPidList,RequestDetails theRequest){
+    JpaPreResourceAccessDetails accessDetails = new JpaPreResourceAccessDetails(
+      includedPidList,
+      () -> this
+    );
+    HookParams params = new HookParams()
+      .add(IPreResourceAccessDetails.class, accessDetails)
+      .add(RequestDetails.class, theRequest)
+      .addIfMatchesType(ServletRequestDetails.class, theRequest);
+    JpaInterceptorBroadcaster.doCallHooks(
+      myInterceptorBroadcaster,
+      theRequest,
+      Pointcut.STORAGE_PREACCESS_RESOURCES,
+      params
+    );
+    return accessDetails;
+  }
+
+  private HashSet<ResourcePersistentId> handleReverseMode(DateRangeParam theLastUpdated, EntityManager theEntityManager,HashSet<ResourcePersistentId> pidsToInclude){
+    if (
+      theLastUpdated != null &&
+      (
+        theLastUpdated.getLowerBoundAsInstant() != null ||
+        theLastUpdated.getUpperBoundAsInstant() != null
+      )
+    ) {
+      return 
+        new HashSet<>(
+          filterResourceIdsByLastUpdated(
+            theEntityManager,
+            theLastUpdated,
+            pidsToInclude
+          )
+        );
+    }
+  }
+
+  private HashSet<ResourcePersistentId> loadIncludeMatchAll(String findFieldName, String searchFieldName,boolean theReverseMode, EntityManager theEntityManager,Collection<ResourcePersistentId> nextRoundMatches,
+  HashSet<ResourcePersistentId> pidsToInclude){
+    String sql = Queries.matchAll(findFieldName, searchFieldName);
+    List<Collection<ResourcePersistentId>> partitions = partition(
+      nextRoundMatches,
+      getMaximumPageSize()
+    );
+    for (Collection<ResourcePersistentId> nextPartition : partitions) {
+      TypedQuery<Long> q = theEntityManager.createQuery(sql, Long.class);
+      q.setParameter("target_pids", ResourcePersistentId.toLongList(nextPartition));
+      List<Long> results = q.getResultList();
+      for (Long resourceLink : results) {
+        if (theReverseMode) {
+          pidsToInclude.add(new ResourcePersistentId(resourceLink));
+        } else {
+          pidsToInclude.add(new ResourcePersistentId(resourceLink));
+        }
+      }
+    }
+    return pidsToInclude;
+  }
+
+  private HashSet<ResourcePersistentId> loadInclude(String findFieldName, String searchFieldName, Iterator<Include> iter, 
+    boolean theReverseMode, FhirContext theContext, EntityManager theEntityManager,Collection<ResourcePersistentId> nextRoundMatches,
+    HashSet<ResourcePersistentId> pidsToInclude, RequestDetails theRequest) {
+      Include nextInclude = iter.next();
         if (nextInclude.isRecurse() == false) {
           iter.remove();
         }
 
         boolean matchAll = "*".equals(nextInclude.getValue());
         if (matchAll) {
-          String sql;
-          sql =
-            "SELECT r." +
-            findFieldName +
-            " FROM ResourceLink r WHERE r." +
-            searchFieldName +
-            " IN (:target_pids) ";
-          List<Collection<ResourcePersistentId>> partitions = partition(
-            nextRoundMatches,
-            getMaximumPageSize()
-          );
-          for (Collection<ResourcePersistentId> nextPartition : partitions) {
-            TypedQuery<Long> q = theEntityManager.createQuery(sql, Long.class);
-            q.setParameter("target_pids", ResourcePersistentId.toLongList(nextPartition));
-            List<Long> results = q.getResultList();
-            for (Long resourceLink : results) {
-              if (theReverseMode) {
-                pidsToInclude.add(new ResourcePersistentId(resourceLink));
-              } else {
-                pidsToInclude.add(new ResourcePersistentId(resourceLink));
-              }
-            }
-          }
+        return this.loadIncludeMatchAll(findFieldName, searchFieldName, theReverseMode, theEntityManager, nextRoundMatches, pidsToInclude);
         } else {
           List<String> paths;
           RuntimeSearchParam param;
@@ -172,32 +255,8 @@ public class MoveBaseSearchBuilder extends SearchBuilder {
             null
           );
           for (String nextPath : paths) {
-            String sql;
-
             boolean haveTargetTypesDefinedByParam = param.hasTargets();
-            if (targetResourceType != null) {
-              sql =
-                "SELECT r." +
-                findFieldName +
-                " FROM ResourceLink r WHERE r.mySourcePath = :src_path AND r." +
-                searchFieldName +
-                " IN (:target_pids) AND r.myTargetResourceType = :target_resource_type";
-            } else if (haveTargetTypesDefinedByParam) {
-              sql =
-                "SELECT r." +
-                findFieldName +
-                ",r.myTargetResourceUrl  FROM ResourceLink r WHERE r.mySourcePath = :src_path AND r." +
-                searchFieldName +
-                " IN (:target_pids) AND r.myTargetResourceType in (:target_resource_types)";
-            } else {
-              sql =
-                "SELECT r." +
-                findFieldName +
-                " FROM ResourceLink r WHERE r.mySourcePath = :src_path AND r." +
-                searchFieldName +
-                " IN (:target_pids)";
-            }
-
+            String sql = Queries.notMatchAll(findFieldName, searchFieldName, targetResourceType, haveTargetTypesDefinedByParam);
             List<Collection<ResourcePersistentId>> partitions = partition(
               nextRoundMatches,
               getMaximumPageSize()
@@ -226,85 +285,6 @@ public class MoveBaseSearchBuilder extends SearchBuilder {
             }
           }
         }
-      }
-      Map<String, String[]> map = new <String, String[]>HashMap();
-      map.put("some", new String[] { "someValue" });
-      theRequest.setParameters(map);
-      if (theReverseMode) {
-        if (
-          theLastUpdated != null &&
-          (
-            theLastUpdated.getLowerBoundAsInstant() != null ||
-            theLastUpdated.getUpperBoundAsInstant() != null
-          )
-        ) {
-          pidsToInclude =
-            new HashSet<>(
-              filterResourceIdsByLastUpdated(
-                theEntityManager,
-                theLastUpdated,
-                pidsToInclude
-              )
-            );
-        }
-      }
-      for (ResourcePersistentId next : pidsToInclude) {
-        if (original.contains(next) == false && allAdded.contains(next) == false) {
-          theMatches.add(next);
-        }
-      }
-
-      addedSomeThisRound = allAdded.addAll(pidsToInclude);
-      nextRoundMatches = pidsToInclude;
-    } while (includes.size() > 0 && nextRoundMatches.size() > 0 && addedSomeThisRound);
-
-    allAdded.removeAll(original);
-
-    ourLog.info(
-      "Loaded {} {} in {} rounds and {} ms for search {}",
-      allAdded.size(),
-      theReverseMode ? "_revincludes" : "_includes",
-      roundCounts,
-      w.getMillisAndRestart(),
-      theSearchIdOrDescription
-    );
-
-    // if results contains no PID but URL add to request for RESPONSE_INTERCEPTOR
-
-    // Interceptor call: STORAGE_PREACCESS_RESOURCES
-    // This can be used to remove results from the search result details before
-    // the user has a chance to know that they were in the results
-    if (allAdded.size() > 0) {
-      List<ResourcePersistentId> includedPidList = new ArrayList<>(allAdded);
-      JpaPreResourceAccessDetails accessDetails = new JpaPreResourceAccessDetails(
-        includedPidList,
-        () -> this
-      );
-      HookParams params = new HookParams()
-        .add(IPreResourceAccessDetails.class, accessDetails)
-        .add(RequestDetails.class, theRequest)
-        .addIfMatchesType(ServletRequestDetails.class, theRequest);
-      JpaInterceptorBroadcaster.doCallHooks(
-        myInterceptorBroadcaster,
-        theRequest,
-        Pointcut.STORAGE_PREACCESS_RESOURCES,
-        params
-      );
-
-      for (int i = includedPidList.size() - 1; i >= 0; i--) {
-        if (accessDetails.isDontReturnResourceAtIndex(i)) {
-          ResourcePersistentId value = includedPidList.remove(i);
-          if (value != null) {
-            theMatches.remove(value);
-          }
-        }
-      }
-
-      allAdded = new HashSet<>(includedPidList);
-    }
-    return allAdded;
-    // PersistedJpaBundleProvider.toResourceList()
-    // then loadResourcesByPid()
   }
 
   private List<Collection<ResourcePersistentId>> partition(
