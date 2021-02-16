@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.starter.moveBase;
+package ca.uhn.fhir.jpa.starter.dotBase.searchBuilder;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -26,12 +26,11 @@ import ca.uhn.fhir.util.StopWatch;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
+
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;

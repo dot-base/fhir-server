@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.starter.moveBase;
+package ca.uhn.fhir.jpa.starter.dotBase;
 
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.provider.r4.JpaSystemProviderR4;
