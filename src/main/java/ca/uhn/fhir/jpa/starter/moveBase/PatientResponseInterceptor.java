@@ -58,33 +58,50 @@ import org.hl7.fhir.r4.model.Resource;
  */
 
 public class PatientResponseInterceptor {
-  private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(PatientResponseInterceptor.class);
+  private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(
+    PatientResponseInterceptor.class
+  );
 
   @Hook(Pointcut.SERVER_OUTGOING_RESPONSE)
-  public void preProcessOutgoingResponse(RequestDetails theRequestDetails, ResponseDetails theResponseDetails) {
+  public void preProcessOutgoingResponse(
+    RequestDetails theRequestDetails,
+    ResponseDetails theResponseDetails
+  ) {
     IBaseResource responseResource = theResponseDetails.getResponseResource();
     if (responseResource != null) {
       // TODO: ADD Constants.PARAM_INCLUDE_QUALIFIER_RECURSE,
       // PARAM_INCLUDE_QUALIFIER_ITERATE, PARAM_INCLUDE_RECURSE and
       // PARAM_INCLUDE_ITERATE
-      String externalReference = theRequestDetails.getAttribute("includesExternalReference").toString();
+      String externalReference = theRequestDetails
+        .getAttribute("includesExternalReference")
+        .toString();
       if (externalReference != null) {
         // List<IBaseResource> bundleList = BundleUtil.toListOfResources(
         // ctx,
         // (IBaseBundle) responseResource
         // );
         FhirContext ctx = theRequestDetails.getFhirContext();
-        List<Pair<String, IBaseResource>> bundle = BundleUtil.getBundleEntryUrlsAndResources(ctx,
-            (IBaseBundle) responseResource);
+        List<Pair<String, IBaseResource>> bundle = BundleUtil.getBundleEntryUrlsAndResources(
+          ctx,
+          (IBaseBundle) responseResource
+        );
         Patient patient = new Patient();
         patient.addName(new HumanName().setFamily("PatientFamilyName"));
-        Pair<String, IBaseResource> includeEntry = new MutablePair<>(externalReference, patient);
+        Pair<String, IBaseResource> includeEntry = new MutablePair<>(
+          externalReference,
+          patient
+        );
         bundle.add(includeEntry);
         Bundle copyBundle = new Bundle();
-        bundle.forEach(entry -> {
-          copyBundle
-              .addEntry(new BundleEntryComponent().setFullUrl(entry.getKey()).setResource((Resource) entry.getValue()));
-        });
+        bundle.forEach(
+          entry -> {
+            copyBundle.addEntry(
+              new BundleEntryComponent()
+                .setFullUrl(entry.getKey())
+                .setResource((Resource) entry.getValue())
+            );
+          }
+        );
 
         theResponseDetails.setResponseResource(copyBundle);
       }
