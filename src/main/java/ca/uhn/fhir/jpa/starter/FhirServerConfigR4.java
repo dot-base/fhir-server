@@ -1,14 +1,19 @@
 package ca.uhn.fhir.jpa.starter;
 
 import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.jpa.api.dao.IDao;
 import ca.uhn.fhir.jpa.config.BaseJavaConfigR4;
+import ca.uhn.fhir.jpa.dao.SearchBuilder;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
+import ca.uhn.fhir.jpa.starter.moveBase.MoveBaseSearchBuilder;
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Scope;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 
@@ -28,6 +33,16 @@ public class FhirServerConfigR4 extends BaseJavaConfigR4 {
     pagingProvider.setDefaultPageSize(HapiProperties.getDefaultPageSize());
     pagingProvider.setMaximumPageSize(HapiProperties.getMaximumPageSize());
     return pagingProvider;
+  }
+
+  @Bean(name = SEARCH_BUILDER)
+  @Scope("prototype")
+  public SearchBuilder persistedJpaSearchFirstPageBundleProvider(
+    IDao theDao,
+    String theResourceName,
+    Class<? extends IBaseResource> theResourceType
+  ) {
+    return new MoveBaseSearchBuilder(theDao, theResourceName, theResourceType);
   }
 
   @Override
