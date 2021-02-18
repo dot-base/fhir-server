@@ -30,7 +30,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -46,8 +45,8 @@ import org.springframework.beans.factory.annotation.Autowired;
  * Due to using separate FHIR servers for patients and all other clinical data
  * external references to patients need to be resolved and returned as well.
  * In general for requests to /Patient or /Patient/id this is handled by using a proxy server
- * 
- * Requests with _include params that result in a external reference for a patient are handled 
+ *
+ * Requests with _include params that result in a external reference for a patient are handled
  * by this SearchBuilder.
  */
 public class DotBaseSearchBuilder extends SearchBuilder {
@@ -101,11 +100,25 @@ public class DotBaseSearchBuilder extends SearchBuilder {
       roundCounts++;
       HashSet<ResourcePersistentId> pidsToInclude = new HashSet<>();
 
-      for (Iterator<Include> iter = includes.iterator(); iter.hasNext();)
-        pidsToInclude.addAll(this.loadInclude(findFieldName, searchFieldName, iter, theReverseMode, theContext, theEntityManager, nextRoundMatches, pidsToInclude, theRequest));
-        
-      if (theReverseMode) 
-          pidsToInclude = this.handleReverseMode(theLastUpdated, theEntityManager, pidsToInclude);
+      for (
+        Iterator<Include> iter = includes.iterator();
+        iter.hasNext();
+      ) pidsToInclude.addAll(
+        this.loadInclude(
+            findFieldName,
+            searchFieldName,
+            iter,
+            theReverseMode,
+            theContext,
+            theEntityManager,
+            nextRoundMatches,
+            pidsToInclude,
+            theRequest
+          )
+      );
+
+      if (theReverseMode) pidsToInclude =
+        this.handleReverseMode(theLastUpdated, theEntityManager, pidsToInclude);
       for (ResourcePersistentId next : pidsToInclude) {
         if (original.contains(next) == false && allAdded.contains(next) == false) {
           theMatches.add(next);
@@ -129,8 +142,8 @@ public class DotBaseSearchBuilder extends SearchBuilder {
 
     if (allAdded.size() > 0) {
       List<ResourcePersistentId> includedPidList = new ArrayList<>(allAdded);
-      JpaPreResourceAccessDetails accessDetails = this.callPreAccessResourcesHook(includedPidList,theRequest);
-
+      JpaPreResourceAccessDetails accessDetails =
+        this.callPreAccessResourcesHook(includedPidList, theRequest);
 
       for (int i = includedPidList.size() - 1; i >= 0; i--) {
         if (accessDetails.isDontReturnResourceAtIndex(i)) {
@@ -149,7 +162,10 @@ public class DotBaseSearchBuilder extends SearchBuilder {
   // Interceptor call: STORAGE_PREACCESS_RESOURCES
   // This can be used to remove results from the search result details before
   // the user has a chance to know that they were in the results
-  private JpaPreResourceAccessDetails callPreAccessResourcesHook(List<ResourcePersistentId> includedPidList,RequestDetails theRequest){
+  private JpaPreResourceAccessDetails callPreAccessResourcesHook(
+    List<ResourcePersistentId> includedPidList,
+    RequestDetails theRequest
+  ) {
     JpaPreResourceAccessDetails accessDetails = new JpaPreResourceAccessDetails(
       includedPidList,
       () -> this
@@ -167,27 +183,31 @@ public class DotBaseSearchBuilder extends SearchBuilder {
     return accessDetails;
   }
 
-  private HashSet<ResourcePersistentId> handleReverseMode(DateRangeParam theLastUpdated, EntityManager theEntityManager,HashSet<ResourcePersistentId> pidsToInclude){
+  private HashSet<ResourcePersistentId> handleReverseMode(
+    DateRangeParam theLastUpdated,
+    EntityManager theEntityManager,
+    HashSet<ResourcePersistentId> pidsToInclude
+  ) {
     if (
       theLastUpdated != null &&
       (
         theLastUpdated.getLowerBoundAsInstant() != null ||
         theLastUpdated.getUpperBoundAsInstant() != null
       )
-    )
-      return 
-        new HashSet<>(
-          filterResourceIdsByLastUpdated(
-            theEntityManager,
-            theLastUpdated,
-            pidsToInclude
-          )
-        );
-  return pidsToInclude;
+    ) return new HashSet<>(
+      filterResourceIdsByLastUpdated(theEntityManager, theLastUpdated, pidsToInclude)
+    );
+    return pidsToInclude;
   }
 
-  private HashSet<ResourcePersistentId> loadIncludeMatchAll(String findFieldName, String searchFieldName,boolean theReverseMode, EntityManager theEntityManager,Collection<ResourcePersistentId> nextRoundMatches,
-  HashSet<ResourcePersistentId> pidsToInclude){
+  private HashSet<ResourcePersistentId> loadIncludeMatchAll(
+    String findFieldName,
+    String searchFieldName,
+    boolean theReverseMode,
+    EntityManager theEntityManager,
+    Collection<ResourcePersistentId> nextRoundMatches,
+    HashSet<ResourcePersistentId> pidsToInclude
+  ) {
     String sql = Queries.matchAll(findFieldName, searchFieldName);
     List<Collection<ResourcePersistentId>> partitions = partition(
       nextRoundMatches,
@@ -208,83 +228,97 @@ public class DotBaseSearchBuilder extends SearchBuilder {
     return pidsToInclude;
   }
 
-  private HashSet<ResourcePersistentId> loadInclude(String findFieldName, String searchFieldName, Iterator<Include> iter, 
-    boolean theReverseMode, FhirContext theContext, EntityManager theEntityManager,Collection<ResourcePersistentId> nextRoundMatches,
-    HashSet<ResourcePersistentId> pidsToInclude, RequestDetails theRequest) {
-      Include nextInclude = iter.next();
-        if (nextInclude.isRecurse() == false) {
-          iter.remove();
-        }
+  private HashSet<ResourcePersistentId> loadInclude(
+    String findFieldName,
+    String searchFieldName,
+    Iterator<Include> iter,
+    boolean theReverseMode,
+    FhirContext theContext,
+    EntityManager theEntityManager,
+    Collection<ResourcePersistentId> nextRoundMatches,
+    HashSet<ResourcePersistentId> pidsToInclude,
+    RequestDetails theRequest
+  ) {
+    Include nextInclude = iter.next();
+    if (nextInclude.isRecurse() == false) {
+      iter.remove();
+    }
 
-        boolean matchAll = "*".equals(nextInclude.getValue());
-        if (matchAll) {
-          pidsToInclude.addAll(this.loadIncludeMatchAll(findFieldName, searchFieldName, theReverseMode, theEntityManager, nextRoundMatches, pidsToInclude));
-        } else {
-          List<String> paths;
-          RuntimeSearchParam param;
-          String resType = nextInclude.getParamType();
-          if (isBlank(resType)) {
-            return pidsToInclude;
-          }
-          RuntimeResourceDefinition def = theContext.getResourceDefinition(resType);
-          if (def == null) {
-            ourLog.warn(
-              "Unknown resource type in include/revinclude=" + nextInclude.getValue()
-            );
-            return pidsToInclude;
-          }
-
-          String paramName = nextInclude.getParamName();
-          if (isNotBlank(paramName)) {
-            param = mySearchParamRegistry.getSearchParamByName(def, paramName);
-          } else {
-            param = null;
-          }
-          if (param == null) {
-            ourLog.warn(
-              "Unknown param name in include/revinclude=" + nextInclude.getValue()
-            );
-            return pidsToInclude;
-          }
-
-          paths = param.getPathsSplit();
-
-          String targetResourceType = defaultString(
-            nextInclude.getParamTargetType(),
-            null
-          );
-          for (String nextPath : paths) {
-            boolean haveTargetTypesDefinedByParam = param.hasTargets();
-            String sql = Queries.notMatchAll(findFieldName, searchFieldName, targetResourceType, haveTargetTypesDefinedByParam);
-            List<Collection<ResourcePersistentId>> partitions = partition(
-              nextRoundMatches,
-              getMaximumPageSize()
-            );
-            for (Collection<ResourcePersistentId> nextPartition : partitions) {
-              TypedQuery<Object[]> q = theEntityManager.createQuery(sql, Object[].class);
-              q.setParameter("src_path", nextPath);
-              q.setParameter(
-                "target_pids",
-                ResourcePersistentId.toLongList(nextPartition)
-              );
-              if (targetResourceType != null) {
-                q.setParameter("target_resource_type", targetResourceType);
-              } else if (haveTargetTypesDefinedByParam) {
-                q.setParameter("target_resource_types", param.getTargets());
-              }
-              List<Object[]> results = q.getResultList();
-              for (Object[] resourceLink : results) {
-                if (resourceLink != null) if (
-                  resourceLink.length == 2 && resourceLink[1] != null
-                ) theRequest.setAttribute(
-                  "includesExternalReference",
-                  resourceLink[1]
-                ); else pidsToInclude.add(new ResourcePersistentId(resourceLink[0]));
-              }
-            }
-          }
-        }
+    boolean matchAll = "*".equals(nextInclude.getValue());
+    if (matchAll) {
+      pidsToInclude.addAll(
+        this.loadIncludeMatchAll(
+            findFieldName,
+            searchFieldName,
+            theReverseMode,
+            theEntityManager,
+            nextRoundMatches,
+            pidsToInclude
+          )
+      );
+    } else {
+      List<String> paths;
+      RuntimeSearchParam param;
+      String resType = nextInclude.getParamType();
+      if (isBlank(resType)) {
         return pidsToInclude;
+      }
+      RuntimeResourceDefinition def = theContext.getResourceDefinition(resType);
+      if (def == null) {
+        ourLog.warn(
+          "Unknown resource type in include/revinclude=" + nextInclude.getValue()
+        );
+        return pidsToInclude;
+      }
+
+      String paramName = nextInclude.getParamName();
+      if (isNotBlank(paramName)) {
+        param = mySearchParamRegistry.getSearchParamByName(def, paramName);
+      } else {
+        param = null;
+      }
+      if (param == null) {
+        ourLog.warn("Unknown param name in include/revinclude=" + nextInclude.getValue());
+        return pidsToInclude;
+      }
+
+      paths = param.getPathsSplit();
+
+      String targetResourceType = defaultString(nextInclude.getParamTargetType(), null);
+      for (String nextPath : paths) {
+        boolean haveTargetTypesDefinedByParam = param.hasTargets();
+        String sql = Queries.notMatchAll(
+          findFieldName,
+          searchFieldName,
+          targetResourceType,
+          haveTargetTypesDefinedByParam
+        );
+        List<Collection<ResourcePersistentId>> partitions = partition(
+          nextRoundMatches,
+          getMaximumPageSize()
+        );
+        for (Collection<ResourcePersistentId> nextPartition : partitions) {
+          TypedQuery<Object[]> q = theEntityManager.createQuery(sql, Object[].class);
+          q.setParameter("src_path", nextPath);
+          q.setParameter("target_pids", ResourcePersistentId.toLongList(nextPartition));
+          if (targetResourceType != null) {
+            q.setParameter("target_resource_type", targetResourceType);
+          } else if (haveTargetTypesDefinedByParam) {
+            q.setParameter("target_resource_types", param.getTargets());
+          }
+          List<Object[]> results = q.getResultList();
+          for (Object[] resourceLink : results) {
+            if (resourceLink != null) if (
+              resourceLink.length == 2 && resourceLink[1] != null
+            ) theRequest.setAttribute(
+              "includesExternalReference",
+              resourceLink[1]
+            ); else pidsToInclude.add(new ResourcePersistentId(resourceLink[0]));
+          }
+        }
+      }
+    }
+    return pidsToInclude;
   }
 
   private List<Collection<ResourcePersistentId>> partition(

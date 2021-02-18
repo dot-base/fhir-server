@@ -4,7 +4,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.starter.dotBase.PatientInterceptor;
 import ca.uhn.fhir.jpa.starter.dotBase.PatientResponseInterceptor;
 import ca.uhn.fhir.jpa.starter.dotBase.PlainSystemProviderR4;
-
 import javax.servlet.ServletException;
 
 public class JpaRestfulServer extends BaseJpaRestfulServer {
