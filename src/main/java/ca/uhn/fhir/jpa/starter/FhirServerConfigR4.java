@@ -5,7 +5,7 @@ import ca.uhn.fhir.jpa.api.dao.IDao;
 import ca.uhn.fhir.jpa.config.BaseJavaConfigR4;
 import ca.uhn.fhir.jpa.dao.SearchBuilder;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
-import ca.uhn.fhir.jpa.starter.moveBase.searchBuilder.DotBaseSearchBuilder;
+import ca.uhn.fhir.jpa.starter.dotBase.searchBuilder.DotBaseSearchBuilder;
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
