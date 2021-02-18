@@ -41,13 +41,18 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * Custom SearchBuilder that overrides SearchBuilder.loadIncludes()
- * Due to using separate FHIR servers for patients and all other clinical data
- * external references to patients need to be resolved and returned as well.
- * In general for requests to /Patient or /Patient/id this is handled by using a proxy server
+ * Custom SearchBuilder that overrides SearchBuilder.loadIncludes() to handle
+ * external references: Due to using separate FHIR servers for clinical,study
+ * and core data in dot.base, external references should be resolved and
+ * returned as well.
  *
- * Requests with _include params that result in a external reference for a patient are handled
- * by this SearchBuilder.
+ * In general this aspect is handled by the fhir-reverse-proxy that handles all
+ * incoming resources. But can only handle simple requests like .../fhir/Patient
+ * or transaction bundles
+ *
+ * Requests with _include params that result in a external reference to be
+ * included in the response are handled by this SearchBuilder. See also:
+ * ResponseInterceptorExternalReference
  */
 public class DotBaseSearchBuilder extends SearchBuilder {
   @Autowired
@@ -307,27 +312,54 @@ public class DotBaseSearchBuilder extends SearchBuilder {
             q.setParameter("target_resource_types", param.getTargets());
           }
           List<Object[]> results = q.getResultList();
-          for (Object[] resourceLink : results) {
-            if (resourceLink != null) if (
-              resourceLink.length == 2 && resourceLink[1] != null
-            ) theRequest.setAttribute(
-              "includesExternalReference",
-              resourceLink[1]
-            ); else pidsToInclude.add(new ResourcePersistentId(resourceLink[0]));
-          }
+          this.processResultList(results, pidsToInclude, theRequest);
         }
       }
     }
     return pidsToInclude;
   }
 
+  private HashSet<ResourcePersistentId> processResultList(
+    List<Object[]> results,
+    HashSet<ResourcePersistentId> pidsToInclude,
+    RequestDetails theRequest
+  ) {
+    for (Object[] resourceLink : results) {
+      if (resourceLink != null) if (
+        this.isExternalReference(resourceLink)
+      ) this.externalReferenceToInclude(resourceLink, theRequest); else pidsToInclude.add(
+        new ResourcePersistentId(resourceLink[0])
+      );
+    }
+    return pidsToInclude;
+  }
+
+  private boolean isExternalReference(Object[] resourceLink) {
+    if (resourceLink.length == 2 && resourceLink[1] != null) return true;
+    return false;
+  }
+
+  @SuppressWarnings("unchecked")
+  private void externalReferenceToInclude(
+    Object[] resourceLink,
+    RequestDetails theRequest
+  ) {
+    HashSet<String> attributeValues = new HashSet<String>();
+    HashSet<String> currentValues = (HashSet<String>) theRequest.getAttribute(
+      "_includeIsExternalReference"
+    );
+    if (currentValues != null) attributeValues = currentValues;
+    attributeValues.add(resourceLink[1].toString());
+    theRequest.setAttribute("_includeIsExternalReference", attributeValues);
+  }
+
   private List<Collection<ResourcePersistentId>> partition(
     Collection<ResourcePersistentId> theNextRoundMatches,
     int theMaxLoad
   ) {
-    if (theNextRoundMatches.size() <= theMaxLoad) {
-      return Collections.singletonList(theNextRoundMatches);
-    } else {
+    if (theNextRoundMatches.size() <= theMaxLoad) return Collections.singletonList(
+      theNextRoundMatches
+    ); else {
       List<Collection<ResourcePersistentId>> retVal = new ArrayList<>();
       Collection<ResourcePersistentId> current = null;
       for (ResourcePersistentId next : theNextRoundMatches) {
@@ -338,9 +370,7 @@ public class DotBaseSearchBuilder extends SearchBuilder {
 
         current.add(next);
 
-        if (current.size() >= theMaxLoad) {
-          current = null;
-        }
+        if (current.size() >= theMaxLoad) current = null;
       }
 
       return retVal;
@@ -381,9 +411,8 @@ public class DotBaseSearchBuilder extends SearchBuilder {
     final DateRangeParam theLastUpdated,
     Collection<ResourcePersistentId> thePids
   ) {
-    if (thePids.isEmpty()) {
-      return Collections.emptyList();
-    }
+    if (thePids.isEmpty()) return Collections.emptyList();
+
     CriteriaBuilder builder = theEntityManager.getCriteriaBuilder();
     CriteriaQuery<Long> cq = builder.createQuery(Long.class);
     Root<ResourceTable> from = cq.from(ResourceTable.class);

@@ -1,9 +1,8 @@
 package ca.uhn.fhir.jpa.starter;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.starter.dotBase.PatientInterceptor;
-import ca.uhn.fhir.jpa.starter.dotBase.PatientResponseInterceptor;
 import ca.uhn.fhir.jpa.starter.dotBase.PlainSystemProviderR4;
+import ca.uhn.fhir.jpa.starter.dotBase.ResponseInterceptorExternalReference;
 import javax.servlet.ServletException;
 
 public class JpaRestfulServer extends BaseJpaRestfulServer {
@@ -15,8 +14,7 @@ public class JpaRestfulServer extends BaseJpaRestfulServer {
     // Add your own customization here
 
     registerProvider(new PlainSystemProviderR4());
-    registerInterceptor(new PatientInterceptor());
-    registerInterceptor(new PatientResponseInterceptor());
+    registerInterceptor(new ResponseInterceptorExternalReference());
 
     FhirContext ctx = getFhirContext();
     ctx.getParserOptions().setStripVersionsFromReferences(false);
