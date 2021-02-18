@@ -63,14 +63,14 @@ public class PatientResponseInterceptor {
       // TODO: ADD Constants.PARAM_INCLUDE_QUALIFIER_RECURSE,
       // PARAM_INCLUDE_QUALIFIER_ITERATE, PARAM_INCLUDE_RECURSE and
       // PARAM_INCLUDE_ITERATE
-      String externalReference = theRequestDetails
-        .getAttribute("includesExternalReference")
-        .toString();
-      if (externalReference != null) {
+      if (theRequestDetails.getAttribute("includesExternalReference") != null) {
         // List<IBaseResource> bundleList = BundleUtil.toListOfResources(
         // ctx,
         // (IBaseBundle) responseResource
         // );
+        String externalReference = theRequestDetails
+          .getAttribute("includesExternalReference")
+          .toString();
         FhirContext ctx = theRequestDetails.getFhirContext();
         List<Pair<String, IBaseResource>> bundle = BundleUtil.getBundleEntryUrlsAndResources(
           ctx,
