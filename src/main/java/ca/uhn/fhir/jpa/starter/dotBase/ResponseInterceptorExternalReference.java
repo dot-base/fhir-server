@@ -50,7 +50,6 @@ import org.hl7.fhir.r4.model.Resource;
  *      - Response Customization: Evaluate FHIRPath</a>
  * @since 5.0.0
  */
-
 public class ResponseInterceptorExternalReference {
   private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(
     ResponseInterceptorExternalReference.class
