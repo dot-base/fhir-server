@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.starter.dotBase;
 
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.jpa.starter.dotBase.api.FhirServer;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.ResponseDetails;
 import java.util.HashSet;
@@ -114,13 +115,7 @@ public class ResponseInterceptorExternalReference {
   }
 
   private Resource getExternalResource(String url) {
-    return this.fetchResource(url);
-  }
-
-  //TODO:fetch Patient
-  private Resource fetchResource(String url) {
-    Patient patient = new Patient();
-    patient.addName(new HumanName().setFamily("PatientFamilyName"));
-    return patient;
+    //TODO if /Patient -> getPatient
+    return FhirServer.getPatient(url);
   }
 }
