@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.starter.dotBase;
 
+import ca.uhn.fhir.context.FhirContext;
 /*-
  * #%L
  * HAPI FHIR - Server Framework
@@ -23,6 +24,8 @@ package ca.uhn.fhir.jpa.starter.dotBase;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.starter.dotBase.api.FhirServer;
+import ca.uhn.fhir.parser.DataFormatException;
+import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.ResponseDetails;
 import java.util.HashSet;
@@ -33,7 +36,6 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleEntrySearchComponent;
 import org.hl7.fhir.r4.model.Bundle.SearchEntryMode;
-import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Resource;
 
@@ -53,10 +55,8 @@ public class ResponseInterceptorExternalReference {
   private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(
     ResponseInterceptorExternalReference.class
   );
+  private static final IParser r4Parser = FhirContext.forR4().newJsonParser();
 
-  // TODO: ADD Constants.PARAM_INCLUDE_QUALIFIER_RECURSE,
-  // PARAM_INCLUDE_QUALIFIER_ITERATE, PARAM_INCLUDE_RECURSE and
-  // PARAM_INCLUDE_ITERATE
   @Hook(Pointcut.SERVER_OUTGOING_RESPONSE)
   public void preProcessOutgoingResponse(
     RequestDetails theRequestDetails,
@@ -100,22 +100,34 @@ public class ResponseInterceptorExternalReference {
     HashSet<String> externalReferences
   ) {
     List<BundleEntryComponent> entries = new LinkedList<BundleEntryComponent>();
-    for (String externalReference : externalReferences) entries.add(
-      this.getResourceEntry(externalReference)
-    );
+    for (String externalReference : externalReferences) {
+      BundleEntryComponent entry = this.getResourceEntry(externalReference);
+      if (entry != null) entries.add(this.getResourceEntry(externalReference));
+    }
     return entries;
   }
 
   private BundleEntryComponent getResourceEntry(String externalReference) {
     BundleEntryComponent entry = new BundleEntryComponent();
-    return entry
+    Resource resource = this.getExternalResource(externalReference);
+    return resource == null? null : entry
       .setResource(this.getExternalResource(externalReference))
       .setFullUrl(externalReference)
       .setSearch(new BundleEntrySearchComponent().setMode(SearchEntryMode.INCLUDE));
   }
 
   private Resource getExternalResource(String url) {
-    //TODO if /Patient -> getPatient
-    return FhirServer.getPatient(url);
+    String resource = FhirServer.getExternalResource(url);
+    return (resource == null ? null : parseToPatient(resource));
+  }
+
+  private static Patient parseToPatient(String fullUrl) {
+    String resource = FhirServer.getExternalResource(fullUrl);
+    try {
+      return r4Parser.parseResource(Patient.class, resource);
+    } catch (DataFormatException e) {
+      ourLog.info(e.getMessage());
+      return null;
+    }
   }
 }
