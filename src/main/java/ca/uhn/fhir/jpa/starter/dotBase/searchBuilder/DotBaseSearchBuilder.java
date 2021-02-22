@@ -47,7 +47,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  * returned as well.
  *
  * In general this aspect is handled by the fhir-reverse-proxy that handles all
- * incoming resources. But can only handle simple requests like .../fhir/Patient
+ * incoming resources - but only for simple requests like .../fhir/Patient
  * or transaction bundles
  *
  * Requests with _include params that result in a external reference to be
