@@ -38,6 +38,7 @@ public class FhirServer {
       response = HTTP_CLIENT.send(request, BodyHandlers.ofString());
     } catch (IOException | InterruptedException e) {
       ourLog.info(e.getMessage());
+      return null;
     }
     return (response.statusCode() == 200 ? response.body() : null);
   }

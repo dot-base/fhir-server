@@ -109,10 +109,12 @@ public class ResponseInterceptorExternalReference {
   private BundleEntryComponent getResourceEntry(String externalReference) {
     BundleEntryComponent entry = new BundleEntryComponent();
     Resource resource = this.getExternalResource(externalReference);
-    return resource == null? null : entry
-      .setResource(this.getExternalResource(externalReference))
-      .setFullUrl(externalReference)
-      .setSearch(new BundleEntrySearchComponent().setMode(SearchEntryMode.INCLUDE));
+    return resource == null
+      ? null
+      : entry
+        .setResource(this.getExternalResource(externalReference))
+        .setFullUrl(externalReference)
+        .setSearch(new BundleEntrySearchComponent().setMode(SearchEntryMode.INCLUDE));
   }
 
   private Resource getExternalResource(String url) {
