@@ -18,15 +18,13 @@ public class Queries {
     String targetResourceType,
     boolean haveTargetTypesDefinedByParam
   ) {
-    if (targetResourceType != null) return Queries.withTargetResourceType(
-      findFieldName,
-      searchFieldName
-    ); else if (
-      haveTargetTypesDefinedByParam
-    ) return Queries.haveTargetTypesDefinedByParam(
-      findFieldName,
-      searchFieldName
-    ); else return Queries.NoTargetResourceType(findFieldName, searchFieldName);
+    if (targetResourceType != null) {
+      return Queries.withTargetResourceType(findFieldName, searchFieldName);
+    } else if (haveTargetTypesDefinedByParam) {
+      return Queries.haveTargetTypesDefinedByParam(findFieldName, searchFieldName);
+    } else {
+      return Queries.NoTargetResourceType(findFieldName, searchFieldName);
+    }
   }
 
   private static String withTargetResourceType(
