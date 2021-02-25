@@ -33,10 +33,10 @@ import java.util.LinkedList;
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleEntrySearchComponent;
 import org.hl7.fhir.r4.model.Bundle.SearchEntryMode;
-import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Resource;
 
 /**
@@ -51,79 +51,71 @@ import org.hl7.fhir.r4.model.Resource;
  * @since 5.0.0
  */
 public class ResponseInterceptorExternalReference {
-  private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(
-    ResponseInterceptorExternalReference.class
-  );
+
   private static final IParser r4Parser = FhirContext.forR4().newJsonParser();
+  private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory
+      .getLogger(ResponseInterceptorExternalReference.class);
 
   @Hook(Pointcut.SERVER_OUTGOING_RESPONSE)
-  public void preProcessOutgoingResponse(
-    RequestDetails theRequestDetails,
-    ResponseDetails theResponseDetails
-  ) {
+  public void preProcessOutgoingResponse(RequestDetails theRequestDetails, ResponseDetails theResponseDetails) {
     IBaseResource responseResource = theResponseDetails.getResponseResource();
     if (responseResource != null && this.hasExternalReference(theRequestDetails)) {
-      HashSet<String> externalReferences = this.getExternalReferences(theRequestDetails);
-      Bundle responseBundle =
-        this.getModifiedResponse((Bundle) responseResource, externalReferences);
+      Bundle responseBundle = this.getModifiedResponse((Bundle) responseResource, theRequestDetails);
       theResponseDetails.setResponseResource(responseBundle);
     }
   }
 
   private boolean hasExternalReference(RequestDetails theRequestDetails) {
-    if (
-      theRequestDetails.getAttribute("_includeIsExternalReference") != null
-    ) return true;
+    if (theRequestDetails.getAttribute("_includeIsExternalReference") != null) {
+      return true;
+    }
     return false;
   }
 
   @SuppressWarnings("unchecked")
   private HashSet<String> getExternalReferences(RequestDetails theRequestDetails) {
-    return (HashSet<String>) theRequestDetails.getAttribute(
-      "_includeIsExternalReference"
-    );
+    return (HashSet<String>) theRequestDetails.getAttribute("_includeIsExternalReference");
   }
 
-  private Bundle getModifiedResponse(
-    Bundle responseResource,
-    HashSet<String> externalReferences
-  ) {
-    List<BundleEntryComponent> includeEntries =
-      this.getResourceEntries(externalReferences);
-    Bundle responseBundle = (Bundle) responseResource;
+  private Bundle getModifiedResponse(Bundle responseBundle, RequestDetails theRequestDetails) {
+    HashSet<String> externalReferences = this.getExternalReferences(theRequestDetails);
+    List<BundleEntryComponent> includeEntries = this.includeEntries(externalReferences, theRequestDetails);
     includeEntries.forEach(entry -> responseBundle.addEntry(entry));
     return responseBundle;
   }
 
-  private List<BundleEntryComponent> getResourceEntries(
-    HashSet<String> externalReferences
-  ) {
+  private List<BundleEntryComponent> includeEntries(HashSet<String> externalReferences,
+      RequestDetails theRequestDetails) {
     List<BundleEntryComponent> entries = new LinkedList<BundleEntryComponent>();
     for (String externalReference : externalReferences) {
-      BundleEntryComponent entry = this.getResourceEntry(externalReference);
-      if (entry != null) entries.add(this.getResourceEntry(externalReference));
+      BundleEntryComponent entry = this.includeEntry(externalReference, theRequestDetails);
+      if (entry != null)
+        entries.add(entry);
     }
     return entries;
   }
 
-  private BundleEntryComponent getResourceEntry(String externalReference) {
+  private BundleEntryComponent includeEntry(String externalReference, RequestDetails theRequestDetails) {
     BundleEntryComponent entry = new BundleEntryComponent();
-    Resource resource = this.getExternalResource(externalReference);
-    return resource == null
-      ? null
-      : entry
-        .setResource(this.getExternalResource(externalReference))
+    Resource resource = this.getExternalResource(externalReference, theRequestDetails);
+    if (resource != null) {
+      return entry
+        .setResource(resource)
         .setFullUrl(externalReference)
         .setSearch(new BundleEntrySearchComponent().setMode(SearchEntryMode.INCLUDE));
+    }
+    return null;
   }
 
-  private Resource getExternalResource(String url) {
-    String resource = FhirServer.getExternalResource(url);
-    return (resource == null ? null : parseToPatient(resource));
+  private Resource getExternalResource(String url, RequestDetails theRequestDetails) {
+    String resource = FhirServer.getExternalResource(url, theRequestDetails);
+    if (resource != null) {
+      return parseToPatient(resource);
+    }
+    return null;
   }
 
-  private static Patient parseToPatient(String fullUrl) {
-    String resource = FhirServer.getExternalResource(fullUrl);
+  private static Patient parseToPatient(String resource) {
     try {
       return r4Parser.parseResource(Patient.class, resource);
     } catch (DataFormatException e) {
