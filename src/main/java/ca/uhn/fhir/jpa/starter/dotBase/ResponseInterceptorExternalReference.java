@@ -33,7 +33,6 @@ import java.util.LinkedList;
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleEntrySearchComponent;
 import org.hl7.fhir.r4.model.Bundle.SearchEntryMode;
@@ -110,14 +109,14 @@ public class ResponseInterceptorExternalReference {
   private Resource getExternalResource(String url, RequestDetails theRequestDetails) {
     String resource = FhirServer.getExternalResource(url, theRequestDetails);
     if (resource != null) {
-      return parseToPatient(resource);
+      return parseToR4Resource(resource);
     }
     return null;
   }
 
-  private static Patient parseToPatient(String resource) {
+  private static Resource parseToR4Resource(String resource) {
     try {
-      return r4Parser.parseResource(Patient.class, resource);
+      return (Resource) r4Parser.parseResource(resource);
     } catch (DataFormatException e) {
       ourLog.info(e.getMessage());
       return null;
