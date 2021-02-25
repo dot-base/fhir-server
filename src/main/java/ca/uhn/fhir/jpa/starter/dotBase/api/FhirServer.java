@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.starter.dotBase.api;
 
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -25,13 +26,23 @@ public class FhirServer {
       .build();
   }
 
-  public static String getExternalResource(String uri) {
+  private static String getAuthHeader(RequestDetails theRequestDetails) {
+    if (theRequestDetails.getHeader("Authorization") != null) {
+      return theRequestDetails.getHeader("Authorization");
+    }
+    return "";
+  }
+
+  public static String getExternalResource(String uri, RequestDetails theRequestDetails) {
     HttpResponse<String> response = null;
+    String authHeader = getAuthHeader(theRequestDetails);
+
     HttpRequest request = HttpRequest
       .newBuilder()
       .uri(URI.create(uri))
       .setHeader("Content-Type", "application/fhir+json")
       .setHeader("Accept", "application/fhir+json; fhirVersion=4.0")
+      .setHeader("Authorization", authHeader)
       .GET()
       .build();
     try {
