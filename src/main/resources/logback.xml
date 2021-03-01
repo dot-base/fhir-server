@@ -9,8 +9,20 @@
 		</encoder>
 	</appender>
 
+	<!-- Configure the Sentry appender, overriding the logging threshold to the WARN level -->
+	<appender name="Sentry" class="io.sentry.logback.SentryAppender">
+		    <!-- Optionally change minimum Event level. Default for Events is ERROR -->
+			<minimumEventLevel>WARN</minimumEventLevel>
+			<!-- Optionally change minimum Breadcrumbs level. Default for Breadcrumbs is INFO -->
+			<minimumBreadcrumbLevel>DEBUG</minimumBreadcrumbLevel>
+	</appender>
+
 	<root level="INFO">
 		<appender-ref ref="STDOUT" />
+	</root>
+
+	<root level="INFO">
+		<appender-ref ref="Sentry" />
 	</root>
 
 </configuration>
