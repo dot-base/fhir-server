@@ -50,16 +50,20 @@ import org.hl7.fhir.r4.model.Resource;
  * @since 5.0.0
  */
 public class ResponseInterceptorExternalReference {
-
   private static final IParser r4Parser = FhirContext.forR4().newJsonParser();
-  private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory
-      .getLogger(ResponseInterceptorExternalReference.class);
+  private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(
+    ResponseInterceptorExternalReference.class
+  );
 
   @Hook(Pointcut.SERVER_OUTGOING_RESPONSE)
-  public void preProcessOutgoingResponse(RequestDetails theRequestDetails, ResponseDetails theResponseDetails) {
+  public void preProcessOutgoingResponse(
+    RequestDetails theRequestDetails,
+    ResponseDetails theResponseDetails
+  ) {
     IBaseResource responseResource = theResponseDetails.getResponseResource();
     if (responseResource != null && this.hasExternalReference(theRequestDetails)) {
-      Bundle responseBundle = this.getModifiedResponse((Bundle) responseResource, theRequestDetails);
+      Bundle responseBundle =
+        this.getModifiedResponse((Bundle) responseResource, theRequestDetails);
       theResponseDetails.setResponseResource(responseBundle);
     }
   }
@@ -73,28 +77,39 @@ public class ResponseInterceptorExternalReference {
 
   @SuppressWarnings("unchecked")
   private HashSet<String> getExternalReferences(RequestDetails theRequestDetails) {
-    return (HashSet<String>) theRequestDetails.getAttribute("_includeIsExternalReference");
+    return (HashSet<String>) theRequestDetails.getAttribute(
+      "_includeIsExternalReference"
+    );
   }
 
-  private Bundle getModifiedResponse(Bundle responseBundle, RequestDetails theRequestDetails) {
+  private Bundle getModifiedResponse(
+    Bundle responseBundle,
+    RequestDetails theRequestDetails
+  ) {
     HashSet<String> externalReferences = this.getExternalReferences(theRequestDetails);
-    List<BundleEntryComponent> includeEntries = this.includeEntries(externalReferences, theRequestDetails);
+    List<BundleEntryComponent> includeEntries =
+      this.includeEntries(externalReferences, theRequestDetails);
     includeEntries.forEach(entry -> responseBundle.addEntry(entry));
     return responseBundle;
   }
 
-  private List<BundleEntryComponent> includeEntries(HashSet<String> externalReferences,
-      RequestDetails theRequestDetails) {
+  private List<BundleEntryComponent> includeEntries(
+    HashSet<String> externalReferences,
+    RequestDetails theRequestDetails
+  ) {
     List<BundleEntryComponent> entries = new LinkedList<BundleEntryComponent>();
     for (String externalReference : externalReferences) {
-      BundleEntryComponent entry = this.includeEntry(externalReference, theRequestDetails);
-      if (entry != null)
-        entries.add(entry);
+      BundleEntryComponent entry =
+        this.includeEntry(externalReference, theRequestDetails);
+      if (entry != null) entries.add(entry);
     }
     return entries;
   }
 
-  private BundleEntryComponent includeEntry(String externalReference, RequestDetails theRequestDetails) {
+  private BundleEntryComponent includeEntry(
+    String externalReference,
+    RequestDetails theRequestDetails
+  ) {
     BundleEntryComponent entry = new BundleEntryComponent();
     Resource resource = this.getExternalResource(externalReference, theRequestDetails);
     if (resource != null) {

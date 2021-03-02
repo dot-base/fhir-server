@@ -3,12 +3,13 @@ package ca.uhn.fhir.jpa.starter;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.starter.dotBase.PlainSystemProviderR4;
 import ca.uhn.fhir.jpa.starter.dotBase.ResponseInterceptorExternalReference;
-import ca.uhn.fhir.rest.server.interceptor.LoggingInterceptor;
 import io.sentry.Sentry;
 import javax.servlet.ServletException;
 
 public class JpaRestfulServer extends BaseJpaRestfulServer {
   private static final long serialVersionUID = 1L;
+  private static final String SENTRY_DSN = System.getenv("SENTRY_DSN") == null? "": System.getenv("SENTRY_DSN");
+  private static final String SENTRY_ENV = System.getenv("SENTRY_ENVIRONMENT");
 
   @Override
   protected void initialize() throws ServletException {
@@ -20,8 +21,8 @@ public class JpaRestfulServer extends BaseJpaRestfulServer {
 
     Sentry.init(
       options -> {
-        options.setDsn(System.getenv("SENTRY_DSN"));
-        options.setEnvironment(System.getenv("SENTRY_ENVIRONMENT"));
+        options.setDsn(SENTRY_DSN);
+        options.setEnvironment(SENTRY_ENV);
         options.setServerName(HapiProperties.getServerName());
         options.setTracesSampleRate(1.0);
         options.setConnectionTimeoutMillis(10000);
