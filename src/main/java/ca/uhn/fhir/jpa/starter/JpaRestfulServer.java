@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.starter;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.starter.dotBase.IncomingRequestInterceptor;
 import ca.uhn.fhir.jpa.starter.dotBase.PlainSystemProviderR4;
 import ca.uhn.fhir.jpa.starter.dotBase.ResponseInterceptorExternalReference;
 import io.sentry.Sentry;
@@ -21,6 +22,7 @@ public class JpaRestfulServer extends BaseJpaRestfulServer {
 
     registerProvider(new PlainSystemProviderR4());
     registerInterceptor(new ResponseInterceptorExternalReference());
+    registerInterceptor(new IncomingRequestInterceptor());
 
     Sentry.init(
       options -> {
