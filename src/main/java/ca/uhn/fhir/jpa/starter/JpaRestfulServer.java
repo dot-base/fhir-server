@@ -29,6 +29,7 @@ public class JpaRestfulServer extends BaseJpaRestfulServer {
 
     registerProvider(new PlainSystemProviderR4());
     registerInterceptor(new ResponseInterceptorExternalReference());
+    registerInterceptor(new IncomingRequestInterceptor());
 
     if (HapiProperties.isAuthenticationInterceptorEnabled()) {
       setRealmPublicKey();
