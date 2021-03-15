@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.starter.dotBase;
+package ca.uhn.fhir.jpa.starter.dotBase.interceptors;
 
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
