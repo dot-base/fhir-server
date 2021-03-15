@@ -1,9 +1,9 @@
 package ca.uhn.fhir.jpa.starter;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.starter.dotBase.IncomingRequestInterceptor;
 import ca.uhn.fhir.jpa.starter.dotBase.PlainSystemProviderR4;
-import ca.uhn.fhir.jpa.starter.dotBase.ResponseInterceptorExternalReference;
+import ca.uhn.fhir.jpa.starter.dotBase.interceptors.IncomingRequestInterceptor;
+import ca.uhn.fhir.jpa.starter.dotBase.interceptors.ResponseInterceptorExternalReference;
 import io.sentry.Sentry;
 import io.sentry.SentryOptions.Proxy;
 import javax.servlet.ServletException;
