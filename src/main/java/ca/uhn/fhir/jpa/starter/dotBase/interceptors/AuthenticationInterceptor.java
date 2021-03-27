@@ -14,9 +14,9 @@ import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.StringType;
 
-public class IncomingRequestInterceptor {
+public class AuthenticationInterceptor {
   private static final org.slf4j.Logger OUR_LOG = org.slf4j.LoggerFactory.getLogger(
-    IncomingRequestInterceptor.class
+    AuthenticationInterceptor.class
   );
 
   @Hook(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED)
