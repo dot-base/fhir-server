@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.starter;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.starter.dotBase.PlainSystemProviderR4;
-import ca.uhn.fhir.jpa.starter.dotBase.interceptors.IncomingRequestInterceptor;
+import ca.uhn.fhir.jpa.starter.dotBase.interceptors.AuthenticationInterceptor;
 import ca.uhn.fhir.jpa.starter.dotBase.interceptors.ResponseInterceptorExternalReference;
 import io.sentry.Sentry;
 import io.sentry.SentryOptions.Proxy;
@@ -22,8 +22,8 @@ public class JpaRestfulServer extends BaseJpaRestfulServer {
 
     registerProvider(new PlainSystemProviderR4());
     registerInterceptor(new ResponseInterceptorExternalReference());
-    if (HapiProperties.isIncomingRequestInterceptorEnabled()) {
-      registerInterceptor(new IncomingRequestInterceptor());
+    if (HapiProperties.isAuthenticationInterceptorEnabled()) {
+      registerInterceptor(new AuthenticationInterceptor());
     }
 
     Sentry.init(
