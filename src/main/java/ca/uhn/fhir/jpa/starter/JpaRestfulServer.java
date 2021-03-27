@@ -22,7 +22,9 @@ public class JpaRestfulServer extends BaseJpaRestfulServer {
 
     registerProvider(new PlainSystemProviderR4());
     registerInterceptor(new ResponseInterceptorExternalReference());
-    registerInterceptor(new IncomingRequestInterceptor());
+    if (HapiProperties.isIncomingRequestInterceptorEnabled()) {
+      registerInterceptor(new IncomingRequestInterceptor());
+    }
 
     Sentry.init(
       options -> {

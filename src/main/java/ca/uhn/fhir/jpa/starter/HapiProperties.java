@@ -84,6 +84,7 @@ public class HapiProperties {
   static final String FILTER_SEARCH_ENABLED = "filter_search.enabled";
   static final String GRAPHQL_ENABLED = "graphql.enabled";
   static final String BULK_EXPORT_ENABLED = "bulk.export.enabled";
+  static final String AUTHENTICATION_ENABLED  ="authentication_interceptor.enabled";
   static final String EXPIRE_SEARCH_RESULTS_AFTER_MINS = "retain_cached_searches_mins";
   static final String MAX_BINARY_SIZE = "max_binary_size";
   static final String PARTITIONING_MULTITENANCY_ENABLED =
@@ -605,6 +606,10 @@ public class HapiProperties {
     return HapiProperties.getBooleanProperty("fhirpath_interceptor.enabled", false);
   }
 
+  public static boolean isIncomingRequestInterceptorEnabled() {
+    return HapiProperties.getBooleanProperty(AUTHENTICATION_ENABLED, false);
+  }
+  
   public static boolean getPartitioningMultitenancyEnabled() {
     return HapiProperties.getBooleanProperty(PARTITIONING_MULTITENANCY_ENABLED, false);
   }
