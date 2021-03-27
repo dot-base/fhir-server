@@ -16,15 +16,15 @@ public class Authentication {
   private static final org.slf4j.Logger OUR_LOG = org.slf4j.LoggerFactory.getLogger(
     Authentication.class
   );
-  // TODO: retrieve or set public_key
+
+  //TBD: User private or public key. Where should it be set or retrieved?
   private static final String PUBLIC_KEY = HapiProperties.getRealmPublicKey();
 
   public static Claims verifyAndDecodeJWT(RequestDetails theRequestDetails) {
     try {
       PublicKey key = decodePublicKey(pemToDer(PUBLIC_KEY));
-      String authHeader = theRequestDetails.getHeader("Authorization");
-      String[] splitToken = authHeader.split("[Bb]earer ");
-      String authToken = splitToken[splitToken.length - 1];
+      String authHeader = getAuthHeader(theRequestDetails);
+      String authToken = getAuthToken(authHeader);
       Claims claims = Jwts
         .parser()
         .setSigningKey(key)
@@ -34,6 +34,22 @@ public class Authentication {
     } catch (Exception e) {
       throw new AuthenticationException("Authentication failed.");
     }
+  }
+
+  private static String getAuthHeader(RequestDetails theRequestDetails) {
+    String authHeader = theRequestDetails.getHeader("Authorization");
+    if (authHeader == "" || authHeader == null) throw new AuthenticationException(
+      "Request must include header of type Authorization."
+    );
+    return authHeader;
+  }
+
+  private static String getAuthToken(String authHeader) {
+    String[] splitToken = authHeader.split("[Bb]earer ");
+    if (splitToken.length != 2) throw new AuthenticationException(
+      "Invalid bearer token format."
+    );
+    return splitToken[1];
   }
 
   private static byte[] pemToDer(String pem) {
