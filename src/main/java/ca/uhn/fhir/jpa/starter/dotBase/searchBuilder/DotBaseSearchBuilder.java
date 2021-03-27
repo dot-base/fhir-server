@@ -52,7 +52,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  *
  * Requests with _include params that result in a external reference to be
  * included in the response are handled by this SearchBuilder. See also:
- * ResponseInterceptorExternalReference
+ * ResponseInterceptor
  */
 public class DotBaseSearchBuilder extends SearchBuilder {
   @Autowired

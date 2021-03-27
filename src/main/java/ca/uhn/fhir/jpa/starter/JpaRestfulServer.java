@@ -4,7 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.starter.dotBase.PlainSystemProviderR4;
 import ca.uhn.fhir.jpa.starter.dotBase.api.IdentityProvider;
 import ca.uhn.fhir.jpa.starter.dotBase.interceptors.AuthenticationInterceptor;
-import ca.uhn.fhir.jpa.starter.dotBase.interceptors.ResponseInterceptorExternalReference;
+import ca.uhn.fhir.jpa.starter.dotBase.interceptors.ResponseInterceptor;
 import io.sentry.Sentry;
 import io.sentry.SentryOptions.Proxy;
 import javax.servlet.ServletException;
@@ -28,9 +28,8 @@ public class JpaRestfulServer extends BaseJpaRestfulServer {
     // Add your own customization here
 
     registerProvider(new PlainSystemProviderR4());
-    registerInterceptor(new ResponseInterceptorExternalReference());
-    registerInterceptor(new IncomingRequestInterceptor());
-
+    registerInterceptor(new ResponseInterceptor());
+    
     if (HapiProperties.isAuthenticationInterceptorEnabled()) {
       setRealmPublicKey();
       registerInterceptor(new AuthenticationInterceptor());
