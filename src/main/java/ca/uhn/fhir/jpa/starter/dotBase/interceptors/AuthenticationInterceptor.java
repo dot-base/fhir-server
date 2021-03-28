@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.starter.dotBase.interceptors;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.starter.dotBase.services.Authentication;
+import ca.uhn.fhir.jpa.starter.dotBase.services.AccessLog;
 import ca.uhn.fhir.jpa.starter.dotBase.services.AuditTrail;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -27,6 +28,8 @@ public class AuthenticationInterceptor {
      */
     if (theRequestDetails.getHeader("Authorization") != null) {
       Claims jwt = Authentication.verifyAndDecodeJWT(theRequestDetails);
+      String username = getUsername(jwt);
+      AccessLog.logRequest(username, theRequestDetails, restOperationType);
       AuditTrail.setUsername(jwt, theRequestDetails, restOperationType);
       return;
     }
@@ -37,4 +40,10 @@ public class AuthenticationInterceptor {
     }
     throw new AuthenticationException("Authentication failed.");
   }
+
+    // TBD: Allow unknown users or throw Exception here?
+    private static String getUsername(Claims jwt) {
+      if (!jwt.containsKey("preferred_username")) return "unknown";
+      return jwt.get("preferred_username").toString();
+    }
 }
