@@ -54,15 +54,15 @@ import org.springframework.beans.factory.annotation.Autowired;
  * included in the response are handled by this SearchBuilder. See also:
  * ResponseInterceptor
  */
-public class DotBaseSearchBuilder extends SearchBuilder {
+public class SearchBuilderIncludes extends SearchBuilder {
   @Autowired
   private ISearchParamRegistry mySearchParamRegistry;
 
   private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(
-    DotBaseSearchBuilder.class
+    SearchBuilderIncludes.class
   );
 
-  public DotBaseSearchBuilder(
+  public SearchBuilderIncludes(
     IDao theDao,
     String theResourceName,
     Class<? extends IBaseResource> theResourceType
@@ -427,7 +427,7 @@ public class DotBaseSearchBuilder extends SearchBuilder {
       from.get("myId").as(Long.class).in(ResourcePersistentId.toLongList(thePids))
     );
 
-    cq.where(SearchBuilder.toPredicateArray(lastUpdatedPredicates));
+    cq.where(SearchBuilderIncludes.toPredicateArray(lastUpdatedPredicates));
     TypedQuery<Long> query = theEntityManager.createQuery(cq);
 
     return ResourcePersistentId.fromLongList(query.getResultList());
