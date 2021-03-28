@@ -22,6 +22,7 @@ public class UsernameLogger {
     RESOURCE_OPERATIONS = new HashSet<RestOperationTypeEnum>();
     RESOURCE_OPERATIONS.add(RestOperationTypeEnum.CREATE);
     RESOURCE_OPERATIONS.add(RestOperationTypeEnum.UPDATE);
+    RESOURCE_OPERATIONS.add(RestOperationTypeEnum.PATCH);
   }
 
   public static void log(
