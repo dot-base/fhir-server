@@ -57,12 +57,10 @@ public class UsernameLogger {
     RequestDetails theRequestDetails
   ) {
     DomainResource theResource = (DomainResource) theRequestDetails.getResource();
-    Meta meta = theResource.getMeta();
     Extension userExtension = new Extension();
     userExtension.setUrl("https://simplifier.net/dot.base/requesting-username");
     userExtension.setValue(new StringType().setValue(username));
-    meta.addExtension(userExtension);
-    theResource.setMeta(meta);
+    theResource.addExtension(userExtension);
     theRequestDetails.setResource(theResource);
   }
 
