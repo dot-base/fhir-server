@@ -5,6 +5,9 @@ import ca.uhn.fhir.jpa.starter.dotBase.PlainSystemProviderR4;
 import ca.uhn.fhir.jpa.starter.dotBase.api.IdentityProvider;
 import ca.uhn.fhir.jpa.starter.dotBase.interceptors.AuthenticationInterceptor;
 import ca.uhn.fhir.jpa.starter.dotBase.interceptors.ResponseInterceptor;
+import ca.uhn.fhir.jpa.starter.dotBase.services.Authorization;
+import ca.uhn.fhir.rest.server.interceptor.consent.ConsentInterceptor;
+import ca.uhn.fhir.rest.server.interceptor.consent.IConsentService;
 import io.sentry.Sentry;
 import io.sentry.SentryOptions.Proxy;
 import javax.servlet.ServletException;
@@ -28,8 +31,14 @@ public class JpaRestfulServer extends BaseJpaRestfulServer {
     // Add your own customization here
 
     registerProvider(new PlainSystemProviderR4());
+
     registerInterceptor(new ResponseInterceptor());
-    
+
+    IConsentService authorizationService = new Authorization();
+    ConsentInterceptor consentInterceptor = new ConsentInterceptor();
+    consentInterceptor.setConsentService(authorizationService);
+    registerInterceptor(consentInterceptor);
+
     if (HapiProperties.isAuthenticationInterceptorEnabled()) {
       setRealmPublicKey();
       registerInterceptor(new AuthenticationInterceptor());
