@@ -5,6 +5,7 @@ import ca.uhn.fhir.jpa.api.dao.IDao;
 import ca.uhn.fhir.jpa.config.BaseJavaConfigR4;
 import ca.uhn.fhir.jpa.dao.SearchBuilder;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
+import ca.uhn.fhir.jpa.starter.dotBase.model.AccessLogRepository;
 import ca.uhn.fhir.jpa.starter.dotBase.searchBuilder.SearchBuilderIncludes;
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
@@ -49,6 +50,11 @@ public class FhirServerConfigR4 extends BaseJavaConfigR4 {
   @Bean
   public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
     LocalContainerEntityManagerFactoryBean retVal = super.entityManagerFactory();
+    retVal.setPackagesToScan(
+      "ca.uhn.fhir.jpa.model.entity",
+      "ca.uhn.fhir.jpa.entity",
+      "ca.uhn.fhir.jpa.starter.dotBase.entity"
+    );
     retVal.setPersistenceUnitName("HAPI_PU");
 
     try {
@@ -72,5 +78,11 @@ public class FhirServerConfigR4 extends BaseJavaConfigR4 {
     JpaTransactionManager retVal = new JpaTransactionManager();
     retVal.setEntityManagerFactory(entityManagerFactory);
     return retVal;
+  }
+
+  @Bean(name = "access_log_repository")
+  @Primary
+  public AccessLogRepository accessLogRepository() {
+    return new AccessLogRepository();
   }
 }
