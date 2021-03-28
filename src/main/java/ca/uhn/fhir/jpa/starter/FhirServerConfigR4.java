@@ -5,7 +5,7 @@ import ca.uhn.fhir.jpa.api.dao.IDao;
 import ca.uhn.fhir.jpa.config.BaseJavaConfigR4;
 import ca.uhn.fhir.jpa.dao.SearchBuilder;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
-import ca.uhn.fhir.jpa.starter.dotBase.searchBuilder.DotBaseSearchBuilder;
+import ca.uhn.fhir.jpa.starter.dotBase.searchBuilder.SearchBuilderIncludes;
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -23,9 +23,9 @@ public class FhirServerConfigR4 extends BaseJavaConfigR4 {
   private DataSource myDataSource;
 
   /**
-   * We override the paging provider definition so that we can customize
-   * the default/max page sizes for search results. You can set these however
-   * you want, although very large page sizes will require a lot of RAM.
+   * We override the paging provider definition so that we can customize the
+   * default/max page sizes for search results. You can set these however you
+   * want, although very large page sizes will require a lot of RAM.
    */
   @Override
   public DatabaseBackedPagingProvider databaseBackedPagingProvider() {
@@ -42,7 +42,7 @@ public class FhirServerConfigR4 extends BaseJavaConfigR4 {
     String theResourceName,
     Class<? extends IBaseResource> theResourceType
   ) {
-    return new DotBaseSearchBuilder(theDao, theResourceName, theResourceType);
+    return new SearchBuilderIncludes(theDao, theResourceName, theResourceType);
   }
 
   @Override
