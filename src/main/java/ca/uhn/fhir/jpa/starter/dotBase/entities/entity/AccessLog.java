@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.starter.dotBase.entity;
+package ca.uhn.fhir.jpa.starter.dotBase.entities.entity;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -17,7 +17,9 @@ import javax.persistence.Table;
     @Index(name = "IDX_METHOD", columnList = "METHOD", unique = false),
     @Index(name = "IDX_USERNAME", columnList = "USERNAME", unique = false),
     @Index(name = "IDX_URL", columnList = "URL", unique = false),
-    @Index(name="IDX_TIMESTAMP", columnList = "TIMESTAMP", unique = false)
+    @Index(name = "IDX_TIMESTAMP", columnList = "TIMESTAMP", unique = false),
+    @Index(name = "RESOURCETYPE", columnList = "RESOURCETYPE", unique = false)
+
   }
 )
 public class AccessLog {
@@ -35,6 +37,9 @@ public class AccessLog {
   @Column(name = "URL")
   public String url;
 
-  @Column(name= "TIMESTAMP")
+  @Column(name = "TIMESTAMP")
   public String timestamp;
+
+  @Column(name = "RESOURCETYPE")
+  public String resourcetype;
 }
