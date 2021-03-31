@@ -15,27 +15,12 @@ import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.StringType;
 
 public class AuthenticationInterceptor {
-  private static final org.slf4j.Logger OUR_LOG = org.slf4j.LoggerFactory.getLogger(
-    AuthenticationInterceptor.class
-  );
+  private static final org.slf4j.Logger OUR_LOG = org.slf4j.LoggerFactory.getLogger(AuthenticationInterceptor.class);
 
   @Hook(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED)
-  public void preHandleIncomingRequest(
-    RequestDetails theRequestDetails,
-    ServletRequestDetails servletRequestDetails,
-    RestOperationTypeEnum restOperationType
-  ) {
-    Claims jwt;
-
-    jwt = Authentication.verifyAndDecodeJWT(theRequestDetails);
-    // IncomingRequestInterceptor.setSentryUserDetails(jwt);
-    theRequestDetails.setAttribute("_userDetails", jwt.getId());
-    if (
-      restOperationType.equals(RestOperationTypeEnum.CREATE) ||
-      restOperationType.equals(RestOperationTypeEnum.UPDATE)
-    ) {
-      setResourceUserDetails(jwt, theRequestDetails);
-    }
+  public void preHandleIncomingRequest(RequestDetails theRequestDetails, ServletRequestDetails servletRequestDetails,
+      RestOperationTypeEnum restOperationType) {
+    Claims jwt = Authentication.verifyAndDecodeJWT(theRequestDetails);
   }
 
   private static void setResourceUserDetails(
