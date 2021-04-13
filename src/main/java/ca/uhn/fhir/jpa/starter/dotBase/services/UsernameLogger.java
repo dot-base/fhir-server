@@ -6,10 +6,11 @@ import io.jsonwebtoken.Claims;
 import io.sentry.Sentry;
 import io.sentry.protocol.User;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DomainResource;
-import org.hl7.fhir.r4.model.Extension;
-import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.Meta;
 
 public class UsernameLogger {
   private static final org.slf4j.Logger OUR_LOG = org.slf4j.LoggerFactory.getLogger(
@@ -33,7 +34,6 @@ public class UsernameLogger {
     logUsername(username, theRequestDetails, restOperationType);
   }
 
-  // TBD: Allow unknown users or throw Exception here?
   private static String getUsername(Claims jwt) {
     if (!jwt.containsKey("preferred_username")) return "unknown";
     return jwt.get("preferred_username").toString();
@@ -57,10 +57,13 @@ public class UsernameLogger {
     RequestDetails theRequestDetails
   ) {
     DomainResource theResource = (DomainResource) theRequestDetails.getResource();
-    Extension userExtension = new Extension();
-    userExtension.setUrl("https://simplifier.net/dot.base/requesting-username");
-    userExtension.setValue(new StringType().setValue(username));
-    theResource.addExtension(userExtension);
+    Meta meta = theResource.getMeta();
+    List<Coding> tags = meta.getTag();
+    Coding code = new Coding()
+    .setSystem("https://simplifier.net/dot.base/requesting-username");
+    code.setCode(username);
+    tags.add(code);
+    theResource.setMeta(meta.setTag(tags));
     theRequestDetails.setResource(theResource);
   }
 
