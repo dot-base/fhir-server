@@ -64,3 +64,6 @@ Want a FHIR Server that supports profiles established throughout the Movebase pr
     ```
 1. By default the server is available at http://localhost:8080.
 1. Go and mix up some code 👩‍💻. The server will reload automatically once you save. Remember to keep an eye on the console.
+
+
+FHIR® is the registered trademark of HL7. Use of the FHIR trademark does not constitute endorsement of this product by HL7.
