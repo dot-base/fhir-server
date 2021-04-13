@@ -41,15 +41,22 @@ import org.hl7.fhir.r4.model.Bundle;
  * @since 5.0.0
  */
 public class ResponseInterceptor {
-  private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory
-      .getLogger(ResponseInterceptor.class);
+  private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(
+    ResponseInterceptor.class
+  );
 
   @Hook(Pointcut.SERVER_OUTGOING_RESPONSE)
-  public void preProcessOutgoingResponse(RequestDetails theRequestDetails, ResponseDetails theResponseDetails) {
+  public void preProcessOutgoingResponse(
+    RequestDetails theRequestDetails,
+    ResponseDetails theResponseDetails
+  ) {
     IBaseResource responseResource = theResponseDetails.getResponseResource();
-    
+
     if (responseResource != null && this.hasExternalReference(theRequestDetails)) {
-      Bundle responseBundle = ExternalReferences.resolve((Bundle) responseResource, theRequestDetails);
+      Bundle responseBundle = ExternalReferences.resolve(
+        (Bundle) responseResource,
+        theRequestDetails
+      );
       theResponseDetails.setResponseResource(responseBundle);
     }
   }
@@ -60,5 +67,4 @@ public class ResponseInterceptor {
     }
     return false;
   }
-
 }
