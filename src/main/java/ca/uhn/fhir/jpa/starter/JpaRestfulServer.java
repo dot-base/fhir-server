@@ -34,14 +34,15 @@ public class JpaRestfulServer extends BaseJpaRestfulServer {
 
     registerInterceptor(new ResponseInterceptor());
 
-    IConsentService authorizationService = new Authorization();
-    ConsentInterceptor consentInterceptor = new ConsentInterceptor();
-    consentInterceptor.setConsentService(authorizationService);
-    registerInterceptor(consentInterceptor);
-
     if (HapiProperties.isAuthenticationInterceptorEnabled()) {
       setRealmPublicKey();
       registerInterceptor(new AuthenticationInterceptor());
+
+      // Authorization Rules 
+      IConsentService authorizationService = new Authorization();
+      ConsentInterceptor consentInterceptor = new ConsentInterceptor();
+      consentInterceptor.setConsentService(authorizationService);
+      registerInterceptor(consentInterceptor);
     }
 
     if (HapiProperties.isErrorMonitorinEnabled()) {
