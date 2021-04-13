@@ -13,41 +13,33 @@ import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 
 public class Authentication {
-  private static final org.slf4j.Logger OUR_LOG = org.slf4j.LoggerFactory.getLogger(
-    Authentication.class
-  );
+  private static final org.slf4j.Logger OUR_LOG = org.slf4j.LoggerFactory.getLogger(Authentication.class);
 
   private static final String PUBLIC_KEY = HapiProperties.getRealmPublicKey();
 
   public static Claims verifyAndDecodeJWT(RequestDetails theRequestDetails) {
     try {
       PublicKey key = decodePublicKey(pemToDer(PUBLIC_KEY));
-      String authHeader = getAuthHeader(theRequestDetails);
-      String authToken = getAuthToken(authHeader);
-      Claims claims = Jwts
-        .parser()
-        .setSigningKey(key)
-        .parseClaimsJws(authToken)
-        .getBody();
+      String authToken = getAuthToken(theRequestDetails);
+      Claims claims = Jwts.parser().setSigningKey(key).parseClaimsJws(authToken).getBody();
       return claims;
     } catch (Exception e) {
       throw new AuthenticationException("Authentication failed.");
     }
   }
 
-  private static String getAuthHeader(RequestDetails theRequestDetails) {
+  private static String getAuthToken(RequestDetails theRequestDetails) {
     String authHeader = theRequestDetails.getHeader("Authorization");
-    if (authHeader == "" || authHeader == null) throw new AuthenticationException(
-      "Request must include header of type Authorization."
-    );
-    return authHeader;
+    if (authHeader != null) {
+      return getBearerToken(authHeader);
+    }
+    throw new AuthenticationException("Request must include authorization header.");
   }
 
-  private static String getAuthToken(String authHeader) {
+  private static String getBearerToken(String authHeader) {
     String[] splitToken = authHeader.split("[Bb]earer ");
-    if (splitToken.length != 2) throw new AuthenticationException(
-      "Invalid bearer token format."
-    );
+    if (splitToken.length != 2)
+      throw new AuthenticationException("Invalid bearer token format.");
     return splitToken[1];
   }
 
@@ -63,8 +55,7 @@ public class Authentication {
     return stripped.trim();
   }
 
-  private static PublicKey decodePublicKey(byte[] der)
-    throws InvalidKeySpecException, NoSuchAlgorithmException {
+  private static PublicKey decodePublicKey(byte[] der) throws InvalidKeySpecException, NoSuchAlgorithmException {
     X509EncodedKeySpec spec = new X509EncodedKeySpec(der);
     KeyFactory keyFactory = KeyFactory.getInstance("RSA");
     return keyFactory.generatePublic(spec);
