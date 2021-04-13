@@ -9,7 +9,6 @@ import java.util.HashSet;
 import java.util.Set;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Extension;
-import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.StringType;
 
 public class UsernameLogger {
