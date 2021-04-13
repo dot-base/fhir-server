@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.starter.dotBase.interceptors;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.starter.dotBase.services.Authentication;
+import ca.uhn.fhir.jpa.starter.dotBase.services.UsernameLogger;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
@@ -26,6 +27,7 @@ public class AuthenticationInterceptor {
      */
     if (theRequestDetails.getHeader("Authorization") != null) {
       Claims jwt = Authentication.verifyAndDecodeJWT(theRequestDetails);
+      UsernameLogger.log(jwt, theRequestDetails, restOperationType);
       return;
     }
     if (theRequestDetails.getHeader("X-Forwarded-User") != null) {
