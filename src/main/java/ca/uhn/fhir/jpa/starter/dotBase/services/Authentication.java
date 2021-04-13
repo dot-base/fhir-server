@@ -17,9 +17,6 @@ public class Authentication {
     Authentication.class
   );
 
-  // TBD: User private or public key. Where should it be set or retrieved?
-  // private static final String PUBLIC_KEY = System.getenv("KEYCLOAK_PUBLIC_KEY") == null ? ""
-  //     : System.getenv("KEYCLOAK_PUBLIC_KEY");
   private static final String PUBLIC_KEY = HapiProperties.getRealmPublicKey();
 
   public static Claims verifyAndDecodeJWT(RequestDetails theRequestDetails) {

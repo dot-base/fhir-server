@@ -15,31 +15,16 @@ import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.StringType;
 
 public class AuthenticationInterceptor {
-  private static final org.slf4j.Logger OUR_LOG = org.slf4j.LoggerFactory.getLogger(AuthenticationInterceptor.class);
+  private static final org.slf4j.Logger OUR_LOG = org.slf4j.LoggerFactory.getLogger(
+    AuthenticationInterceptor.class
+  );
 
   @Hook(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED)
-  public void preHandleIncomingRequest(RequestDetails theRequestDetails, ServletRequestDetails servletRequestDetails,
-      RestOperationTypeEnum restOperationType) {
-    Claims jwt = Authentication.verifyAndDecodeJWT(theRequestDetails);
-  }
-
-  private static void setResourceUserDetails(
-    Claims jwt,
-    RequestDetails theRequestDetails
+  public void preHandleIncomingRequest(
+    RequestDetails theRequestDetails,
+    ServletRequestDetails servletRequestDetails,
+    RestOperationTypeEnum restOperationType
   ) {
-    DomainResource theResource = (DomainResource) theRequestDetails.getResource();
-    Meta meta = theResource.getMeta();
-    Extension userExtension = new Extension();
-    userExtension.setUrl("userDetailsExtension");
-    userExtension.setValue(new StringType().setValue("theValue"));
-    meta.addExtension(userExtension);
-    theResource.setMeta(meta);
-    theRequestDetails.setResource(theResource);
-  }
-
-  private static void setSentryUserDetails(String jwt) {
-    User user = new User();
-    user.setId(jwt);
-    Sentry.setUser(user);
+    Claims jwt = Authentication.verifyAndDecodeJWT(theRequestDetails);
   }
 }
