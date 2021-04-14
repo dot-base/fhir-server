@@ -60,7 +60,7 @@ public class UsernameLogger {
     Meta meta = theResource.getMeta();
     List<Coding> tags = meta.getTag();
     Coding code = new Coding()
-    .setSystem("https://simplifier.net/dot.base/requesting-username");
+    .setSystem("https://simplifier.net/dot.base/requesting-username-namingsystem");
     code.setCode(username);
     tags.add(code);
     theResource.setMeta(meta.setTag(tags));
