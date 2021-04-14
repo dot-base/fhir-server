@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.starter;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.starter.dotBase.PlainSystemProviderR4;
+import ca.uhn.fhir.jpa.starter.dotBase.api.IdentityProvider;
 import ca.uhn.fhir.jpa.starter.dotBase.interceptors.AuthenticationInterceptor;
 import ca.uhn.fhir.jpa.starter.dotBase.interceptors.ResponseInterceptorExternalReference;
 import io.sentry.Sentry;
@@ -23,6 +24,7 @@ public class JpaRestfulServer extends BaseJpaRestfulServer {
     registerProvider(new PlainSystemProviderR4());
     registerInterceptor(new ResponseInterceptorExternalReference());
     if (HapiProperties.isAuthenticationInterceptorEnabled()) {
+      setRealmPublicKey();
       registerInterceptor(new AuthenticationInterceptor());
     }
 
@@ -40,5 +42,13 @@ public class JpaRestfulServer extends BaseJpaRestfulServer {
 
     FhirContext ctx = getFhirContext();
     ctx.getParserOptions().setStripVersionsFromReferences(false);
+  }
+
+  public static void setRealmPublicKey() {
+    String realm = HapiProperties.getIdentityProviderRealm();
+    HapiProperties.setProperty(
+      "REALM_PUBLIC_KEY",
+      IdentityProvider.getRealmPublicKey(realm)
+    );
   }
 }
