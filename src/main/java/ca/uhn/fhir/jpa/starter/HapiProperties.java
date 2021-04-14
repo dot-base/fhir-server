@@ -607,7 +607,7 @@ public class HapiProperties {
   }
 
   public static boolean isAuthenticationInterceptorEnabled() {
-    return HapiProperties.getBooleanProperty(AUTHENTICATION_ENABLED, false);
+    return HapiProperties.getBooleanProperty(AUTHENTICATION_ENABLED, true);
   }
 
   public static boolean getPartitioningMultitenancyEnabled() {
