@@ -5,6 +5,7 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.starter.dotBase.services.Authentication;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import io.jsonwebtoken.Claims;
 
@@ -19,6 +20,15 @@ public class AuthenticationInterceptor {
     ServletRequestDetails servletRequestDetails,
     RestOperationTypeEnum restOperationType
   ) {
-    Claims jwt = Authentication.verifyAndDecodeJWT(theRequestDetails);
+    /**
+     * Currently Authorization is not set on incoming requests.
+     * Thus, we retrieve the username from header "X-Forwarded-User" for the moment.
+     */
+    if(theRequestDetails.getHeader("Authorization") != null){
+      Claims jwt = Authentication.verifyAndDecodeJWT(theRequestDetails);
+    }
+    if(theRequestDetails.getHeader("X-Forwarded-User") == null)
+      throw new AuthenticationException("Authentication failed.");
+    String username = theRequestDetails.getHeader("X-Forwarded-User");
   }
 }
