@@ -120,7 +120,6 @@
             <version>5.2.14.RELEASE</version>
         </dependency>
 
-
         <!-- You may not need this if you are deploying to an application server which provides database connection pools itself. -->
         <dependency>
             <groupId>org.apache.commons</groupId>
@@ -309,9 +308,6 @@
                     </execution>
                 </executions>
             </plugin>
-
-
         </plugins>
     </build>
-
 </project>
