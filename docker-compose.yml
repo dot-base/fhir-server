@@ -6,6 +6,9 @@ services:
       HAPI_DATASOURCE_URL: "jdbc:postgresql://fhir-postgres:5432/hapi_r4"
       HAPI_DATASOURCE_USERNAME: "${FHIR_DB_USER:-admin}"
       HAPI_DATASOURCE_PASSWORD: "${FHIR_DB_PASSWORD:-admin}"
+      HAPI_AUTHENTICATION__INTERCEPTOR_ENABLED: "true"
+      HAPI_SSO_REALM_URL: ${SSO_REALM_URL}""
+
     ports:
       - "8080:8080"
     networks:
@@ -24,6 +27,7 @@ services:
       POSTGRES_USER: "${FHIR_DB_USER:-admin}"
       POSTGRES_PASSWORD: "${FHIR_DB_PASSWORD:-admin}"
       POSTGRES_DB: "hapi_r4"
+
     networks:
       - backend
     volumes:

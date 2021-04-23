@@ -9,7 +9,7 @@ import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import io.jsonwebtoken.Claims;
 
 public class AuthenticationInterceptor {
-  private static final org.slf4j.Logger OUR_LOG = org.slf4j.LoggerFactory.getLogger(
+  private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(
     AuthenticationInterceptor.class
   );
 

@@ -10,6 +10,10 @@ import io.sentry.SentryOptions.Proxy;
 import javax.servlet.ServletException;
 
 public class JpaRestfulServer extends BaseJpaRestfulServer {
+  private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(
+    JpaRestfulServer.class
+  );
+
   private static final long serialVersionUID = 1L;
   private static final String SENTRY_DSN = System.getenv("SENTRY_DSN") == null
     ? ""
@@ -23,6 +27,7 @@ public class JpaRestfulServer extends BaseJpaRestfulServer {
 
     registerProvider(new PlainSystemProviderR4());
     registerInterceptor(new ResponseInterceptorExternalReference());
+
     if (HapiProperties.isAuthenticationInterceptorEnabled()) {
       setRealmPublicKey();
       registerInterceptor(new AuthenticationInterceptor());
@@ -44,7 +49,7 @@ public class JpaRestfulServer extends BaseJpaRestfulServer {
     ctx.getParserOptions().setStripVersionsFromReferences(false);
   }
 
-  public static void setRealmPublicKey() {
+  private static void setRealmPublicKey() {
     String realm = HapiProperties.getIdentityProviderRealm();
     HapiProperties.setProperty(
       "REALM_PUBLIC_KEY",
