@@ -318,4 +318,15 @@
             </plugin>
         </plugins>
     </build>
+    <profiles>
+        <profile>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <id>local</id>
+            <properties>
+                <HAPI_AUTHENTICATION_INTERCEPTOR_ENABLED>false</HAPI_AUTHENTICATION_INTERCEPTOR_ENABLED>
+            </properties>
+        </profile>
+    </profiles>
 </project>

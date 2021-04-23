@@ -13,7 +13,7 @@ import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 
 public class Authentication {
-  private static final org.slf4j.Logger OUR_LOG = org.slf4j.LoggerFactory.getLogger(
+  private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(
     Authentication.class
   );
   private static final String REALM_PUBLIC_KEY = HapiProperties
