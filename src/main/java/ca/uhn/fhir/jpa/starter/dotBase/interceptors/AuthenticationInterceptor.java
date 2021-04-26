@@ -24,11 +24,12 @@ public class AuthenticationInterceptor {
      * Currently Authorization is not set on incoming requests.
      * Thus, we retrieve the username from header "X-Forwarded-User" for the moment.
      */
-    if(theRequestDetails.getHeader("Authorization") != null){
+    if (theRequestDetails.getHeader("Authorization") != null) {
       Claims jwt = Authentication.verifyAndDecodeJWT(theRequestDetails);
     }
-    if(theRequestDetails.getHeader("X-Forwarded-User") == null)
+    if (theRequestDetails.getHeader("X-Forwarded-User") == null) {
       throw new AuthenticationException("Authentication failed.");
+    }
     String username = theRequestDetails.getHeader("X-Forwarded-User");
   }
 }
