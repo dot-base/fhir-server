@@ -13,16 +13,16 @@ import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Meta;
 
 public class UsernameLogger {
-  private static final org.slf4j.Logger OUR_LOG = org.slf4j.LoggerFactory.getLogger(
+  private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(
     UsernameLogger.class
   );
-  private static final Set<RestOperationTypeEnum> RESOURCE_OPERATIONS;
+  private static final Set<RestOperationTypeEnum> RESOURCE_EDITING_OPERATIONS;
 
   static {
-    RESOURCE_OPERATIONS = new HashSet<RestOperationTypeEnum>();
-    RESOURCE_OPERATIONS.add(RestOperationTypeEnum.CREATE);
-    RESOURCE_OPERATIONS.add(RestOperationTypeEnum.UPDATE);
-    RESOURCE_OPERATIONS.add(RestOperationTypeEnum.PATCH);
+    RESOURCE_EDITING_OPERATIONS = new HashSet<RestOperationTypeEnum>();
+    RESOURCE_EDITING_OPERATIONS.add(RestOperationTypeEnum.CREATE);
+    RESOURCE_EDITING_OPERATIONS.add(RestOperationTypeEnum.UPDATE);
+    RESOURCE_EDITING_OPERATIONS.add(RestOperationTypeEnum.PATCH);
   }
 
   public static void log(
@@ -39,14 +39,14 @@ public class UsernameLogger {
     return jwt.get("preferred_username").toString();
   }
 
-  private static void logUsername(
+  public static void logUsername(
     String username,
     RequestDetails theRequestDetails,
     RestOperationTypeEnum restOperationType
   ) {
     setSentryUser(username);
     theRequestDetails.setAttribute("_username", username);
-    if (RESOURCE_OPERATIONS.contains(restOperationType)) setResourceUserExtension(
+    if (RESOURCE_EDITING_OPERATIONS.contains(restOperationType)) setResourceUserExtension(
       username,
       theRequestDetails
     );
