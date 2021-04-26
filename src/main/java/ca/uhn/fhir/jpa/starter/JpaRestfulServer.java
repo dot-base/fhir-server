@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.starter;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.starter.dotBase.PlainSystemProviderR4;
 import ca.uhn.fhir.jpa.starter.dotBase.api.IdentityProvider;
+import ca.uhn.fhir.jpa.starter.dotBase.entities.AccessLogProvider;
 import ca.uhn.fhir.jpa.starter.dotBase.interceptors.AuthenticationInterceptor;
 import ca.uhn.fhir.jpa.starter.dotBase.interceptors.ResponseInterceptor;
 import ca.uhn.fhir.jpa.starter.dotBase.services.Authorization;
@@ -31,6 +32,7 @@ public class JpaRestfulServer extends BaseJpaRestfulServer {
     // Add your own customization here
 
     registerProvider(new PlainSystemProviderR4());
+    registerProvider(new AccessLogProvider());
 
     registerInterceptor(new ResponseInterceptor());
 

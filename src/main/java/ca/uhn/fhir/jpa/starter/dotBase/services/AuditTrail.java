@@ -14,29 +14,13 @@ import org.hl7.fhir.r4.model.StringType;
 
 public class AuditTrail {
   private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(AuditTrail.class);
-  private static final Set<RestOperationTypeEnum> RESOURCE_OPERATIONS;
+  private static final Set<RestOperationTypeEnum> RESOURCE_EDIT_OPERATIONS;
 
   static {
-    RESOURCE_OPERATIONS = new HashSet<RestOperationTypeEnum>();
-    RESOURCE_OPERATIONS.add(RestOperationTypeEnum.CREATE);
-    RESOURCE_OPERATIONS.add(RestOperationTypeEnum.UPDATE);
-    RESOURCE_OPERATIONS.add(RestOperationTypeEnum.PATCH);
-  }
-
-  public static void setUsername(
-    Claims jwt,
-    RequestDetails theRequestDetails,
-    RestOperationTypeEnum restOperationType
-  ) {
-    String username = getUsername(jwt);
-    logUsername(username, theRequestDetails, restOperationType);
-  }
-
-  private static String getUsername(Claims jwt) {
-    if (!jwt.containsKey("preferred_username")) {
-      throw new AuthenticationException("Authentication failed - access token does not provide a username");
-    }
-    return jwt.get("preferred_username").toString();
+    RESOURCE_EDIT_OPERATIONS = new HashSet<RestOperationTypeEnum>();
+    RESOURCE_EDIT_OPERATIONS.add(RestOperationTypeEnum.CREATE);
+    RESOURCE_EDIT_OPERATIONS.add(RestOperationTypeEnum.UPDATE);
+    RESOURCE_EDIT_OPERATIONS.add(RestOperationTypeEnum.PATCH);
   }
 
   public static void logUsername(
@@ -46,7 +30,7 @@ public class AuditTrail {
   ) {
     setSentryUser(username);
     theRequestDetails.setAttribute("_username", username);
-    if (RESOURCE_OPERATIONS.contains(restOperationType))
+    if (RESOURCE_EDIT_OPERATIONS.contains(restOperationType))
       setResourceUserExtension(username, theRequestDetails);
   }
 
