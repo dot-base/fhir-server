@@ -27,7 +27,9 @@ services:
       POSTGRES_USER: "${FHIR_DB_USER:-admin}"
       POSTGRES_PASSWORD: "${FHIR_DB_PASSWORD:-admin}"
       POSTGRES_DB: "hapi_r4"
-
+      
+    ports:
+      - "5432:5432"
     networks:
       - backend
     volumes:

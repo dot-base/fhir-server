@@ -56,7 +56,7 @@ public class HapiProperties {
   static final String MAX_FETCH_SIZE = "max_fetch_size";
   static final String MAX_PAGE_SIZE = "max_page_size";
   static final String SERVER_ADDRESS = "server_address";
-  static final String IDENTITY_PROVIDER_REALM_URL = "sso_realm.url";
+  static final String IDENTITY_PROVIDER_REALM_URL = "sso_realm.address";
   static final String SERVER_ID = "server.id";
   static final String SERVER_NAME = "server.name";
   static final String SUBSCRIPTION_EMAIL_ENABLED = "subscription.email.enabled";
