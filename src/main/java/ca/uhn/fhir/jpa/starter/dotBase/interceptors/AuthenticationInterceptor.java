@@ -32,6 +32,7 @@ public class AuthenticationInterceptor {
     }
     if (theRequestDetails.getHeader("X-Forwarded-User") != null) {
       String username = theRequestDetails.getHeader("X-Forwarded-User");
+      UsernameLogger.logUsername(username, theRequestDetails, restOperationType);
       return;
     }
     throw new AuthenticationException("Authentication failed.");
