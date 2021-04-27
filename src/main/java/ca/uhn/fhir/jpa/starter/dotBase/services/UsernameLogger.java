@@ -11,7 +11,9 @@ import java.util.List;
 import java.util.Set;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DomainResource;
+import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Meta;
+import org.hl7.fhir.r4.model.StringType;
 
 public class UsernameLogger {
   private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(
@@ -60,13 +62,10 @@ public class UsernameLogger {
     RequestDetails theRequestDetails
   ) {
     DomainResource theResource = (DomainResource) theRequestDetails.getResource();
-    Meta meta = theResource.getMeta();
-    List<Coding> tags = meta.getTag();
-    Coding code = new Coding()
-    .setSystem("https://simplifier.net/dot.base/requesting-username-namingsystem");
-    code.setCode(username);
-    tags.add(code);
-    theResource.setMeta(meta.setTag(tags));
+    Extension usernameExtension = new Extension()
+      .setUrl("https://simplifier.net/dot.base/resource-editor-username")
+      .setValue(new StringType(username));
+    theResource.getExtension().add(usernameExtension);
     theRequestDetails.setResource(theResource);
   }
 
