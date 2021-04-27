@@ -35,7 +35,7 @@ public class JpaRestfulServer extends BaseJpaRestfulServer {
       registerInterceptor(new AuthenticationInterceptor());
     }
 
-    if(HapiProperties.isErrorMonitorinEnabled()){
+    if (HapiProperties.isErrorMonitorinEnabled()) {
       Sentry.init(
         options -> {
           options.setDsn(SENTRY_DSN);
@@ -49,8 +49,6 @@ public class JpaRestfulServer extends BaseJpaRestfulServer {
       );
     }
 
-
-
     FhirContext ctx = getFhirContext();
     ctx.getParserOptions().setStripVersionsFromReferences(false);
   }
@@ -58,7 +56,7 @@ public class JpaRestfulServer extends BaseJpaRestfulServer {
   private static void setRealmPublicKey() {
     String realm = HapiProperties.getIdentityProviderRealm();
     HapiProperties.setProperty(
-      "REALM_PUBLIC_KEY",
+      "sso_realm.publicKey",
       IdentityProvider.getRealmPublicKey(realm)
     );
   }

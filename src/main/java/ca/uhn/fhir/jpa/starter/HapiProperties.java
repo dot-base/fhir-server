@@ -616,4 +616,8 @@ public class HapiProperties {
   public static boolean getPartitioningMultitenancyEnabled() {
     return HapiProperties.getBooleanProperty(PARTITIONING_MULTITENANCY_ENABLED, false);
   }
+
+  public static String getRealmPublicKey() {
+    return HapiProperties.getProperty("sso_realm.publicKey");
+  }
 }

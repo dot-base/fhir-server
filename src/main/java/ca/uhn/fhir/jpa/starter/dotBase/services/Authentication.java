@@ -16,9 +16,7 @@ public class Authentication {
   private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(
     Authentication.class
   );
-  private static final String REALM_PUBLIC_KEY = HapiProperties
-    .getJpaProperties()
-    .getProperty("REALM_PUBLIC_KEY");
+  private static final String REALM_PUBLIC_KEY = HapiProperties.getRealmPublicKey();
 
   public static Claims verifyAndDecodeJWT(RequestDetails theRequestDetails) {
     try {
