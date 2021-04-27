@@ -2,8 +2,6 @@ package ca.uhn.fhir.jpa.starter.dotBase.services;
 
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
-import io.jsonwebtoken.Claims;
 import io.sentry.Sentry;
 import io.sentry.protocol.User;
 import java.util.HashSet;
