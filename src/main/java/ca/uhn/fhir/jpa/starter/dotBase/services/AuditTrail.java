@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.starter.dotBase.services;
 
+import ca.uhn.fhir.jpa.starter.dotBase.Utils;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import io.sentry.Sentry;
@@ -8,6 +9,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Meta;
@@ -32,15 +34,13 @@ public class AuditTrail {
     setSentryUser(username);
     theRequestDetails.setAttribute("_username", username);
 
-    if (restOperationType.equals(RestOperationTypeEnum.CREATE)) setResourceCreator(
-      username,
-      theRequestDetails
-    );
+    if (restOperationType.equals(RestOperationTypeEnum.CREATE)){
+        setResourceCreator( username, theRequestDetails );
+          setCreationDateTime(theRequestDetails);
+    }
 
-    if (RESOURCE_EDITING_OPERATIONS.contains(restOperationType)) setResourceEditor(
-      username,
-      theRequestDetails
-    );
+    if (RESOURCE_EDITING_OPERATIONS.contains(restOperationType))
+         setResourceEditor(username, theRequestDetails );
   }
 
   private static void setResourceCreator(
@@ -76,5 +76,15 @@ public class AuditTrail {
     User user = new User();
     user.setUsername(username);
     Sentry.setUser(user);
+  }
+
+  private static void setCreationDateTime(RequestDetails theRequestDetails) {
+    DomainResource theResource = (DomainResource) theRequestDetails.getResource();
+    DateTimeType now = new DateTimeType(Utils.getCurrentTimestamp());
+    Extension creationDate = new Extension()
+      .setUrl("https://simplifier.net/dot.base/resource-creation-datetime")
+      .setValue(now);
+    theResource.getExtension().add(creationDate);
+    theRequestDetails.setResource(theResource);
   }
 }
