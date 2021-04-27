@@ -83,6 +83,7 @@ public class HapiProperties {
   static final String GRAPHQL_ENABLED = "graphql.enabled";
   static final String BULK_EXPORT_ENABLED = "bulk.export.enabled";
   static final String AUTHENTICATION_ENABLED = "authentication_interceptor.enabled";
+  static final String ERROR_MONITORING_ENABLED = "error_monitoring.enabled";
   static final String EXPIRE_SEARCH_RESULTS_AFTER_MINS = "retain_cached_searches_mins";
   static final String MAX_BINARY_SIZE = "max_binary_size";
   static final String PARTITIONING_MULTITENANCY_ENABLED =
@@ -606,6 +607,10 @@ public class HapiProperties {
 
   public static boolean isAuthenticationInterceptorEnabled() {
     return HapiProperties.getBooleanProperty(AUTHENTICATION_ENABLED, true);
+  }
+
+  public static boolean isErrorMonitorinEnabled() {
+    return HapiProperties.getBooleanProperty(ERROR_MONITORING_ENABLED, true);
   }
 
   public static boolean getPartitioningMultitenancyEnabled() {

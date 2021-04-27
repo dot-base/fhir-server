@@ -19,6 +19,8 @@ public class JpaRestfulServer extends BaseJpaRestfulServer {
     ? ""
     : System.getenv("SENTRY_DSN");
   private static final String SENTRY_ENV = System.getenv("SENTRY_ENVIRONMENT");
+  private static final String PROXY_ADDRESS = System.getenv("PROXY_ADDRESS");
+  private static final String PROXY_PORT = System.getenv("PROXY_PORT");
 
   @Override
   protected void initialize() throws ServletException {
@@ -33,17 +35,21 @@ public class JpaRestfulServer extends BaseJpaRestfulServer {
       registerInterceptor(new AuthenticationInterceptor());
     }
 
-    Sentry.init(
-      options -> {
-        options.setDsn(SENTRY_DSN);
-        options.setEnvironment(SENTRY_ENV);
-        options.setProxy(new Proxy("http://proxy.charite.de", "8080"));
-        options.setServerName(HapiProperties.getServerName());
-        options.setTracesSampleRate(1.0);
-        options.setConnectionTimeoutMillis(10000);
-        options.setReadTimeoutMillis(10000);
-      }
-    );
+    if(HapiProperties.isErrorMonitorinEnabled()){
+      Sentry.init(
+        options -> {
+          options.setDsn(SENTRY_DSN);
+          options.setEnvironment(SENTRY_ENV);
+          options.setProxy(new Proxy(PROXY_ADDRESS, PROXY_PORT));
+          options.setServerName(HapiProperties.getServerName());
+          options.setTracesSampleRate(1.0);
+          options.setConnectionTimeoutMillis(10000);
+          options.setReadTimeoutMillis(10000);
+        }
+      );
+    }
+
+
 
     FhirContext ctx = getFhirContext();
     ctx.getParserOptions().setStripVersionsFromReferences(false);
