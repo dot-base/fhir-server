@@ -8,9 +8,9 @@ import ca.uhn.fhir.rest.server.interceptor.consent.IConsentService;
 import java.util.HashSet;
 import java.util.Set;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Element;
+import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Procedure;
 import org.hl7.fhir.r4.model.Procedure.ProcedureStatus;
 import org.hl7.fhir.r4.model.ResourceType;
@@ -77,19 +77,16 @@ public class Authorization implements IConsentService {
 
   private boolean isAuthorizedRequester(RequestDetails theRequestDetails, DomainResource theResource) {
     String requestingUser = (String) theRequestDetails.getAttribute("_username");
-    return requesterOwnsDraftResource(theResource, requestingUser);
+    return isResourceEditor(theResource, requestingUser);
   }
 
-  private static boolean requesterOwnsDraftResource(DomainResource theResource, String requestingUser) {
-    if (hasMatchingUsernameTag(theResource, requestingUser) != null) {
-      return true;
+  private static boolean isResourceEditor(DomainResource theResource,String requestingUser) {
+    Extension usernameExtension = theResource.getExtensionByUrl("https://simplifier.net/dot.base/resource-editor-username");
+    if (usernameExtension != null) {
+      return usernameExtension.getValue().toString().equals(requestingUser) 
+        ? true
+        : false;
     }
     return false;
-  }
-
-  private static Coding hasMatchingUsernameTag(DomainResource theResource, String requestingUser) {
-    return theResource
-      .getMeta()
-      .getTag("https://simplifier.net/dot.base/requesting-username-namingsystem",requestingUser);
   }
 }
