@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.starter.dotBase.services;
 
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.interceptor.consent.ConsentOutcome;
 import ca.uhn.fhir.rest.server.interceptor.consent.IConsentContextServices;
@@ -9,8 +10,8 @@ import java.util.Set;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DomainResource;
+import org.hl7.fhir.r4.model.Element;
 import org.hl7.fhir.r4.model.Procedure;
-import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.Procedure.ProcedureStatus;
 import org.hl7.fhir.r4.model.ResourceType;
 
@@ -19,10 +20,12 @@ public class Authorization implements IConsentService {
 
   private static final Set<String> DRAFT_RESOURCE_TYPES;
 
+  //TODO: delimit resourceTypes or include all types? If so missing draft resourceTypes?
   static {
     DRAFT_RESOURCE_TYPES = new HashSet<String>();
     DRAFT_RESOURCE_TYPES.add(ResourceType.Procedure.toString());
     DRAFT_RESOURCE_TYPES.add(ResourceType.QuestionnaireResponse.toString());
+    DRAFT_RESOURCE_TYPES.add(ResourceType.Condition.toString());
   }
 
   /**
@@ -38,10 +41,12 @@ public class Authorization implements IConsentService {
    */
   @Override
   public ConsentOutcome canSeeResource(RequestDetails theRequestDetails, IBaseResource theResource,
-      IConsentContextServices theContextServices) {
-    if (isDraftResource(theResource)) {
-      return isAuthorizedRequester(theRequestDetails, (DomainResource) theResource) ? ConsentOutcome.AUTHORIZED
-          : ConsentOutcome.REJECT;
+    IConsentContextServices theContextServices
+  ) {
+    if (theRequestDetails.getRequestType() == RequestTypeEnum.GET && isDraftResource(theResource)) {
+      return isAuthorizedRequester(theRequestDetails, (DomainResource) theResource)
+        ? ConsentOutcome.AUTHORIZED
+        : ConsentOutcome.REJECT;
     }
     return ConsentOutcome.AUTHORIZED;
   }
@@ -67,11 +72,7 @@ public class Authorization implements IConsentService {
       Procedure procedure = (Procedure) theResource;
       return procedure.getStatus() == ProcedureStatus.INPROGRESS;
     }
-    if (theResource instanceof QuestionnaireResponse) {
-      QuestionnaireResponse questionnaireResponse = (QuestionnaireResponse) theResource;
-      return questionnaireResponse.getExtensionByUrl("https://simplifier.net/dot.base/draft-action")==null;
-    }
-    return false;
+    return ((Element) theResource).getExtensionByUrl("https://simplifier.net/dot.base/draft-action")!=null;
   }
 
   private boolean isAuthorizedRequester(RequestDetails theRequestDetails, DomainResource theResource) {
@@ -87,6 +88,8 @@ public class Authorization implements IConsentService {
   }
 
   private static Coding hasMatchingUsernameTag(DomainResource theResource, String requestingUser) {
-    return theResource.getMeta().getTag("https://simplifier.net/dot.base/requesting-username", requestingUser);
+    return theResource
+      .getMeta()
+      .getTag("https://simplifier.net/dot.base/requesting-username-namingsystem",requestingUser);
   }
 }
