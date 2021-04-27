@@ -38,7 +38,7 @@ public class IdentityProvider {
       HttpResponse<String> response = HTTP_CLIENT.send(request, BodyHandlers.ofString());
       return (response.statusCode() == 200 ? publicKey(response.body()) : null);
     } catch (IOException | InterruptedException | JSONException e) {
-      ourLog.info(e.getMessage());
+      ourLog.error(e.getMessage());
       return null;
     }
   }
