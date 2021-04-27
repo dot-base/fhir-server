@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.starter.dotBase.services;
 
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import io.jsonwebtoken.Claims;
 import io.sentry.Sentry;
 import io.sentry.protocol.User;
@@ -35,7 +36,9 @@ public class UsernameLogger {
   }
 
   private static String getUsername(Claims jwt) {
-    if (!jwt.containsKey("preferred_username")) return "unknown";
+    if (!jwt.containsKey("preferred_username")) {
+      throw new AuthenticationException("Authentication failed - access token does not provide a username");
+    }
     return jwt.get("preferred_username").toString();
   }
 
