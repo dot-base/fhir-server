@@ -6,7 +6,7 @@ services:
       HAPI_DATASOURCE_URL: "jdbc:postgresql://fhir-postgres:5432/hapi_r4"
       HAPI_DATASOURCE_USERNAME: "${FHIR_DB_USER:-admin}"
       HAPI_DATASOURCE_PASSWORD: "${FHIR_DB_PASSWORD:-admin}"
-      HAPI_AUTHENTICATION__INTERCEPTOR_ENABLED: "false"
+      HAPI_AUTHENTICATION_INTERCEPTOR_ENABLED: "false"
       HAPI_SSO_REALM_URL: ""
 
     ports:
