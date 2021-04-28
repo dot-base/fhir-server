@@ -38,7 +38,7 @@ public class JpaRestfulServer extends BaseJpaRestfulServer {
       setRealmPublicKey();
       registerInterceptor(new AuthenticationInterceptor());
 
-      // Authorization Rules 
+      // Authorization Rules
       IConsentService authorizationService = new Authorization();
       ConsentInterceptor consentInterceptor = new ConsentInterceptor();
       consentInterceptor.setConsentService(authorizationService);

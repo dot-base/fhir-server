@@ -7,9 +7,12 @@ import io.jsonwebtoken.Claims;
 import io.sentry.Sentry;
 import io.sentry.protocol.User;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.StringType;
 
 public class UsernameLogger {
@@ -36,7 +39,9 @@ public class UsernameLogger {
 
   private static String getUsername(Claims jwt) {
     if (!jwt.containsKey("preferred_username")) {
-      throw new AuthenticationException("Authentication failed - access token does not provide a username");
+      throw new AuthenticationException(
+        "Authentication failed - access token does not provide a username"
+      );
     }
     return jwt.get("preferred_username").toString();
   }
@@ -48,13 +53,35 @@ public class UsernameLogger {
   ) {
     setSentryUser(username);
     theRequestDetails.setAttribute("_username", username);
-    if (RESOURCE_EDITING_OPERATIONS.contains(restOperationType)) setResourceUserExtension(
+
+    if (restOperationType.equals(RestOperationTypeEnum.CREATE)) setResourceCreator(
+      username,
+      theRequestDetails
+    );
+
+    if (RESOURCE_EDITING_OPERATIONS.contains(restOperationType)) setResourceEditor(
       username,
       theRequestDetails
     );
   }
 
-  private static void setResourceUserExtension(
+  private static void setResourceCreator(
+    String username,
+    RequestDetails theRequestDetails
+  ) {
+    Coding usernameCoding = new Coding()
+      .setSystem("https://simplifier.net/dot.base/dotbase-username-namingsystem")
+      .setCode(username);
+
+    DomainResource theResource = (DomainResource) theRequestDetails.getResource();
+    Meta meta = theResource.getMeta();
+    List<Coding> tags = meta.getTag();
+    tags.add(usernameCoding);
+    theResource.setMeta(meta.setTag(tags));
+    theRequestDetails.setResource(theResource);
+  }
+
+  private static void setResourceEditor(
     String username,
     RequestDetails theRequestDetails
   ) {
