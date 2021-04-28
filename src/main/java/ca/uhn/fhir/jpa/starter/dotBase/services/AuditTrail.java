@@ -79,12 +79,16 @@ public class AuditTrail {
   }
 
   private static void setCreationDateTime(RequestDetails theRequestDetails) {
-    DomainResource theResource = (DomainResource) theRequestDetails.getResource();
     DateTimeType now = new DateTimeType(Utils.getCurrentTimestamp());
-    Extension creationDate = new Extension()
-      .setUrl("https://simplifier.net/dot.base/resource-creation-datetime")
-      .setValue(now);
-    theResource.getExtension().add(creationDate);
+    Coding creationDate = new Coding()
+    .setSystem("https://simplifier.net/dot.base/resource-creation-datetime-namingsystem")
+    .setCode(now.toHumanDisplay());
+
+    DomainResource theResource = (DomainResource) theRequestDetails.getResource();
+    Meta meta = theResource.getMeta();
+    List<Coding> tags = meta.getTag();
+    tags.add(creationDate);
+    theResource.setMeta(meta.setTag(tags));
     theRequestDetails.setResource(theResource);
   }
 }
