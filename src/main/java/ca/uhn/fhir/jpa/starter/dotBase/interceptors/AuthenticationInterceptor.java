@@ -25,13 +25,13 @@ public class AuthenticationInterceptor {
       Claims jwt = Authentication.verifyAndDecodeJWT(theRequestDetails);
       String username = getUsername(jwt);
       AccessLog.logRequest(username, theRequestDetails, restOperationType);
-      AuditTrail.logUsername(username, theRequestDetails, restOperationType);
+      AuditTrail.logRequest(username, theRequestDetails, restOperationType);
       return;
     }
     if (theRequestDetails.getHeader("X-Forwarded-User") != null) {
       String username = theRequestDetails.getHeader("X-Forwarded-User");
       AccessLog.logRequest(username, theRequestDetails, restOperationType);
-      AuditTrail.logUsername(username, theRequestDetails, restOperationType);
+      AuditTrail.logRequest(username, theRequestDetails, restOperationType);
       return;
     }
     throw new AuthenticationException("Authentication failed");
