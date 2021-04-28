@@ -43,5 +43,4 @@ public class AuthenticationInterceptor {
     }
     return jwt.get("preferred_username").toString();
   }
-
 }

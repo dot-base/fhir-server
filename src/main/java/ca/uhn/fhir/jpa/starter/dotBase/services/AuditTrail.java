@@ -24,7 +24,6 @@ public class AuditTrail {
     RESOURCE_EDITING_OPERATIONS.add(RestOperationTypeEnum.PATCH);
   }
 
-
   public static void logRequest(
     String username,
     RequestDetails theRequestDetails,
@@ -64,10 +63,11 @@ public class AuditTrail {
     String username,
     RequestDetails theRequestDetails
   ) {
-    DomainResource theResource = (DomainResource) theRequestDetails.getResource();
     Extension usernameExtension = new Extension()
       .setUrl("https://simplifier.net/dot.base/resource-editor-username")
       .setValue(new StringType(username));
+
+    DomainResource theResource = (DomainResource) theRequestDetails.getResource();
     theResource.getExtension().add(usernameExtension);
     theRequestDetails.setResource(theResource);
   }
