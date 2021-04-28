@@ -82,7 +82,7 @@ public class AuditTrail {
     DateTimeType now = new DateTimeType(Utils.getCurrentTimestamp());
     Coding creationDate = new Coding()
     .setSystem("https://simplifier.net/dot.base/resource-creation-datetime-namingsystem")
-    .setCode(now.toHumanDisplay());
+    .setCode(now.getValueAsString());
 
     DomainResource theResource = (DomainResource) theRequestDetails.getResource();
     Meta meta = theResource.getMeta();
