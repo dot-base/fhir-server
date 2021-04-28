@@ -19,7 +19,6 @@ import javax.persistence.Table;
     @Index(name = "IDX_URL", columnList = "URL", unique = false),
     @Index(name = "IDX_TIMESTAMP", columnList = "TIMESTAMP", unique = false),
     @Index(name = "RESOURCETYPE", columnList = "RESOURCETYPE", unique = false)
-
   }
 )
 public class AccessLog {
