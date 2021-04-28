@@ -77,10 +77,18 @@ public class Authorization implements IConsentService {
 
   private boolean isAuthorizedRequester(RequestDetails theRequestDetails, DomainResource theResource) {
     String requestingUser = (String) theRequestDetails.getAttribute("_username");
-    return isResourceEditor(theResource, requestingUser);
+    return isResourceCreator(theResource, requestingUser) || isResourceEditor(theResource, requestingUser);
   }
 
-  private static boolean isResourceEditor(DomainResource theResource,String requestingUser) {
+  private static boolean isResourceCreator(DomainResource theResource, String requestingUser) {
+    return (theResource
+      .getMeta()
+      .getTag("https://simplifier.net/dot.base/dotbase-username-namingsystem", requestingUser)
+      != null
+    );
+  }
+
+  private static boolean isResourceEditor(DomainResource theResource, String requestingUser) {
     Extension usernameExtension = theResource.getExtensionByUrl("https://simplifier.net/dot.base/resource-editor-username");
     if (usernameExtension != null) {
       return usernameExtension.getValue().toString().equals(requestingUser) 
