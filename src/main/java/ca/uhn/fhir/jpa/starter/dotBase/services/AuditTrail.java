@@ -5,20 +5,23 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import io.sentry.Sentry;
 import io.sentry.protocol.User;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.StringType;
 
 public class AuditTrail {
   private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(AuditTrail.class);
-  private static final Set<RestOperationTypeEnum> RESOURCE_EDIT_OPERATIONS;
+  private static final Set<RestOperationTypeEnum> RESOURCE_EDITING_OPERATIONS;
 
   static {
-    RESOURCE_EDIT_OPERATIONS = new HashSet<RestOperationTypeEnum>();
-    RESOURCE_EDIT_OPERATIONS.add(RestOperationTypeEnum.CREATE);
-    RESOURCE_EDIT_OPERATIONS.add(RestOperationTypeEnum.UPDATE);
-    RESOURCE_EDIT_OPERATIONS.add(RestOperationTypeEnum.PATCH);
+    RESOURCE_EDITING_OPERATIONS = new HashSet<RestOperationTypeEnum>();
+    RESOURCE_EDITING_OPERATIONS.add(RestOperationTypeEnum.CREATE);
+    RESOURCE_EDITING_OPERATIONS.add(RestOperationTypeEnum.UPDATE);
+    RESOURCE_EDITING_OPERATIONS.add(RestOperationTypeEnum.PATCH);
   }
 
   public static void logUsername(
@@ -28,11 +31,38 @@ public class AuditTrail {
   ) {
     setSentryUser(username);
     theRequestDetails.setAttribute("_username", username);
-    if (RESOURCE_EDIT_OPERATIONS.contains(restOperationType))
-      setResourceUserExtension(username, theRequestDetails);
+
+    if (restOperationType.equals(RestOperationTypeEnum.CREATE)) setResourceCreator(
+      username,
+      theRequestDetails
+    );
+
+    if (RESOURCE_EDITING_OPERATIONS.contains(restOperationType)) setResourceEditor(
+      username,
+      theRequestDetails
+    );
   }
 
-  private static void setResourceUserExtension(String username, RequestDetails theRequestDetails) {
+  private static void setResourceCreator(
+    String username,
+    RequestDetails theRequestDetails
+  ) {
+    Coding usernameCoding = new Coding()
+      .setSystem("https://simplifier.net/dot.base/dotbase-username-namingsystem")
+      .setCode(username);
+
+    DomainResource theResource = (DomainResource) theRequestDetails.getResource();
+    Meta meta = theResource.getMeta();
+    List<Coding> tags = meta.getTag();
+    tags.add(usernameCoding);
+    theResource.setMeta(meta.setTag(tags));
+    theRequestDetails.setResource(theResource);
+  }
+
+  private static void setResourceEditor(
+    String username,
+    RequestDetails theRequestDetails
+  ) {
     DomainResource theResource = (DomainResource) theRequestDetails.getResource();
     Extension usernameExtension = new Extension()
       .setUrl("https://simplifier.net/dot.base/resource-editor-username")
