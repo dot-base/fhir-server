@@ -24,7 +24,8 @@ public class AuditTrail {
     RESOURCE_EDITING_OPERATIONS.add(RestOperationTypeEnum.PATCH);
   }
 
-  public static void logUsername(
+
+  public static void logRequest(
     String username,
     RequestDetails theRequestDetails,
     RestOperationTypeEnum restOperationType
