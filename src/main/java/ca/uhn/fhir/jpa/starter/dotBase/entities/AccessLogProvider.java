@@ -21,8 +21,10 @@ public class AccessLogProvider extends JpaSystemProviderR4 {
 
   @Operation(name = "$logs", idempotent = true)
   public Bundle getAllLogs(HttpServletRequest theRequest, RequestDetails requestDetails,
-      @OperationParam(name = "_type") StringType resourceType, @OperationParam(name = "_username") StringType username,
-      @OperationParam(name = "_resourcetype") StringType resourcetype, @OperationParam(name = "_from") DateType from,
+      @OperationParam(name = "_type") StringType resourceType,
+      @OperationParam(name = "_username") StringType username,
+      @OperationParam(name = "_resourcetype") StringType resourcetype,
+      @OperationParam(name = "_from") DateType from,
       @OperationParam(name = "_to") DateType to) throws Exception {
     // TODO: Allow searching accesLog with queryParams instead of findall only
     List<AccessLog> logs = ACCESS_LOG_REPOSITORY.findAll();
