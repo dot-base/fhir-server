@@ -1,11 +1,16 @@
 package ca.uhn.fhir.jpa.starter.dotBase.entities.model;
 
 import ca.uhn.fhir.jpa.starter.dotBase.entities.entity.AccessLog;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 import javax.transaction.Transactional;
 import org.hl7.fhir.r4.model.StringType;
 import org.springframework.stereotype.Repository;
@@ -35,45 +40,46 @@ public class AccessLogRepository {
   @Transactional
   @SuppressWarnings("unchecked")
   public List<AccessLog> getLogs(Map<String, StringType> queryParams, StringType limit) {
-    String queryString = getQuery(queryParams, limit);
-    Query query = em.createNativeQuery(queryString, AccessLog.class);
+    CriteriaQuery<AccessLog> cQuery = getQuery(queryParams);
+    Query query = em.createQuery(cQuery);
+
+    if (toNumeric(limit) > 0)
+      query.setMaxResults(Integer.valueOf(limit.toString()));
+
     return query.getResultList();
   }
 
-  private String getQuery(Map<String, StringType> queryParams, StringType limit) {
-    String query = "SELECT * FROM ACCESS_LOGGING";
-    String whereString = whereQuery(queryParams);
-    String limitString = limitQuery(limit);
-    return query + whereString + limitString;
+  private CriteriaQuery<AccessLog> getQuery(Map<String, StringType> queryParams) {
+    CriteriaBuilder cb = em.getCriteriaBuilder();
+    CriteriaQuery<AccessLog> query = cb.createQuery(AccessLog.class);
+    Root<AccessLog> root = query.from(AccessLog.class);
+
+    if (queryParams != null) {
+      return whereQuery(queryParams);
+    }
+    return query.select(root);
   }
 
-  private String whereQuery(Map<String, StringType> queryParams) {
-    String whereString = " WHERE ";
+  private CriteriaQuery<AccessLog> whereQuery(Map<String, StringType> queryParams) {
+    CriteriaBuilder cb = em.getCriteriaBuilder();
+    CriteriaQuery<AccessLog> cq = cb.createQuery(AccessLog.class);
+    Root<AccessLog> root = cq.from(AccessLog.class);
+    List<Predicate> predicates = new ArrayList<Predicate>();
+
     for (Map.Entry<String, StringType> param : queryParams.entrySet()) {
-      if (param.getValue() == null)
-        continue;
-      
-      if (!whereString.equals(" WHERE "))
-        whereString += " AND ";
-        
-      whereString += param.getKey() + " LIKE '" + param.getValue().toString() + "'";
+      if (param.getValue() != null) {
+        Predicate p = cb.equal(root.get(param.getKey()), param.getValue().toString());
+        predicates.add(p);
+      }
     }
-    return !whereString.equals(" WHERE ") ? whereString : "";
+    return cq.select(root).where(cb.and(predicates.toArray(new Predicate[] {})));
   }
 
-  private String limitQuery(StringType limit) {
-    if (limit != null && isNumeric(limit)) {
-      return limit + ";";
-    }
-    return ";";
-  }
-
-  public static boolean isNumeric(StringType limit) {
+  private static int toNumeric(StringType limit) {
     try {
-      int number = Integer.parseInt(limit.toString());
-      return number > 0;
-    } catch (NumberFormatException e) {
-      return false;
+      return Integer.parseInt(limit.toString());
+    } catch (NumberFormatException | NullPointerException e) {
+      return -1;
     }
   }
 }

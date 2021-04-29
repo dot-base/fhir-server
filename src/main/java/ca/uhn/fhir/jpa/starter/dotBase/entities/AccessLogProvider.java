@@ -13,7 +13,6 @@ import javax.servlet.http.HttpServletRequest;
 import org.hl7.fhir.r4.model.Basic;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.StringType;
 import org.springframework.web.context.ContextLoaderListener;
 
@@ -26,7 +25,7 @@ public class AccessLogProvider extends JpaSystemProviderR4 {
   public Bundle getAllLogs(
     HttpServletRequest theRequest,
     RequestDetails requestDetails,
-    @OperationParam(name = "_type") StringType requestType,
+    @OperationParam(name = "_method") StringType method,
     @OperationParam(name = "_username") StringType username,
     @OperationParam(name = "_resourcetype") StringType resourcetype,
     @OperationParam(name = "_url") StringType url,
@@ -35,15 +34,17 @@ public class AccessLogProvider extends JpaSystemProviderR4 {
     @OperationParam(name = "_limit") StringType limit
   )
     throws Exception {
-    Map<String, StringType> queryParams = new HashMap<>();
-    queryParams.put("METHOD", requestType);
-    queryParams.put("USERNAME", username);
-    queryParams.put("RESOURCETYPE", resourcetype);
-    queryParams.put("URL", url);
-    queryParams.put("FROM", from);
-    queryParams.put("TO", to);
-
-    List<AccessLog> logs = ACCESS_LOG_REPOSITORY.getLogs(queryParams, limit);
+    Map<String, StringType> params = null;
+    if (requestDetails.getParameters().size() > 0) {
+      params = new HashMap<>();
+      params.put("method", method);
+      params.put("username", username);
+      params.put("resourcetype", resourcetype);
+      params.put("url", url);
+      params.put("from", from);
+      params.put("to", to);
+    }
+    List<AccessLog> logs = ACCESS_LOG_REPOSITORY.getLogs(params, limit);
     return responseBundle(logs);
   }
 
