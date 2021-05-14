@@ -5,9 +5,10 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.interceptor.consent.ConsentOutcome;
 import ca.uhn.fhir.rest.server.interceptor.consent.IConsentContextServices;
 import ca.uhn.fhir.rest.server.interceptor.consent.IConsentService;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.r4.model.DomainResource;
-import org.hl7.fhir.r4.model.Element;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Procedure;
 import org.hl7.fhir.r4.model.Procedure.ProcedureStatus;
@@ -28,12 +29,10 @@ public class Authorization implements IConsentService {
    */
   @Override
   public ConsentOutcome canSeeResource(RequestDetails theRequestDetails, IBaseResource theResource,
-    IConsentContextServices theContextServices
-  ) {
-    if (theRequestDetails.getRequestType() == RequestTypeEnum.GET && isDraftResource(theResource)) {
-      return isAuthorizedRequester(theRequestDetails, (DomainResource) theResource)
-        ? ConsentOutcome.AUTHORIZED
-        : ConsentOutcome.REJECT;
+      IConsentContextServices theContextServices) {
+    if (theRequestDetails.getRequestType() == RequestTypeEnum.GET && isDraftResource((IDomainResource) theResource)) {
+      return isAuthorizedRequester(theRequestDetails, (DomainResource) theResource) ? ConsentOutcome.AUTHORIZED
+          : ConsentOutcome.REJECT;
     }
     return ConsentOutcome.AUTHORIZED;
   }
@@ -47,8 +46,8 @@ public class Authorization implements IConsentService {
     return ConsentOutcome.AUTHORIZED;
   }
 
-  private static boolean isDraftResource(IBaseResource theResource) {
-    boolean isDraft = ((Element) theResource).getExtensionByUrl("https://simplifier.net/dot.base/draft-action")!=null;
+  private static boolean isDraftResource(IDomainResource theResource) {
+    boolean isDraft = isDraft(theResource);
     if (!isDraft && theResource instanceof Procedure) {
       Procedure procedure = (Procedure) theResource;
       return procedure.getStatus() == ProcedureStatus.INPROGRESS;
@@ -56,21 +55,26 @@ public class Authorization implements IConsentService {
     return isDraft;
   }
 
+  private static boolean isDraft(IDomainResource theResource) {
+    IBaseExtension<?, ?> draft = theResource.getExtension().stream()
+        .filter(extension -> extension.getUrl().equals("https://simplifier.net/dot.base/draft-action")).findAny()
+        .orElse(null);
+    return draft != null;
+  }
+
   private boolean isAuthorizedRequester(RequestDetails theRequestDetails, DomainResource theResource) {
     String requestingUser = (String) theRequestDetails.getAttribute("_username");
-    return isResourceCreator(theResource, requestingUser) || isResourceEditor(theResource, requestingUser);
+    return (isResourceCreator(theResource, requestingUser) || isResourceEditor(theResource, requestingUser));
   }
 
   private static boolean isResourceCreator(DomainResource theResource, String requestingUser) {
-    return (theResource
-      .getMeta()
-      .getTag("https://simplifier.net/dot.base/dotbase-username-namingsystem", requestingUser)
-      != null
-    );
+    return (theResource.getMeta().getTag("https://simplifier.net/dot.base/dotbase-username-namingsystem",
+        requestingUser) != null);
   }
 
   private static boolean isResourceEditor(DomainResource theResource, String requestingUser) {
-    Extension usernameExtension = theResource.getExtensionByUrl("https://simplifier.net/dot.base/resource-editor-username");
+    Extension usernameExtension = theResource
+        .getExtensionByUrl("https://simplifier.net/dot.base/resource-editor-username");
     if (usernameExtension != null) {
       return usernameExtension.getValue().toString().equals(requestingUser);
     }
