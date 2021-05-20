@@ -1,14 +1,14 @@
 version: "3.8"
 services:
   fhir-server:
-    image: "ghcr.io/dot-base/fhir-server:latest"
+    image: "ghcr.io/dot-base/fhir-server:next"
     environment:
       HAPI_DATASOURCE_URL: "jdbc:postgresql://fhir-postgres:5432/hapi_r4"
       HAPI_DATASOURCE_USERNAME: "${FHIR_DB_USER:-admin}"
       HAPI_DATASOURCE_PASSWORD: "${FHIR_DB_PASSWORD:-admin}"
       HAPI_ERROR_MONITORING_ENABLED: "false"
-      HAPI_AUTHENTICATION_INTERCEPTOR_ENABLED: "false"
-      HAPI_SSO_REALM_URL: ""
+      HAPI_AUTHENTICATION_INTERCEPTOR_ENABLED: "true"
+      HAPI_SSO_REALM_ADDRESS: ""
 
     ports:
       - "8080:8080"
