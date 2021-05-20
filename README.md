@@ -34,6 +34,14 @@ Want a FHIR Server that supports profiles established throughout the Movebase pr
     ```sh
     export FHIR_DB_USER="YOUR_DB_USER"
     export FHIR_DB_PASSWORD="YOUR_DB_PW"
+    export HAPI_SSO_REALM_ADDRESS: "YOUR_SSO_REALM_ADRESS"
+    ```
+    The following environment variables can be set optionally, depending on your setup:
+    ```sh
+    export SENTRY_ENVIRONMENT: "YOUR_SENTRY_ENVIRONMENT"
+    export SENTRY_DSN: "YOUR_SENTRY_DSN"
+    export PROXY_ADDRESS: "YOUR_PROXY_ADDRESS"
+    export PROXY_PORT: "YOUR_PROXY_PORT"
     ```
 1. Done and dusted 🎉. This will deploy two containers: a Movebase fhir server as well as a postgres database container.
 1. [optional] Add these containers to your docker swarm or kubernetes config. Hint: You can use the `docker-compose.yml` as a template for this.
@@ -54,16 +62,25 @@ Want a FHIR Server that supports profiles established throughout the Movebase pr
     ```
     docker swarm init
     ```
-1. Start a database container:
-    ```
-    docker stack deploy -c docker-compose-dev.yml dev-database
-    ```
-1. Start the development server
-    ```
-    mvn jetty:run
-    ```
-1. By default the server is available at http://localhost:8080.
-1. Go and mix up some code 👩‍💻. The server will reload automatically once you save. Remember to keep an eye on the console.
+2. 
+    a) Start a database container and start the development server separately:
+
+        docker stack deploy -c docker-compose-dev-db.yml fhir-db
+        mvn jetty:run
+
+    b) or start the the full setup with docker
+
+        docker stack deploy -c docker-compose-dev.yml fhir-server-dev
+
+4. By default the server is available at http://localhost:8080.
+5. By default authentication will be enabled, but can be disabled in ```hapi.properties``` or ```docker-compose-dev.yml```.
+6. Go and mix up some code 👩‍💻. The server will reload automatically once you save. Remember to keep an eye on the console.
+
+### Authentication
+If ```HAPI_AUTHENTICATION_INTERCEPTOR_ENABLED``` is set to ```true```, you must specify your identity providers realm url, to fetch a public key and requests must include one of the following headers
+
+    Authorization - Bearer sometoken...
+    X-Forwarded-User - username
 
 
 FHIR® is the registered trademark of HL7. Use of the FHIR trademark does not constitute endorsement of this product by HL7.
