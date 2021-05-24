@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.starter.dotBase.PlainSystemProviderR4;
 import ca.uhn.fhir.jpa.starter.dotBase.api.IdentityProvider;
 import ca.uhn.fhir.jpa.starter.dotBase.entities.AccessLogProvider;
+import ca.uhn.fhir.jpa.starter.dotBase.interceptors.AuditTrailInterceptor;
 import ca.uhn.fhir.jpa.starter.dotBase.interceptors.AuthenticationInterceptor;
 import ca.uhn.fhir.jpa.starter.dotBase.interceptors.ResponseInterceptor;
 import ca.uhn.fhir.jpa.starter.dotBase.services.Authorization;
@@ -36,6 +37,7 @@ public class JpaRestfulServer extends BaseJpaRestfulServer {
 
     registerInterceptor(new ResponseInterceptor());
 
+    registerInterceptor(new AuditTrailInterceptor());
     if (HapiProperties.isAuthenticationInterceptorEnabled()) {
       setRealmPublicKey();
       registerInterceptor(new AuthenticationInterceptor());
