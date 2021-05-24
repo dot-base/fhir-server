@@ -64,8 +64,15 @@ public class AccessLogProvider extends JpaSystemProviderR4 {
   }
 
   private StringType logToStringType(AccessLog log) {
-    String concat = "method: " + log.method + ", username: " + log.username + ", url: " + log.url + ", timestamp: "
-        + log.timestamp;
+    String concat =
+      "method: " +
+      log.method +
+      ", username: " +
+      log.username +
+      ", url: " +
+      log.url +
+      ", timestamp: " +
+      log.timestamp;
     return new StringType(concat);
   }
 }
