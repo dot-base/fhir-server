@@ -1,12 +1,12 @@
-package ca.uhn.fhir.jpa.starter.dotBase;
+package ca.uhn.fhir.jpa.starter.dotBase.utils;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
 
-public class Utils {
+public class DateUtils {
   private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(
-    Utils.class
+    DateUtils.class
   );
 
   public static String getCurrentTimestamp() {
