@@ -43,8 +43,7 @@ public class AccessLogRepository {
     CriteriaQuery<AccessLog> cQuery = getQuery(queryParams);
     Query query = em.createQuery(cQuery);
 
-    if (toNumeric(limit) > 0)
-      query.setMaxResults(Integer.valueOf(limit.toString()));
+    if (toNumeric(limit) > 0) query.setMaxResults(Integer.valueOf(limit.toString()));
 
     return query.getResultList();
   }

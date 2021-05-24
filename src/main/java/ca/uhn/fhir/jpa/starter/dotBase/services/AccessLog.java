@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.starter.dotBase.services;
 
-import ca.uhn.fhir.jpa.starter.dotBase.utils.DateUtils;
 import ca.uhn.fhir.jpa.starter.dotBase.entities.model.AccessLogRepository;
+import ca.uhn.fhir.jpa.starter.dotBase.utils.DateUtils;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.springframework.web.context.ContextLoaderListener;
