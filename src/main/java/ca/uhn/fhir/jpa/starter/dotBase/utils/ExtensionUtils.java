@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.starter.dotBase.utils;
 
-import ca.uhn.fhir.rest.api.server.RequestDetails;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -8,19 +7,18 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.StringType;
 
 public class ExtensionUtils {
 
   public static void addExtension(
-    RequestDetails theRequestDetails,
+    IBaseResource theResource,
     String theUrl,
     String theValue
   ) {
     try {
-      IBaseHasExtensions baseHasExtensions = validateExtensionSupport(
-        theRequestDetails.getResource()
-      );
+      IBaseHasExtensions baseHasExtensions = validateExtensionSupport(theResource);
       IBaseExtension<?, ?> extension = baseHasExtensions.addExtension();
       extension.setUrl(theUrl);
       extension.setValue(new StringType(theValue));

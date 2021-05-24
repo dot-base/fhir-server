@@ -10,20 +10,25 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.DateTimeType;
 
 public class AuditTrailInterceptor {
-  private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(AuditTrailInterceptor.class);
+  private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(
+    AuditTrailInterceptor.class
+  );
 
   @Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED)
   public void resourcePreCreate(RequestDetails theRequest, IBaseResource theResource) {
     String username = getUsername(theRequest);
-    setCreationDateTime(theRequest);
-    setResourceCreator(username, theRequest);
+    setCreationDateTime(theRequest, theResource);
+    setResourceCreator(theRequest, theResource, username);
   }
 
   @Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED)
-  public void resourcePreUpdate(RequestDetails theRequest, IBaseResource theOldResource, IBaseResource theNewResource) {
+  public void resourcePreUpdate(
+    RequestDetails theRequest,
+    IBaseResource theOldResource,
+    IBaseResource theNewResource
+  ) {
     String username = getUsername(theRequest);
-    setResourceEditor(username, theRequest);
-
+    setResourceEditor(theNewResource, username);
   }
 
   private String getUsername(RequestDetails theRequestDetails) {
@@ -33,19 +38,32 @@ public class AuditTrailInterceptor {
     return theRequestDetails.getAttribute("_username").toString();
   }
 
-  private static void setCreationDateTime(RequestDetails theRequestDetails) {
+  private static void setCreationDateTime(
+    RequestDetails theRequestDetails,
+    IBaseResource theResource
+  ) {
     DateTimeType now = new DateTimeType(DateUtils.getCurrentTimestamp());
-    String system = "https://simplifier.net/dot.base/resource-creation-datetime-namingsystem";
-    MetaUtils.setTag(theRequestDetails, now.getValueAsString(), system);
+    String system =
+      "https://simplifier.net/dot.base/resource-creation-datetime-namingsystem";
+    MetaUtils.setTag(
+      theRequestDetails.getFhirContext(),
+      theResource,
+      now.getValueAsString(),
+      system
+    );
   }
 
-  private static void setResourceCreator(String username, RequestDetails theRequestDetails) {
+  private static void setResourceCreator(
+    RequestDetails theRequestDetails,
+    IBaseResource theResource,
+    String username
+  ) {
     String system = "https://simplifier.net/dot.base/dotbase-username-namingsystem";
-    MetaUtils.setTag(theRequestDetails, username, system);
+    MetaUtils.setTag(theRequestDetails.getFhirContext(), theResource, username, system);
   }
 
-  private static void setResourceEditor(String username, RequestDetails theRequestDetails) {
+  private static void setResourceEditor(IBaseResource theResource, String username) {
     String system = "https://simplifier.net/dot.base/resource-editor-username";
-    ExtensionUtils.addExtension(theRequestDetails, system, username);
+    ExtensionUtils.addExtension(theResource, system, username);
   }
 }
