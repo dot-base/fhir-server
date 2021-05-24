@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.starter.dotBase.services;
 
-import ca.uhn.fhir.jpa.starter.dotBase.Utils;
+import ca.uhn.fhir.jpa.starter.dotBase.utils.DateUtils;
 import ca.uhn.fhir.jpa.starter.dotBase.entities.model.AccessLogRepository;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -21,7 +21,7 @@ public class AccessLog {
       username,
       theRequestDetails.getCompleteUrl(),
       theRequestDetails.getResourceName(),
-      Utils.getCurrentTimestamp()
+      DateUtils.getCurrentTimestamp()
     );
   }
 }
