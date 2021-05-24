@@ -3,11 +3,11 @@ package ca.uhn.fhir.jpa.starter.dotBase.utils;
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseMetaType;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 public class MetaUtils {
   private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(
@@ -15,12 +15,12 @@ public class MetaUtils {
   );
 
   public static void setTag(
-    RequestDetails theRequestDetails,
+    FhirContext theContext,
+    IBaseResource theResource,
     String theSystem,
     String theValue
   ) {
-    FhirContext theContext = theRequestDetails.getFhirContext();
-    IBaseMetaType theMeta = theRequestDetails.getResource().getMeta();
+    IBaseMetaType theMeta = theResource.getMeta();
     BaseRuntimeElementCompositeDefinition<?> elementDef = (BaseRuntimeElementCompositeDefinition<?>) theContext.getElementDefinition(
       theMeta.getClass()
     );
