@@ -29,6 +29,7 @@ public class AuditTrailInterceptor {
   ) {
     String username = getUsername(theRequest);
     setResourceEditor(theNewResource, username);
+    theRequest.setResource(theNewResource);
   }
 
   private String getUsername(RequestDetails theRequestDetails) {
@@ -59,7 +60,7 @@ public class AuditTrailInterceptor {
     String username
   ) {
     String system = "https://simplifier.net/dot.base/dotbase-username-namingsystem";
-    MetaUtils.setTag(theRequestDetails.getFhirContext(), theResource, username, system);
+    MetaUtils.setTag(theRequestDetails.getFhirContext(), theResource, system, username);
   }
 
   private static void setResourceEditor(IBaseResource theResource, String username) {
