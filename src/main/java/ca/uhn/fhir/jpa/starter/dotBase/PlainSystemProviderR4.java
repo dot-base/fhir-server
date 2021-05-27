@@ -22,17 +22,12 @@ import org.springframework.web.context.ContextLoaderListener;
 public class PlainSystemProviderR4 extends JpaSystemProviderR4 {
 
   @Operation(name = "$history", idempotent = true)
-  public <T extends IBaseResource> IBundleProvider getAllVersions(
-    HttpServletRequest theRequest,
-    RequestDetails requestDetails,
-    @OperationParam(name = "_type") StringType resourceType,
-    @OperationParam(name = "_id") IdType resourceId,
-    @RawParam Map<String, List<String>> queryParams
-  )
-    throws Exception {
-    if (resourceType == null) throw new InvalidRequestException(
-      "Parameter '_type' must be provided"
-    );
+  public <T extends IBaseResource> IBundleProvider getAllVersions(HttpServletRequest theRequest,
+      RequestDetails requestDetails, @OperationParam(name = "_type") StringType resourceType,
+      @OperationParam(name = "_id") IdType resourceId, @RawParam Map<String, List<String>> queryParams)
+      throws Exception {
+    if (resourceType == null)
+      throw new InvalidRequestException("Parameter '_type' must be provided");
     IFhirResourceDao<T> resourceDAO = this.getDao(resourceType);
 
     if (resourceId != null) {
@@ -40,59 +35,43 @@ public class PlainSystemProviderR4 extends JpaSystemProviderR4 {
     }
 
     IBundleProvider typeHistory = this.typeHistory(requestDetails, resourceDAO);
-    if (queryParams == null) return typeHistory;
+    if (queryParams == null)
+      return typeHistory;
 
     return this.searchHistory(queryParams, typeHistory, requestDetails, resourceDAO);
   }
 
   @SuppressWarnings("unchecked")
-  private <T extends IBaseResource> IFhirResourceDao<T> getDao(StringType resourceType) {
-    return ContextLoaderListener
-      .getCurrentWebApplicationContext()
-      .getBean("my" + resourceType + "DaoR4", IFhirResourceDao.class);
+  public <T extends IBaseResource> IFhirResourceDao<T> getDao(StringType resourceType) {
+    return ContextLoaderListener.getCurrentWebApplicationContext().getBean("my" + resourceType + "DaoR4",
+        IFhirResourceDao.class);
   }
 
-  private <T extends IBaseResource> IBundleProvider instanceHistory(
-    RequestDetails requestDetails,
-    IFhirResourceDao<T> resourceDAO,
-    IdType resourceId
-  ) {
-    IBundleProvider instanceHisotry =
-      this.getHistoryForResourceInstance(requestDetails, resourceDAO, resourceId);
+  public <T extends IBaseResource> IBundleProvider instanceHistory(RequestDetails requestDetails,
+      IFhirResourceDao<T> resourceDAO, IdType resourceId) {
+    IBundleProvider instanceHisotry = this.getHistoryForResourceInstance(requestDetails, resourceDAO, resourceId);
     return this.filterDeletes(instanceHisotry);
   }
 
-  private <T extends IBaseResource> IBundleProvider typeHistory(
-    RequestDetails requestDetails,
-    IFhirResourceDao<T> resourceDAO
-  ) {
-    IBundleProvider typeHistory =
-      this.getHistoryForResourceType(requestDetails, resourceDAO);
+  private <T extends IBaseResource> IBundleProvider typeHistory(RequestDetails requestDetails,
+      IFhirResourceDao<T> resourceDAO) {
+    IBundleProvider typeHistory = this.getHistoryForResourceType(requestDetails, resourceDAO);
     return this.filterDeletes(typeHistory);
   }
 
-  private <T extends IBaseResource> IBundleProvider searchHistory(
-    Map<String, List<String>> queryParams,
-    IBundleProvider typeHistory,
-    RequestDetails requestDetails,
-    IFhirResourceDao<T> resourceDAO
-  ) {
+  private <T extends IBaseResource> IBundleProvider searchHistory(Map<String, List<String>> queryParams,
+      IBundleProvider typeHistory, RequestDetails requestDetails, IFhirResourceDao<T> resourceDAO) {
     IBundleProvider searchRes = searchQuery(queryParams, requestDetails, resourceDAO);
     return this.filterSearchHistory(typeHistory, searchRes);
   }
 
-  private <T extends IBaseResource> IBundleProvider getHistoryForResourceInstance(
-    RequestDetails requestDetails,
-    IFhirResourceDao<T> resourceDAO,
-    IdType resourceId
-  ) {
+  private <T extends IBaseResource> IBundleProvider getHistoryForResourceInstance(RequestDetails requestDetails,
+      IFhirResourceDao<T> resourceDAO, IdType resourceId) {
     return resourceDAO.history(resourceId, null, null, requestDetails);
   }
 
-  private <T extends IBaseResource> IBundleProvider getHistoryForResourceType(
-    RequestDetails requestDetails,
-    IFhirResourceDao<T> resourceDAO
-  ) {
+  private <T extends IBaseResource> IBundleProvider getHistoryForResourceType(RequestDetails requestDetails,
+      IFhirResourceDao<T> resourceDAO) {
     return resourceDAO.history(null, null, requestDetails);
   }
 
@@ -103,38 +82,24 @@ public class PlainSystemProviderR4 extends JpaSystemProviderR4 {
     return BundleProviders.newList(filteredList);
   }
 
-  private List<IBaseResource> filterDelete(
-    List<String> deleteIds,
-    List<IBaseResource> resourceList
-  ) {
-    return resourceList
-      .stream()
-      .filter(resource -> !deleteIds.contains(resource.getIdElement().getIdPart()))
-      .collect(Collectors.toList());
+  private List<IBaseResource> filterDelete(List<String> deleteIds, List<IBaseResource> resourceList) {
+    return resourceList.stream().filter(resource -> !deleteIds.contains(resource.getIdElement().getIdPart()))
+        .collect(Collectors.toList());
   }
 
   private List<String> getDeleteIds(List<IBaseResource> resourceList) {
-    return resourceList
-      .stream()
-      .filter(resource -> resource.getUserData("ENTRY_TRANSACTION_OPERATION") == "DELETE")
-      .map(resource -> resource.getIdElement().getIdPart())
-      .collect(Collectors.toList());
+    return resourceList.stream().filter(resource -> resource.getUserData("ENTRY_TRANSACTION_OPERATION") == "DELETE")
+        .map(resource -> resource.getIdElement().getIdPart()).collect(Collectors.toList());
   }
 
-  private <T extends IBaseResource> IBundleProvider searchQuery(
-    Map<String, List<String>> queryParams,
-    RequestDetails requestDetails,
-    IFhirResourceDao<T> resourceDAO
-  ) {
+  private <T extends IBaseResource> IBundleProvider searchQuery(Map<String, List<String>> queryParams,
+      RequestDetails requestDetails, IFhirResourceDao<T> resourceDAO) {
     SearchParameterMap paramMap = new SearchParameterMap();
     resourceDAO.translateRawParameters(queryParams, paramMap);
     return resourceDAO.search(paramMap, requestDetails);
   }
 
-  private IBundleProvider filterSearchHistory(
-    IBundleProvider typeHistory,
-    IBundleProvider searchRes
-  ) {
+  private IBundleProvider filterSearchHistory(IBundleProvider typeHistory, IBundleProvider searchRes) {
     List<IBaseResource> historyList = typeHistory.getResources(0, typeHistory.size());
     List<String> searchIds = this.getSearchIds(searchRes);
     List<IBaseResource> searchHistory = this.filterHistory(searchIds, historyList);
@@ -142,20 +107,12 @@ public class PlainSystemProviderR4 extends JpaSystemProviderR4 {
   }
 
   private List<String> getSearchIds(IBundleProvider searchRes) {
-    return searchRes
-      .getResources(0, searchRes.size())
-      .stream()
-      .map(resource -> resource.getIdElement().getIdPart())
-      .collect(Collectors.toList());
+    return searchRes.getResources(0, searchRes.size()).stream().map(resource -> resource.getIdElement().getIdPart())
+        .collect(Collectors.toList());
   }
 
-  private List<IBaseResource> filterHistory(
-    List<String> searchIds,
-    List<IBaseResource> historyList
-  ) {
-    return historyList
-      .stream()
-      .filter(resource -> searchIds.contains(resource.getIdElement().getIdPart()))
-      .collect(Collectors.toList());
+  private List<IBaseResource> filterHistory(List<String> searchIds, List<IBaseResource> historyList) {
+    return historyList.stream().filter(resource -> searchIds.contains(resource.getIdElement().getIdPart()))
+        .collect(Collectors.toList());
   }
 }
