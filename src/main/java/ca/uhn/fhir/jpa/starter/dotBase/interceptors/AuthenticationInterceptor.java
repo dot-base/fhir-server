@@ -14,12 +14,18 @@ import io.sentry.Sentry;
 import io.sentry.protocol.User;
 
 public class AuthenticationInterceptor {
-  private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(AuthenticationInterceptor.class);
-  private static final String PROCESSING_SUB_REQUEST = "BaseHapiFhirDao.processingSubRequest";
+  private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(
+    AuthenticationInterceptor.class
+  );
+  private static final String PROCESSING_SUB_REQUEST =
+    "BaseHapiFhirDao.processingSubRequest";
 
   @Hook(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED)
-  public void preHandleIncomingRequest(RequestDetails theRequestDetails, ServletRequestDetails servletRequestDetails,
-      RestOperationTypeEnum restOperationType) {
+  public void preHandleIncomingRequest(
+    RequestDetails theRequestDetails,
+    ServletRequestDetails servletRequestDetails,
+    RestOperationTypeEnum restOperationType
+  ) {
     if (theRequestDetails.getAttribute("_username") == null) {
       String username = getAuthenticatedUser(theRequestDetails);
       theRequestDetails.setAttribute("_username", username);
@@ -29,9 +35,10 @@ public class AuthenticationInterceptor {
 
     //TODO: ACCESS_LOG FOR SUBREQUESTS
 
-    if (restOperationType.equals(RestOperationTypeEnum.TRANSACTION)
-        && theRequestDetails.getUserData().get(PROCESSING_SUB_REQUEST) != Boolean.TRUE)
-      AuditTrail.handleTransaction(theRequestDetails);
+    if (
+      restOperationType.equals(RestOperationTypeEnum.TRANSACTION) &&
+      theRequestDetails.getUserData().get(PROCESSING_SUB_REQUEST) != Boolean.TRUE
+    ) AuditTrail.handleTransaction(theRequestDetails);
   }
 
   /**
@@ -51,7 +58,9 @@ public class AuthenticationInterceptor {
 
   private String getUsername(Claims jwt) {
     if (!jwt.containsKey("preferred_username")) {
-      throw new AuthenticationException("Authentication failed - token does not provide a username");
+      throw new AuthenticationException(
+        "Authentication failed - token does not provide a username"
+      );
     }
     return jwt.get("preferred_username").toString();
   }
