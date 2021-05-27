@@ -26,11 +26,12 @@ public class MetaUtils {
     );
     BaseRuntimeChildDefinition sourceChild = elementDef.getChildByName("tag");
     List<IBase> tagValues = sourceChild.getAccessor().getValues(theMeta);
-    IBaseCoding tagElement;
+    IBaseCoding tagElement = (IBaseCoding) theContext
+      .getElementDefinition("Coding")
+      .newInstance();
     if (tagValues.size() > 0) {
-      tagElement = (IBaseCoding) tagValues.get(0);
+      tagValues.add(tagElement);
     } else {
-      tagElement = (IBaseCoding) theContext.getElementDefinition("Coding").newInstance();
       sourceChild.getMutator().setValue(theMeta, tagElement);
     }
     tagElement.setSystem(theSystem);
