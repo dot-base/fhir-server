@@ -1,11 +1,7 @@
 package ca.uhn.fhir.jpa.starter.dotBase.services;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.interceptor.api.Hook;
-import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.patch.FhirPatch;
-import ca.uhn.fhir.jpa.provider.DiffProvider;
 import ca.uhn.fhir.jpa.starter.dotBase.PlainSystemProviderR4;
 import ca.uhn.fhir.jpa.starter.dotBase.interceptors.AuditTrailInterceptor;
 import ca.uhn.fhir.jpa.starter.dotBase.utils.DaoUtils;
@@ -17,10 +13,8 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import java.util.List;
-import org.hl7.fhir.instance.model.api.IBaseBooleanDatatype;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
@@ -29,8 +23,11 @@ import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StringType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class AuditTrail {
+  private static final Logger ourLog = LoggerFactory.getLogger(AuditTrail.class);
 
   public static String getUsername(RequestDetails theRequestDetails) {
     if (theRequestDetails.getAttribute("_username") == null) {
@@ -92,11 +89,7 @@ public class AuditTrail {
       if (
         resourceDiff(theRequestDetails.getFhirContext(), newResource, oldResource)
       ) new AuditTrailInterceptor()
-      .resourcePreUpdate(
-          theRequestDetails,
-          newResource,
-          entry.getResource()
-        );
+      .resourcePreUpdate(theRequestDetails, newResource, entry.getResource());
       return;
     }
 
@@ -144,6 +137,6 @@ public class AuditTrail {
       newResource,
       oldResource
     );
-    return diff.isEmpty();
+    return !diff.isEmpty();
   }
 }
