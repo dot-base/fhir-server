@@ -17,7 +17,7 @@ public class ResourceComparator extends FhirPatch {
     super(theContext);
   }
 
-  //TODO: exclude extension resource-editor from comparison
+  // TODO: exclude extension resource-editor from comparison
   public IBaseParameters callDiff(
     IPrimitiveType<Boolean> theIncludeMeta,
     FhirContext myContext,
@@ -36,7 +36,7 @@ public class ResourceComparator extends FhirPatch {
   ) {
     ResourceComparator fhirPatch = new ResourceComparator(myContext);
     fhirPatch.setIncludePreviousValueInDiff(true);
-
+    fhirPatch.addIgnorePath("*.text");
     if (theIncludeMeta != null && theIncludeMeta.getValue()) {
       ourLog.trace("Including resource metadata in patch");
     } else {
