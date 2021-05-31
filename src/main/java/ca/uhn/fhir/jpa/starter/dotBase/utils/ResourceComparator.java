@@ -2,11 +2,11 @@ package ca.uhn.fhir.jpa.starter.dotBase.utils;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.patch.FhirPatch;
-import io.micrometer.core.lang.Nullable;
 import javax.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.r4.model.BooleanType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,20 +17,35 @@ public class ResourceComparator extends FhirPatch {
     super(theContext);
   }
 
-  // TODO: exclude extension resource-editor from comparison
-  public IBaseParameters callDiff(
+  public static boolean hasDiff(
+    FhirContext fhirContext,
+    IBaseResource newResource,
+    IBaseResource oldResource
+  ) {
+    if (oldResource != null) {
+      IBaseParameters resourceDiff = ResourceComparator.resourceDiff(
+        new BooleanType(false),
+        fhirContext,
+        newResource,
+        oldResource
+      );
+      return !resourceDiff.isEmpty();
+    }
+    return false;
+  }
+
+  private static IBaseParameters resourceDiff(
     IPrimitiveType<Boolean> theIncludeMeta,
     FhirContext myContext,
     IBaseResource sourceResource,
     IBaseResource targetResource
   ) {
-    ResourceComparator fhirPatch = newPatch(theIncludeMeta, myContext);
-    IBaseParameters diff = fhirPatch.diff(sourceResource, targetResource);
-    return diff;
+    ResourceComparator comparator = setResourceComparator(theIncludeMeta, myContext);
+    return comparator.diff(sourceResource, targetResource);
   }
 
   @Nonnull
-  public ResourceComparator newPatch(
+  private static ResourceComparator setResourceComparator(
     IPrimitiveType<Boolean> theIncludeMeta,
     FhirContext myContext
   ) {

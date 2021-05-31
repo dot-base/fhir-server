@@ -12,6 +12,8 @@ import ca.uhn.fhir.jpa.starter.dotBase.utils.ResourceComparator;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -29,114 +31,81 @@ import org.slf4j.LoggerFactory;
 public class AuditTrail {
   private static final Logger ourLog = LoggerFactory.getLogger(AuditTrail.class);
 
-  public static String getUsername(RequestDetails theRequestDetails) {
-    if (theRequestDetails.getAttribute("_username") == null) {
-      return "unknown";
-    }
-    return theRequestDetails.getAttribute("_username").toString();
-  }
-
-  public static void setCreationDateTime(
-    RequestDetails theRequestDetails,
-    IBaseResource theResource
-  ) {
+  public static void setCreationDateTime(RequestDetails theRequest, IBaseResource theResource) {
     DateTimeType now = new DateTimeType(DateUtils.getCurrentTimestamp());
-    String system =
-      "https://simplifier.net/dot.base/resource-creation-datetime-namingsystem";
-    MetaUtils.setTag(
-      theRequestDetails.getFhirContext(),
-      theResource,
-      system,
-      now.getValueAsString()
-    );
+    String system = "https://simplifier.net/dot.base/resource-creation-datetime-namingsystem";
+    MetaUtils.setTag(theRequest.getFhirContext(), theResource, system, now.getValueAsString());
   }
 
-  public static void setResourceCreator(
-    RequestDetails theRequestDetails,
-    IBaseResource theResource,
-    String username
-  ) {
+  public static void setResourceCreator(RequestDetails theRequest, IBaseResource theResource) {
+    String username = getUsername(theRequest);
     String system = "https://simplifier.net/dot.base/dotbase-username-namingsystem";
-    MetaUtils.setTag(theRequestDetails.getFhirContext(), theResource, system, username);
+    MetaUtils.setTag(theRequest.getFhirContext(), theResource, system, username);
   }
 
-  public static void setResourceEditor(IBaseResource theResource, String username) {
+  public static void setResourceEditor(RequestDetails theRequest, IBaseResource theResource) {
+    String username = getUsername(theRequest);
     String system = "https://simplifier.net/dot.base/resource-editor-username";
     ExtensionUtils.addExtension(theResource, system, username);
   }
 
-  public static void handleTransaction(RequestDetails theRequestDetails) {
-    if (theRequestDetails.getResource() instanceof Bundle) {
-      Bundle theResource = (Bundle) theRequestDetails.getResource();
+  public static void handleTransaction(RequestDetails theRequest) {
+    if (theRequest.getResource() instanceof Bundle) {
+      Bundle theResource = (Bundle) theRequest.getResource();
       List<BundleEntryComponent> entries = theResource.getEntry();
-      entries.forEach(entry -> transactionEntry(theRequestDetails, entry));
+      entries.forEach(entry -> transactionEntry(theRequest, entry));
     }
   }
 
-  private static void transactionEntry(
-    RequestDetails theRequestDetails,
-    BundleEntryComponent entry
-  ) {
-    List<IBaseResource> preExistResources = resourcePreExist(
-      theRequestDetails,
-      entry.getResource()
-    );
-    if (
-      entry.getRequest().getMethod().equals(HTTPVerb.PUT) && preExistResources != null
-    ) {
-      IBaseResource oldResource = getLatestVersion(preExistResources);
-      IBaseResource newResource = entry.getResource();
-      if (
-        resourceDiff(theRequestDetails.getFhirContext(), newResource, oldResource)
-      ) new AuditTrailInterceptor()
-      .resourcePreUpdate(theRequestDetails, newResource, entry.getResource());
-      return;
+  private static void transactionEntry(RequestDetails theRequest, BundleEntryComponent entry) {
+    boolean isPut = entry.getRequest().getMethod().equals(HTTPVerb.PUT);
+    boolean isPost = entry.getRequest().getMethod().equals(HTTPVerb.POST);
+    if (isPut || isPost) {
+      setAuditTrail(theRequest, entry);
     }
-
-    if (
-      entry.getRequest().getMethod().equals(HTTPVerb.POST) ||
-      entry.getRequest().getMethod().equals(HTTPVerb.PUT)
-    ) new AuditTrailInterceptor()
-    .resourcePreCreate(theRequestDetails, entry.getResource());
   }
 
-  private static <T extends IBaseResource> List<IBaseResource> resourcePreExist(
-    RequestDetails theRequestDetails,
-    Resource resource
-  ) {
+  private static void setAuditTrail(RequestDetails theRequest, BundleEntryComponent entry) {
+    IBaseResource oldResource = resourcePreVersion(theRequest, entry.getResource());
+    IBaseResource newResource = entry.getResource();
+    boolean resourceDiff = ResourceComparator.hasDiff(theRequest.getFhirContext(), newResource, oldResource);
+
+    if (resourceDiff)
+      new AuditTrailInterceptor().resourcePreUpdate(theRequest, oldResource, newResource);
+    if (oldResource == null)
+      new AuditTrailInterceptor().resourcePreCreate(theRequest, newResource);
+  }
+
+  private static <T extends IBaseResource> IBaseResource resourcePreVersion(RequestDetails theRequest,
+      Resource resource) {
     try {
-      IFhirResourceDao<T> resourceDAO = DaoUtils.getDao(
-        new StringType(resource.getResourceType().name())
-      );
+      IFhirResourceDao<T> resourceDAO = DaoUtils.getDao(new StringType(resource.getResourceType().name()));
       IdType resourceId = new IdType(resource.getIdElement().getIdPart());
-      IBundleProvider preExist = new PlainSystemProviderR4()
-      .instanceHistory(theRequestDetails, resourceDAO, resourceId);
-      if (preExist.size() == null || preExist.size() < 1) {
-        return null;
+      IBundleProvider preExist = new PlainSystemProviderR4().instanceHistory(theRequest, resourceDAO, resourceId);
+
+      if (preExist.size() != null || preExist.size() > 0) {
+        return getLatestVersion(preExist.getResources(0, preExist.size()));
       }
-      return preExist.getResources(0, preExist.size());
+      return null;
     } catch (ResourceNotFoundException ex) {
       return null;
     }
   }
 
   private static IBaseResource getLatestVersion(List<IBaseResource> preExistResources) {
-    // TODO: sort by version and return latest
-    return preExistResources.get(0);
+    Collections.sort(preExistResources, new Comparator<IBaseResource>() {
+
+      public int compare(IBaseResource resA, IBaseResource resB) {
+        return resB.getMeta().getVersionId().compareTo(resA.getMeta().getVersionId());
+      }
+    });
+    return preExistResources.get(preExistResources.size() - 1);
   }
 
-  private static boolean resourceDiff(
-    FhirContext fhirContext,
-    IBaseResource newResource,
-    IBaseResource oldResource
-  ) {
-    ResourceComparator fhirPatch = new ResourceComparator(fhirContext);
-    IBaseParameters diff = fhirPatch.callDiff(
-      new BooleanType(false),
-      fhirContext,
-      newResource,
-      oldResource
-    );
-    return !diff.isEmpty();
+  private static String getUsername(RequestDetails theRequest) {
+    if (theRequest.getAttribute("_username") == null) {
+      return "unknown";
+    }
+    return theRequest.getAttribute("_username").toString();
   }
 }
