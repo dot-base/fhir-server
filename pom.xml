@@ -301,7 +301,7 @@
                 <artifactId>prettier-maven-plugin</artifactId>
                 <version>0.10</version>
                 <configuration>
-                    <printWidth>90</printWidth>
+                    <printWidth>100</printWidth>
                     <tabWidth>2</tabWidth>
                     <useTabs>false</useTabs>
                     <ignoreConfigFile>true</ignoreConfigFile>
