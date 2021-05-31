@@ -13,9 +13,8 @@ public class AuditTrailInterceptor {
 
   @Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED)
   public void resourcePreCreate(RequestDetails theRequest, IBaseResource theResource) {
-    String username = AuditTrail.getUsername(theRequest);
     AuditTrail.setCreationDateTime(theRequest, theResource);
-    AuditTrail.setResourceCreator(theRequest, theResource, username);
+    AuditTrail.setResourceCreator(theRequest, theResource);
   }
 
   @Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED)
@@ -24,8 +23,6 @@ public class AuditTrailInterceptor {
     IBaseResource theOldResource,
     IBaseResource theNewResource
   ) {
-    String username = AuditTrail.getUsername(theRequest);
-    AuditTrail.setResourceEditor(theNewResource, username);
-    theRequest.setResource(theNewResource);
+    AuditTrail.setResourceEditor(theRequest, theNewResource);
   }
 }
