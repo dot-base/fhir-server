@@ -17,8 +17,7 @@ public class AuthenticationInterceptor {
   private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(
     AuthenticationInterceptor.class
   );
-  private static final String PROCESSING_SUB_REQUEST =
-    "BaseHapiFhirDao.processingSubRequest";
+  private static final String PROCESSING_SUB_REQUEST = "BaseHapiFhirDao.processingSubRequest";
 
   @Hook(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED)
   public void preHandleIncomingRequest(
@@ -26,24 +25,26 @@ public class AuthenticationInterceptor {
     ServletRequestDetails servletRequestDetails,
     RestOperationTypeEnum restOperationType
   ) {
-    if (theRequestDetails.getAttribute("_username") == null) {
+    boolean isTransaction = restOperationType.equals(RestOperationTypeEnum.TRANSACTION);
+    boolean isSubRequest =
+      theRequestDetails.getUserData().get(PROCESSING_SUB_REQUEST) == Boolean.TRUE;
+    boolean isAuthenticated = theRequestDetails.getAttribute("_username") != null;
+
+    if (!isAuthenticated) {
       String username = getAuthenticatedUser(theRequestDetails);
       theRequestDetails.setAttribute("_username", username);
       setSentryUser(username);
       AccessLog.logRequest(username, theRequestDetails, restOperationType);
     }
 
-    //TODO: ACCESS_LOG FOR SUBREQUESTS
-
-    if (
-      restOperationType.equals(RestOperationTypeEnum.TRANSACTION) &&
-      theRequestDetails.getUserData().get(PROCESSING_SUB_REQUEST) != Boolean.TRUE
-    ) AuditTrail.handleTransaction(theRequestDetails);
+    if (isTransaction && !isSubRequest) {
+      AuditTrail.handleTransaction(theRequestDetails);
+    }
   }
 
   /**
-   * Currently Authorization is not set on incoming requests. Thus, we retrieve
-   * the username from header "X-Forwarded-User" for the moment.
+   * Currently Authorization is not set on incoming requests. Thus, we retrieve the username from
+   * header "X-Forwarded-User" for the moment.
    */
   private String getAuthenticatedUser(RequestDetails theRequestDetails) {
     if (theRequestDetails.getHeader("Authorization") != null) {

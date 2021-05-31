@@ -27,10 +27,7 @@ public class Queries {
     }
   }
 
-  private static String withTargetResourceType(
-    String findFieldName,
-    String searchFieldName
-  ) {
+  private static String withTargetResourceType(String findFieldName, String searchFieldName) {
     return (
       "SELECT r." +
       findFieldName +
@@ -53,10 +50,7 @@ public class Queries {
     );
   }
 
-  private static String NoTargetResourceType(
-    String findFieldName,
-    String searchFieldName
-  ) {
+  private static String NoTargetResourceType(String findFieldName, String searchFieldName) {
     return (
       "SELECT r." +
       findFieldName +

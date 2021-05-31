@@ -69,9 +69,6 @@ public class JpaRestfulServer extends BaseJpaRestfulServer {
 
   private static void setRealmPublicKey() {
     String realm = HapiProperties.getIdentityProviderRealm();
-    HapiProperties.setProperty(
-      "sso_realm.publicKey",
-      IdentityProvider.getRealmPublicKey(realm)
-    );
+    HapiProperties.setProperty("sso_realm.publicKey", IdentityProvider.getRealmPublicKey(realm));
   }
 }

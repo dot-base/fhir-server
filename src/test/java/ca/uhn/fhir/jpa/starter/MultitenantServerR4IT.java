@@ -57,10 +57,7 @@ public class MultitenantServerR4IT {
         ProviderConstants.PARTITION_MANAGEMENT_PARTITION_ID,
         new IntegerType(1)
       )
-      .andParameter(
-        ProviderConstants.PARTITION_MANAGEMENT_PARTITION_NAME,
-        new CodeType("TENANT-A")
-      )
+      .andParameter(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_NAME, new CodeType("TENANT-A"))
       .execute();
 
     ourClientTenantInterceptor.setTenantId("TENANT-A");
@@ -94,10 +91,7 @@ public class MultitenantServerR4IT {
         ProviderConstants.PARTITION_MANAGEMENT_PARTITION_ID,
         new IntegerType(2)
       )
-      .andParameter(
-        ProviderConstants.PARTITION_MANAGEMENT_PARTITION_NAME,
-        new CodeType("TENANT-B")
-      )
+      .andParameter(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_NAME, new CodeType("TENANT-B"))
       .execute();
 
     ourClientTenantInterceptor.setTenantId("TENANT-B");
@@ -141,9 +135,7 @@ public class MultitenantServerR4IT {
 
     ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
-    ourCtx
-      .getRestfulClientFactory()
-      .setServerValidationMode(ServerValidationModeEnum.NEVER);
+    ourCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
     ourCtx.getRestfulClientFactory().setSocketTimeout(1200 * 1000);
     String ourServerBase = HapiProperties.getServerAddress();
     ourServerBase = "http://localhost:" + ourPort + "/hapi-fhir-jpaserver/fhir/";

@@ -199,9 +199,7 @@ public class ExampleServerR4IT {
 
     ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
-    ourCtx
-      .getRestfulClientFactory()
-      .setServerValidationMode(ServerValidationModeEnum.NEVER);
+    ourCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
     ourCtx.getRestfulClientFactory().setSocketTimeout(1200 * 1000);
     String ourServerBase = HapiProperties.getServerAddress();
     ourServerBase = "http://localhost:" + ourPort + "/hapi-fhir-jpaserver/fhir/";

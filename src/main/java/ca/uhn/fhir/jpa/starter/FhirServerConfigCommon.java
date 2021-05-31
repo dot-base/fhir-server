@@ -62,9 +62,7 @@ public class FhirServerConfigCommon {
       " contains searches"
     );
     ourLog.info(
-      "Server configured to " +
-      (this.allowMultipleDelete ? "allow" : "deny") +
-      " multiple deletes"
+      "Server configured to " + (this.allowMultipleDelete ? "allow" : "deny") + " multiple deletes"
     );
     ourLog.info(
       "Server configured to " +
@@ -95,9 +93,7 @@ public class FhirServerConfigCommon {
       ourLog.info("Server will use '" + this.emailFrom + "' as the from email address");
 
       if (this.emailUsername != null && this.emailUsername.length() > 0) {
-        ourLog.info(
-          "Server is configured to use username '" + this.emailUsername + "' for email"
-        );
+        ourLog.info("Server is configured to use username '" + this.emailUsername + "' for email");
       }
 
       if (this.emailPassword != null && this.emailPassword.length() > 0) {
@@ -126,13 +122,9 @@ public class FhirServerConfigCommon {
         ? DaoConfig.IndexEnabledEnum.ENABLED
         : DaoConfig.IndexEnabledEnum.DISABLED
     );
-    retVal.setAutoCreatePlaceholderReferenceTargets(
-      this.autoCreatePlaceholderReferenceTargets
-    );
+    retVal.setAutoCreatePlaceholderReferenceTargets(this.autoCreatePlaceholderReferenceTargets);
     retVal.setEnforceReferentialIntegrityOnWrite(this.enforceReferentialIntegrityOnWrite);
-    retVal.setEnforceReferentialIntegrityOnDelete(
-      this.enforceReferentialIntegrityOnDelete
-    );
+    retVal.setEnforceReferentialIntegrityOnDelete(this.enforceReferentialIntegrityOnDelete);
     retVal.setAllowContainsSearches(this.allowContainsSearches);
     retVal.setAllowMultipleDelete(this.allowMultipleDelete);
     retVal.setAllowExternalReferences(this.allowExternalReferences);
@@ -199,22 +191,16 @@ public class FhirServerConfigCommon {
     ModelConfig modelConfig = new ModelConfig();
     modelConfig.setAllowContainsSearches(this.allowContainsSearches);
     modelConfig.setAllowExternalReferences(this.allowExternalReferences);
-    modelConfig.setDefaultSearchParamsCanBeOverridden(
-      this.allowOverrideDefaultSearchParams
-    );
+    modelConfig.setDefaultSearchParamsCanBeOverridden(this.allowOverrideDefaultSearchParams);
     modelConfig.setEmailFromAddress(this.emailFrom);
 
     // You can enable these if you want to support Subscriptions from your server
     if (this.subscriptionRestHookEnabled) {
-      modelConfig.addSupportedSubscriptionType(
-        Subscription.SubscriptionChannelType.RESTHOOK
-      );
+      modelConfig.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.RESTHOOK);
     }
 
     if (this.subscriptionEmailEnabled) {
-      modelConfig.addSupportedSubscriptionType(
-        Subscription.SubscriptionChannelType.EMAIL
-      );
+      modelConfig.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.EMAIL);
     }
 
     return modelConfig;
@@ -271,10 +257,7 @@ public class FhirServerConfigCommon {
       SubscriptionDeliveryHandlerFactory subscriptionDeliveryHandlerFactory = myAppCtx.getBean(
         SubscriptionDeliveryHandlerFactory.class
       );
-      Validate.notNull(
-        subscriptionDeliveryHandlerFactory,
-        "No subscription delivery handler"
-      );
+      Validate.notNull(subscriptionDeliveryHandlerFactory, "No subscription delivery handler");
       subscriptionDeliveryHandlerFactory.setEmailSender(retVal);
 
       return retVal;

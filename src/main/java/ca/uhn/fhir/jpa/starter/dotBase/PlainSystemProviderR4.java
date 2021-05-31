@@ -60,8 +60,7 @@ public class PlainSystemProviderR4 extends JpaSystemProviderR4 {
     RequestDetails requestDetails,
     IFhirResourceDao<T> resourceDAO
   ) {
-    IBundleProvider typeHistory =
-      this.getHistoryForResourceType(requestDetails, resourceDAO);
+    IBundleProvider typeHistory = this.getHistoryForResourceType(requestDetails, resourceDAO);
     return this.filterDeletes(typeHistory);
   }
 

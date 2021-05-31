@@ -87,9 +87,7 @@ public class SearchBuilderIncludes extends SearchBuilder {
     if (theRevIncludes == null || theRevIncludes.isEmpty()) {
       return new HashSet<>();
     }
-    String searchFieldName = theReverseMode
-      ? "myTargetResourcePid"
-      : "mySourceResourcePid";
+    String searchFieldName = theReverseMode ? "myTargetResourcePid" : "mySourceResourcePid";
     String findFieldName = theReverseMode ? "mySourceResourcePid" : "myTargetResourcePid";
 
     Collection<ResourcePersistentId> nextRoundMatches = theMatches;
@@ -105,10 +103,7 @@ public class SearchBuilderIncludes extends SearchBuilder {
       roundCounts++;
       HashSet<ResourcePersistentId> pidsToInclude = new HashSet<>();
 
-      for (
-        Iterator<Include> iter = includes.iterator();
-        iter.hasNext();
-      ) pidsToInclude.addAll(
+      for (Iterator<Include> iter = includes.iterator(); iter.hasNext();) pidsToInclude.addAll(
         this.loadInclude(
             findFieldName,
             searchFieldName,
@@ -270,9 +265,7 @@ public class SearchBuilderIncludes extends SearchBuilder {
       }
       RuntimeResourceDefinition def = theContext.getResourceDefinition(resType);
       if (def == null) {
-        ourLog.warn(
-          "Unknown resource type in include/revinclude=" + nextInclude.getValue()
-        );
+        ourLog.warn("Unknown resource type in include/revinclude=" + nextInclude.getValue());
         return pidsToInclude;
       }
 
@@ -340,10 +333,7 @@ public class SearchBuilderIncludes extends SearchBuilder {
   }
 
   @SuppressWarnings("unchecked")
-  private void externalReferenceToInclude(
-    Object[] resourceLink,
-    RequestDetails theRequest
-  ) {
+  private void externalReferenceToInclude(Object[] resourceLink, RequestDetails theRequest) {
     HashSet<String> attributeValues = new HashSet<String>();
     HashSet<String> currentValues = (HashSet<String>) theRequest.getAttribute(
       "_includeIsExternalReference"

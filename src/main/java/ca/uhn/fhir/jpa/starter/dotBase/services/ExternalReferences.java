@@ -34,9 +34,7 @@ public class ExternalReferences {
 
   @SuppressWarnings("unchecked")
   private static HashSet<String> getExternalReferences(RequestDetails theRequestDetails) {
-    return (HashSet<String>) theRequestDetails.getAttribute(
-      "_includeIsExternalReference"
-    );
+    return (HashSet<String>) theRequestDetails.getAttribute("_includeIsExternalReference");
   }
 
   private static List<BundleEntryComponent> includeEntries(
@@ -66,10 +64,7 @@ public class ExternalReferences {
     return null;
   }
 
-  private static Resource getExternalResource(
-    String url,
-    RequestDetails theRequestDetails
-  ) {
+  private static Resource getExternalResource(String url, RequestDetails theRequestDetails) {
     String resource = FhirServer.getExternalResource(url, theRequestDetails);
     if (resource != null) {
       return parseToR4Resource(resource);
