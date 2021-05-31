@@ -35,8 +35,7 @@ public class HapiProperties {
   static final String ALLOW_EXTERNAL_REFERENCES = "allow_external_references";
   static final String ALLOW_MULTIPLE_DELETE = "allow_multiple_delete";
   static final String ALLOW_PLACEHOLDER_REFERENCES = "allow_placeholder_references";
-  static final String REUSE_CACHED_SEARCH_RESULTS_MILLIS =
-    "reuse_cached_search_results_millis";
+  static final String REUSE_CACHED_SEARCH_RESULTS_MILLIS = "reuse_cached_search_results_millis";
   static final String DATASOURCE_DRIVER = "datasource.driver";
   static final String DATASOURCE_MAX_POOL_SIZE = "datasource.max_pool_size";
   static final String DATASOURCE_PASSWORD = "datasource.password";
@@ -74,8 +73,7 @@ public class HapiProperties {
   static final String CORS_ALLOWED_ORIGIN = "cors.allowed_origin";
   static final String CORS_ALLOW_CREDENTIALS = "cors.allowCredentials";
   static final String ALLOW_CONTAINS_SEARCHES = "allow_contains_searches";
-  static final String ALLOW_OVERRIDE_DEFAULT_SEARCH_PARAMS =
-    "allow_override_default_search_params";
+  static final String ALLOW_OVERRIDE_DEFAULT_SEARCH_PARAMS = "allow_override_default_search_params";
   static final String EMAIL_FROM = "email.from";
   static final String VALIDATE_REQUESTS_ENABLED = "validation.requests.enabled";
   static final String VALIDATE_RESPONSES_ENABLED = "validation.responses.enabled";
@@ -86,8 +84,7 @@ public class HapiProperties {
   static final String ERROR_MONITORING_ENABLED = "error_monitoring.enabled";
   static final String EXPIRE_SEARCH_RESULTS_AFTER_MINS = "retain_cached_searches_mins";
   static final String MAX_BINARY_SIZE = "max_binary_size";
-  static final String PARTITIONING_MULTITENANCY_ENABLED =
-    "partitioning.multitenancy.enabled";
+  static final String PARTITIONING_MULTITENANCY_ENABLED = "partitioning.multitenancy.enabled";
   private static final String PARTITIONING_INCLUDE_PARTITION_IN_SEARCH_HASHES =
     "partitioning.partitioning_include_in_search_hashes";
   static final String CLIENT_ID_STRATEGY = "daoconfig.client_id_strategy";
@@ -162,8 +159,7 @@ public class HapiProperties {
     // Load the configurable properties file
     Properties properties;
     try (
-      InputStream in = HapiProperties.class.getClassLoader()
-        .getResourceAsStream(HAPI_PROPERTIES)
+      InputStream in = HapiProperties.class.getClassLoader().getResourceAsStream(HAPI_PROPERTIES)
     ) {
       properties = new Properties();
       properties.load(in);
@@ -200,10 +196,7 @@ public class HapiProperties {
         props.load(new FileInputStream(confFile));
         return props;
       } catch (Exception e) {
-        throw new ConfigurationException(
-          "Could not load HAPI properties file: " + confFile,
-          e
-        );
+        throw new ConfigurationException("Could not load HAPI properties file: " + confFile, e);
       }
     }
 
@@ -342,10 +335,7 @@ public class HapiProperties {
   }
 
   public static String getLoggerErrorFormat() {
-    return HapiProperties.getProperty(
-      LOGGER_ERROR_FORMAT,
-      "ERROR - ${requestVerb} ${requestUrl}"
-    );
+    return HapiProperties.getProperty(LOGGER_ERROR_FORMAT, "ERROR - ${requestVerb} ${requestUrl}");
   }
 
   public static Boolean getLoggerLogExceptions() {
@@ -353,10 +343,7 @@ public class HapiProperties {
   }
 
   public static String getDataSourceDriver() {
-    return HapiProperties.getProperty(
-      DATASOURCE_DRIVER,
-      "org.apache.derby.jdbc.EmbeddedDriver"
-    );
+    return HapiProperties.getProperty(DATASOURCE_DRIVER, "org.apache.derby.jdbc.EmbeddedDriver");
   }
 
   public static Integer getDataSourceMaxPoolSize() {
@@ -395,10 +382,7 @@ public class HapiProperties {
   }
 
   public static Boolean getTesterConfigRefustToFetchThirdPartyUrls() {
-    return HapiProperties.getBooleanProperty(
-      TESTER_CONFIG_REFUSE_TO_FETCH_THIRD_PARTY_URLS,
-      false
-    );
+    return HapiProperties.getBooleanProperty(TESTER_CONFIG_REFUSE_TO_FETCH_THIRD_PARTY_URLS, false);
   }
 
   public static Boolean getCorsEnabled() {
@@ -456,17 +440,11 @@ public class HapiProperties {
   }
 
   public static String getPartitioningCrossPartitionReferenceMode() {
-    return HapiProperties.getProperty(
-      PARTITIONING_CROSS_PARTITION_REFERENCE_MODE,
-      "NOT_ALLOWED"
-    );
+    return HapiProperties.getProperty(PARTITIONING_CROSS_PARTITION_REFERENCE_MODE, "NOT_ALLOWED");
   }
 
   public static Boolean getIncludePartitionInSearchHashes() {
-    return HapiProperties.getBooleanProperty(
-      PARTITIONING_INCLUDE_PARTITION_IN_SEARCH_HASHES,
-      true
-    );
+    return HapiProperties.getBooleanProperty(PARTITIONING_INCLUDE_PARTITION_IN_SEARCH_HASHES, true);
   }
 
   public static Boolean getAllowContainsSearches() {
@@ -519,10 +497,7 @@ public class HapiProperties {
   }
 
   public static Long getReuseCachedSearchResultsMillis() {
-    String value = HapiProperties.getProperty(
-      REUSE_CACHED_SEARCH_RESULTS_MILLIS,
-      "60000"
-    );
+    String value = HapiProperties.getProperty(REUSE_CACHED_SEARCH_RESULTS_MILLIS, "60000");
     return Long.valueOf(value);
   }
 
@@ -552,24 +527,15 @@ public class HapiProperties {
   }
 
   public static boolean getEnforceReferentialIntegrityOnDelete() {
-    return HapiProperties.getBooleanProperty(
-      ENFORCE_REFERENTIAL_INTEGRITY_ON_DELETE,
-      true
-    );
+    return HapiProperties.getBooleanProperty(ENFORCE_REFERENTIAL_INTEGRITY_ON_DELETE, true);
   }
 
   public static boolean getEnforceReferentialIntegrityOnWrite() {
-    return HapiProperties.getBooleanProperty(
-      ENFORCE_REFERENTIAL_INTEGRITY_ON_WRITE,
-      true
-    );
+    return HapiProperties.getBooleanProperty(ENFORCE_REFERENTIAL_INTEGRITY_ON_WRITE, true);
   }
 
   public static boolean getAutoCreatePlaceholderReferenceTargets() {
-    return HapiProperties.getBooleanProperty(
-      AUTO_CREATE_PLACEHOLDER_REFERENCE_TARGETS,
-      true
-    );
+    return HapiProperties.getBooleanProperty(AUTO_CREATE_PLACEHOLDER_REFERENCE_TARGETS, true);
   }
 
   public static boolean getEnableIndexMissingFields() {
@@ -580,10 +546,7 @@ public class HapiProperties {
     return getIntegerProperty(MAX_BINARY_SIZE, null);
   }
 
-  private static boolean getPropertyBoolean(
-    String thePropertyName,
-    boolean theDefaultValue
-  ) {
+  private static boolean getPropertyBoolean(String thePropertyName, boolean theDefaultValue) {
     String value = getProperty(thePropertyName, Boolean.toString(theDefaultValue));
     return Boolean.parseBoolean(value);
   }

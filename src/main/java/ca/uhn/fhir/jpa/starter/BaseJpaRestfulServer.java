@@ -60,10 +60,7 @@ public class BaseJpaRestfulServer extends RestfulServer {
     // Customize supported resource types
     Set<String> supportedResourceTypes = HapiProperties.getSupportedResourceTypes();
 
-    if (
-      !supportedResourceTypes.isEmpty() &&
-      !supportedResourceTypes.contains("SearchParameter")
-    ) {
+    if (!supportedResourceTypes.isEmpty() && !supportedResourceTypes.contains("SearchParameter")) {
       supportedResourceTypes.add("SearchParameter");
     }
 
@@ -79,10 +76,7 @@ public class BaseJpaRestfulServer extends RestfulServer {
       "myResourceProvidersR4",
       ResourceProviderFactory.class
     );
-    Object systemProvider = appCtx.getBean(
-      "mySystemProviderR4",
-      JpaSystemProviderR4.class
-    );
+    Object systemProvider = appCtx.getBean("mySystemProviderR4", JpaSystemProviderR4.class);
 
     setFhirContext(appCtx.getBean(FhirContext.class));
 
@@ -244,9 +238,7 @@ public class BaseJpaRestfulServer extends RestfulServer {
 
     // Cascading deletes
     DaoRegistry daoRegistry = appCtx.getBean(DaoRegistry.class);
-    IInterceptorBroadcaster interceptorBroadcaster = appCtx.getBean(
-      IInterceptorBroadcaster.class
-    );
+    IInterceptorBroadcaster interceptorBroadcaster = appCtx.getBean(IInterceptorBroadcaster.class);
     if (HapiProperties.getAllowCascadingDeletes()) {
       CascadingDeleteInterceptor cascadingDeleteInterceptor = new CascadingDeleteInterceptor(
         ctx,

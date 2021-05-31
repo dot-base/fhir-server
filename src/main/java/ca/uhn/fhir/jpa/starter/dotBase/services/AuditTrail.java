@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.starter.dotBase.services;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.starter.dotBase.PlainSystemProviderR4;
 import ca.uhn.fhir.jpa.starter.dotBase.interceptors.AuditTrailInterceptor;
@@ -15,9 +14,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
@@ -68,20 +65,31 @@ public class AuditTrail {
   private static void setAuditTrail(RequestDetails theRequest, BundleEntryComponent entry) {
     IBaseResource oldResource = resourcePreVersion(theRequest, entry.getResource());
     IBaseResource newResource = entry.getResource();
-    boolean resourceDiff = ResourceComparator.hasDiff(theRequest.getFhirContext(), newResource, oldResource);
+    boolean resourceDiff = ResourceComparator.hasDiff(
+      theRequest.getFhirContext(),
+      newResource,
+      oldResource
+    );
 
-    if (resourceDiff)
+    if (resourceDiff) {
       new AuditTrailInterceptor().resourcePreUpdate(theRequest, oldResource, newResource);
-    if (oldResource == null)
+    }
+    if (oldResource == null) {
       new AuditTrailInterceptor().resourcePreCreate(theRequest, newResource);
+    }
   }
 
-  private static <T extends IBaseResource> IBaseResource resourcePreVersion(RequestDetails theRequest,
-      Resource resource) {
+  private static <T extends IBaseResource> IBaseResource resourcePreVersion(
+    RequestDetails theRequest,
+    Resource resource
+  ) {
     try {
-      IFhirResourceDao<T> resourceDAO = DaoUtils.getDao(new StringType(resource.getResourceType().name()));
+      IFhirResourceDao<T> resourceDAO = DaoUtils.getDao(
+        new StringType(resource.getResourceType().name())
+      );
       IdType resourceId = new IdType(resource.getIdElement().getIdPart());
-      IBundleProvider preExist = new PlainSystemProviderR4().instanceHistory(theRequest, resourceDAO, resourceId);
+      IBundleProvider preExist = new PlainSystemProviderR4()
+      .instanceHistory(theRequest, resourceDAO, resourceId);
 
       if (preExist.size() != null || preExist.size() > 0) {
         return getLatestVersion(preExist.getResources(0, preExist.size()));
@@ -93,12 +101,15 @@ public class AuditTrail {
   }
 
   private static IBaseResource getLatestVersion(List<IBaseResource> preExistResources) {
-    Collections.sort(preExistResources, new Comparator<IBaseResource>() {
+    Collections.sort(
+      preExistResources,
+      new Comparator<IBaseResource>() {
 
-      public int compare(IBaseResource resA, IBaseResource resB) {
-        return resB.getMeta().getVersionId().compareTo(resA.getMeta().getVersionId());
+        public int compare(IBaseResource resA, IBaseResource resB) {
+          return resB.getMeta().getVersionId().compareTo(resA.getMeta().getVersionId());
+        }
       }
-    });
+    );
     return preExistResources.get(preExistResources.size() - 1);
   }
 

@@ -5,9 +5,7 @@ import java.util.Date;
 import java.util.TimeZone;
 
 public class DateUtils {
-  private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(
-    DateUtils.class
-  );
+  private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(DateUtils.class);
 
   public static String getCurrentTimestamp() {
     TimeZone localTimeZone = getTimeZone();

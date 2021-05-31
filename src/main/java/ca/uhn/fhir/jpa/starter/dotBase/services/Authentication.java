@@ -22,11 +22,7 @@ public class Authentication {
     try {
       PublicKey key = decodePublicKey(pemToDer(REALM_PUBLIC_KEY));
       String authToken = getAuthToken(theRequestDetails);
-      Claims claims = Jwts
-        .parser()
-        .setSigningKey(key)
-        .parseClaimsJws(authToken)
-        .getBody();
+      Claims claims = Jwts.parser().setSigningKey(key).parseClaimsJws(authToken).getBody();
       return claims;
     } catch (Exception e) {
       throw new AuthenticationException("Authentication failed.");
@@ -43,9 +39,7 @@ public class Authentication {
 
   private static String getBearerToken(String authHeader) {
     String[] splitToken = authHeader.split("[Bb]earer ");
-    if (splitToken.length != 2) throw new AuthenticationException(
-      "Invalid bearer token format."
-    );
+    if (splitToken.length != 2) throw new AuthenticationException("Invalid bearer token format.");
     return splitToken[1];
   }
 

@@ -12,11 +12,7 @@ import org.hl7.fhir.r4.model.StringType;
 
 public class ExtensionUtils {
 
-  public static void addExtension(
-    IBaseResource theResource,
-    String theUrl,
-    String theValue
-  ) {
+  public static void addExtension(IBaseResource theResource, String theUrl, String theValue) {
     try {
       IBaseHasExtensions baseHasExtensions = validateExtensionSupport(theResource);
       IBaseExtension<?, ?> extension = baseHasExtensions.addExtension();
@@ -53,10 +49,7 @@ public class ExtensionUtils {
     return getExtensionByUrl(baseHasExtensions, theExtensionUrl) != null;
   }
 
-  public static IBaseExtension<?, ?> getExtensionByUrl(
-    IBase theBase,
-    String theExtensionUrl
-  ) {
+  public static IBaseExtension<?, ?> getExtensionByUrl(IBase theBase, String theExtensionUrl) {
     Predicate<IBaseExtension<?, ?>> filter;
     if (theExtensionUrl == null) {
       filter = (e -> true);
@@ -64,10 +57,7 @@ public class ExtensionUtils {
       filter = (e -> theExtensionUrl.equals(e.getUrl()));
     }
 
-    return getExtensionsMatchingPredicate(theBase, filter)
-      .stream()
-      .findFirst()
-      .orElse(null);
+    return getExtensionsMatchingPredicate(theBase, filter).stream().findFirst().orElse(null);
   }
 
   public static List<IBaseExtension<?, ?>> getExtensionsMatchingPredicate(

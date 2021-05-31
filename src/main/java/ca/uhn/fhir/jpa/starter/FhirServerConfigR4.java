@@ -72,9 +72,7 @@ public class FhirServerConfigR4 extends BaseJavaConfigR4 {
 
   @Bean
   @Primary
-  public JpaTransactionManager hapiTransactionManager(
-    EntityManagerFactory entityManagerFactory
-  ) {
+  public JpaTransactionManager hapiTransactionManager(EntityManagerFactory entityManagerFactory) {
     JpaTransactionManager retVal = new JpaTransactionManager();
     retVal.setEntityManagerFactory(entityManagerFactory);
     return retVal;

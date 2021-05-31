@@ -36,10 +36,7 @@ public class Authorization implements IConsentService {
     IBaseResource theResource,
     IConsentContextServices theContextServices
   ) {
-    if (
-      theRequestDetails.getRequestType() == RequestTypeEnum.GET &&
-      isDraftResource(theResource)
-    ) {
+    if (theRequestDetails.getRequestType() == RequestTypeEnum.GET && isDraftResource(theResource)) {
       return isAuthorizedRequester(theRequestDetails, theResource)
         ? ConsentOutcome.AUTHORIZED
         : ConsentOutcome.REJECT;
@@ -84,30 +81,17 @@ public class Authorization implements IConsentService {
     );
   }
 
-  private static boolean isResourceCreator(
-    IBaseResource theResource,
-    String requestingUser
-  ) {
+  private static boolean isResourceCreator(IBaseResource theResource, String requestingUser) {
     return (
       theResource
         .getMeta()
-        .getTag(
-          "https://simplifier.net/dot.base/dotbase-username-namingsystem",
-          requestingUser
-        ) !=
+        .getTag("https://simplifier.net/dot.base/dotbase-username-namingsystem", requestingUser) !=
       null
     );
   }
 
-  private static boolean isResourceEditor(
-    IBaseResource theResource,
-    String requestingUser
-  ) {
+  private static boolean isResourceEditor(IBaseResource theResource, String requestingUser) {
     String theExtensionUrl = "https://simplifier.net/dot.base/resource-editor-username";
-    return ExtensionUtils.hasExtension(
-      (IBase) theResource,
-      theExtensionUrl,
-      requestingUser
-    );
+    return ExtensionUtils.hasExtension((IBase) theResource, theExtensionUrl, requestingUser);
   }
 }
