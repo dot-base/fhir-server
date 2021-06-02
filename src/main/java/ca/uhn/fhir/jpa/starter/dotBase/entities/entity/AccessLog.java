@@ -14,7 +14,7 @@ import javax.persistence.Table;
   uniqueConstraints = {},
   indexes = {
     @Index(name = "IDX_LOG_ID", columnList = "LOG_ID", unique = true),
-    @Index(name = "IDX_REQUEST_ID", columnList = "REQUEST_ID", unique = true),
+    @Index(name = "IDX_REQUEST_ID", columnList = "REQUEST_ID", unique = false),
     @Index(name = "IDX_METHOD", columnList = "METHOD", unique = false),
     @Index(name = "IDX_USERNAME", columnList = "USERNAME", unique = false),
     @Index(name = "IDX_URL", columnList = "URL", unique = false),
