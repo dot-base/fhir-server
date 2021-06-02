@@ -7,15 +7,15 @@ import java.util.Properties;
 public class DotbaseProperties {
 
   public static String get(String propertyname) {
-    InputStream input =
-      DotbaseProperties.class.getClassLoader().getResourceAsStream("dotbase.properties");
     Properties prop = new Properties();
     try {
+      InputStream input =
+        DotbaseProperties.class.getClassLoader().getResourceAsStream("dotbase.properties");
       prop.load(input);
     } catch (IOException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
     }
-    return new Properties().getProperty(propertyname);
+    return prop.getProperty(propertyname);
   }
 }

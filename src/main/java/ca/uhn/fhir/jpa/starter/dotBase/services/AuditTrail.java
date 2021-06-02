@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.starter.dotBase.services;
 
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.starter.dotBase.DotbaseProperties;
 import ca.uhn.fhir.jpa.starter.dotBase.PlainSystemProviderR4;
 import ca.uhn.fhir.jpa.starter.dotBase.interceptors.AuditTrailInterceptor;
 import ca.uhn.fhir.jpa.starter.dotBase.utils.DaoUtils;
@@ -30,19 +31,19 @@ public class AuditTrail {
 
   public static void setCreationDateTime(RequestDetails theRequest, IBaseResource theResource) {
     DateTimeType now = new DateTimeType(DateUtils.getCurrentTimestamp());
-    String system = "https://simplifier.net/dot.base/resource-creation-datetime-namingsystem";
+    String system = DotbaseProperties.get("Url.NamingSystem.CreationDateTime");
     MetaUtils.setTag(theRequest.getFhirContext(), theResource, system, now.getValueAsString());
   }
 
   public static void setResourceCreator(RequestDetails theRequest, IBaseResource theResource) {
     String username = getUsername(theRequest);
-    String system = "https://simplifier.net/dot.base/dotbase-username-namingsystem";
+    String system = DotbaseProperties.get("Url.NamingSystem.DotbaseUsername");
     MetaUtils.setTag(theRequest.getFhirContext(), theResource, system, username);
   }
 
   public static void setResourceEditor(RequestDetails theRequest, IBaseResource theResource) {
     String username = getUsername(theRequest);
-    String system = "https://simplifier.net/dot.base/resource-editor-username";
+    String system = DotbaseProperties.get("Url.StructureDefinition.ResourceEditor");
     ExtensionUtils.addExtension(theResource, system, username);
   }
 

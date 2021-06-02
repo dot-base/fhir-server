@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.starter.dotBase.services;
 
+import ca.uhn.fhir.jpa.starter.dotBase.DotbaseProperties;
 import ca.uhn.fhir.jpa.starter.dotBase.utils.ExtensionUtils;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -66,7 +67,7 @@ public class Authorization implements IConsentService {
   }
 
   private static boolean isDraft(IBaseResource theResource) {
-    String theExtensionUrl = "https://simplifier.net/dot.base/draft-action";
+    String theExtensionUrl = DotbaseProperties.get("Url.StructureDefinition.DocumentDraftAction");
     return ExtensionUtils.hasExtension(theResource, theExtensionUrl);
   }
 
@@ -85,13 +86,13 @@ public class Authorization implements IConsentService {
     return (
       theResource
         .getMeta()
-        .getTag("https://simplifier.net/dot.base/dotbase-username-namingsystem", requestingUser) !=
+        .getTag(DotbaseProperties.get("Url.NamingSystem.DotbaseUsername"), requestingUser) !=
       null
     );
   }
 
   private static boolean isResourceEditor(IBaseResource theResource, String requestingUser) {
-    String theExtensionUrl = "https://simplifier.net/dot.base/resource-editor-username";
+    String theExtensionUrl = DotbaseProperties.get("Url.StructureDefinition.ResourceEditor");
     return ExtensionUtils.hasExtension((IBase) theResource, theExtensionUrl, requestingUser);
   }
 }
