@@ -17,6 +17,7 @@ public class AccessLog {
     RestOperationTypeEnum restOperationType
   ) {
     ACCESS_LOG_REPOSITORY.createLog(
+      theRequestDetails.getRequestId(),
       restOperationType.toString(),
       username,
       theRequestDetails.getCompleteUrl(),

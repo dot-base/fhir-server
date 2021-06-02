@@ -14,6 +14,7 @@ import javax.persistence.Table;
   uniqueConstraints = {},
   indexes = {
     @Index(name = "IDX_LOG_ID", columnList = "LOG_ID", unique = true),
+    @Index(name = "IDX_REQUEST_ID", columnList = "REQUEST_ID", unique = true),
     @Index(name = "IDX_METHOD", columnList = "METHOD", unique = false),
     @Index(name = "IDX_USERNAME", columnList = "USERNAME", unique = false),
     @Index(name = "IDX_URL", columnList = "URL", unique = false),
@@ -26,6 +27,9 @@ public class AccessLog {
   @Column(name = "LOG_ID")
   @GeneratedValue(strategy = GenerationType.AUTO)
   public int id;
+
+  @Column(name = "REQUEST_ID")
+  public String requestId;
 
   @Column(name = "METHOD")
   public String method;

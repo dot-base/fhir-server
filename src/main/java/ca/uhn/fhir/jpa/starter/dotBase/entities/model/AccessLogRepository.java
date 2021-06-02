@@ -22,6 +22,7 @@ public class AccessLogRepository {
 
   @Transactional
   public void createLog(
+    String requestId,
     String method,
     String username,
     String url,
@@ -29,6 +30,7 @@ public class AccessLogRepository {
     String timestamp
   ) {
     AccessLog logEntity = new AccessLog();
+    logEntity.requestId = requestId;
     logEntity.method = method;
     logEntity.username = username;
     logEntity.url = url;
