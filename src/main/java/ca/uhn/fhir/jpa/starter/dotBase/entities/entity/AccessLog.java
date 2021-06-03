@@ -37,7 +37,7 @@ public class AccessLog {
   @Column(name = "USERNAME")
   public String username;
 
-  @Column(name = "URL")
+  @Column(name = "URL", columnDefinition = "TEXT")
   public String url;
 
   @Column(name = "TIMESTAMP")
