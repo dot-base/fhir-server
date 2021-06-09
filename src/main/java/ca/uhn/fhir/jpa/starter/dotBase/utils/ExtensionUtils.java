@@ -8,16 +8,19 @@ import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.StringType;
 
 public class ExtensionUtils {
 
-  public static void addExtension(IBaseResource theResource, String theUrl, String theValue) {
+  public static void addExtension(
+    IBaseResource theResource,
+    String theUrl,
+    IBaseDatatype theValue
+  ) {
     try {
       IBaseHasExtensions baseHasExtensions = validateExtensionSupport(theResource);
       IBaseExtension<?, ?> extension = baseHasExtensions.addExtension();
       extension.setUrl(theUrl);
-      extension.setValue(new StringType(theValue));
+      extension.setValue(theValue);
     } catch (Exception e) {
       return;
     }

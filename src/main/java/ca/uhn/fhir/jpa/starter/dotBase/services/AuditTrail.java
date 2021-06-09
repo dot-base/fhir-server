@@ -19,6 +19,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
+import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Resource;
@@ -44,7 +45,7 @@ public class AuditTrail {
   public static void setResourceEditor(RequestDetails theRequest, IBaseResource theResource) {
     String username = getUsername(theRequest);
     String system = DotbaseProperties.get("Url.StructureDefinition.ResourceEditor");
-    ExtensionUtils.addExtension(theResource, system, username);
+    ExtensionUtils.addExtension(theResource, system, new CodeType(username));
   }
 
   public static void handleTransaction(RequestDetails theRequest) {
