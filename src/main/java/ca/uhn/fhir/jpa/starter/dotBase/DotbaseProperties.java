@@ -12,6 +12,7 @@ public class DotbaseProperties {
       InputStream input =
         DotbaseProperties.class.getClassLoader().getResourceAsStream("dotbase.properties");
       prop.load(input);
+      input.close();
     } catch (IOException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
