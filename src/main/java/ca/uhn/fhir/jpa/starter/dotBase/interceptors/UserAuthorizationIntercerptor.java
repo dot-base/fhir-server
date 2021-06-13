@@ -29,7 +29,7 @@ public class UserAuthorizationIntercerptor extends AuthorizationInterceptor {
                 .atAnyLevel()
                 .andAllowAllResponses()
                 .andThen()
-            .deny("Deleting meta (profiles, tags, security labels) forbidden for non-admin")
+            .deny("Deleting meta forbidden for non-admin")
                 .operation()
                 .named("$meta-delete")
                 .atAnyLevel()
