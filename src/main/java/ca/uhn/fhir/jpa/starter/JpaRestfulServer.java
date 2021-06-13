@@ -8,6 +8,7 @@ import ca.uhn.fhir.jpa.starter.dotBase.entities.AccessLogProvider;
 import ca.uhn.fhir.jpa.starter.dotBase.interceptors.AuditTrailInterceptor;
 import ca.uhn.fhir.jpa.starter.dotBase.interceptors.AuthenticationInterceptor;
 import ca.uhn.fhir.jpa.starter.dotBase.interceptors.ResponseInterceptor;
+import ca.uhn.fhir.jpa.starter.dotBase.interceptors.UserAuthorizationIntercerptor;
 import ca.uhn.fhir.jpa.starter.dotBase.services.Authorization;
 import ca.uhn.fhir.rest.server.interceptor.consent.ConsentInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.consent.IConsentService;
@@ -48,6 +49,8 @@ public class JpaRestfulServer extends BaseJpaRestfulServer {
       ConsentInterceptor consentInterceptor = new ConsentInterceptor();
       consentInterceptor.setConsentService(authorizationService);
       registerInterceptor(consentInterceptor);
+
+      registerInterceptor(new UserAuthorizationIntercerptor());
     }
 
     if (HapiProperties.isErrorMonitorinEnabled()) {
