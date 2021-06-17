@@ -54,10 +54,10 @@ public class AuthenticationInterceptor {
       return getUsername(jwt);
     }
     String xForwardedUser = theRequestDetails.getHeader("X-Forwarded-User");
-    if (xForwardedUser != null && !xForwardedUser.equals("")) {
-      return theRequestDetails.getHeader("X-Forwarded-User");
-    }
-    throw new AuthenticationException("Authentication failed");
+    if (xForwardedUser == null || xForwardedUser.equals("")) throw new AuthenticationException(
+      "Authentication failed"
+    );
+    return xForwardedUser;
   }
 
   private String getUsername(Claims jwt) {

@@ -13,7 +13,7 @@ import java.util.List;
  *
  * @pre register after {@link AuthenticationInterceptor}
  */
-public class UserAuthorizationIntercerptor extends AuthorizationInterceptor {
+public class UserAuthorizationInterceptor extends AuthorizationInterceptor {
   private static final List<IAuthRule> ADMIN_RULES = new RuleBuilder().allowAll().build();
   private static final List<IAuthRule> DENY_ALL_RULES = new RuleBuilder().denyAll().build();
   private static final List<IAuthRule> USER_RULES = new RuleBuilder()
