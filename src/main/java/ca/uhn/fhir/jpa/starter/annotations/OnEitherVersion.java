@@ -16,20 +16,8 @@ public class OnEitherVersion extends AnyNestedCondition {
     return result;
   }
 
-  @Conditional(OnDSTU2Condition.class)
-  static class OnDSTU2 {
-  }
-
-  @Conditional(OnDSTU3Condition.class)
-  static class OnDSTU3 {
-  }
-
   @Conditional(OnR4Condition.class)
   static class OnR4 {
-  }
-
-  @Conditional(OnR5Condition.class)
-  static class OnR5 {
   }
 
 }
