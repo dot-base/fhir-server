@@ -196,9 +196,6 @@ spring:
   jpa:
     hibernate.physical_naming_strategy: NAME_OF_PREFERRED_STRATEGY
 ```
-On linux systems or when using docker mysql containers, it will be necessary to review the case-sensitive setup for
-mysql schema identifiers. See  https://dev.mysql.com/doc/refman/8.0/en/identifier-case-sensitivity.html. We suggest you
-set `lower_case_table_names=1` during mysql startup.
 
 ### PostgreSQL configuration
 
@@ -353,11 +350,6 @@ elasticsearch.schema_management_strategy=CREATE
 ## Enabling LastN
 
 Set `hapi.fhir.lastn_enabled=true` in the [application.yaml](https://github.com/hapifhir/hapi-fhir-jpaserver-starter/blob/master/src/main/resources/application.yaml) file to enable the $lastn operation on this server.  Note that the $lastn operation relies on Elasticsearch, so for $lastn to work, indexing must be enabled using Elasticsearch.
-
-## Changing cached search results time
-
-It is possible to change the cached search results time. The option `reuse_cached_search_results_millis` in the [application.yaml] is 6000 miliseconds by default.
-Set `reuse_cached_search_results_millis: -1` in the [application.yaml] file to ignore the cache time every search. 
 
 ## Build the distroless variant of the image (for lower footprint and improved security)
 
