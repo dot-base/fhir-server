@@ -18,10 +18,8 @@ import ca.uhn.fhir.jpa.partition.PartitionManagementProvider;
 import ca.uhn.fhir.jpa.provider.GraphQLProvider;
 import ca.uhn.fhir.jpa.provider.IJpaSystemProvider;
 import ca.uhn.fhir.jpa.provider.JpaCapabilityStatementProvider;
-import ca.uhn.fhir.jpa.provider.JpaConformanceProviderDstu2;
 import ca.uhn.fhir.jpa.provider.SubscriptionTriggeringProvider;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
-import ca.uhn.fhir.jpa.provider.dstu3.JpaConformanceProviderDstu3;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.subscription.util.SubscriptionDebugLogInterceptor;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
@@ -139,35 +137,15 @@ public class BaseJpaRestfulServer extends RestfulServer {
      */
 
     FhirVersionEnum fhirVersion = fhirSystemDao.getContext().getVersion().getVersion();
-    if (fhirVersion == FhirVersionEnum.DSTU2) {
-
-      JpaConformanceProviderDstu2 confProvider = new JpaConformanceProviderDstu2(this, fhirSystemDao,
-        daoConfig);
-      confProvider.setImplementationDescription("HAPI FHIR DSTU2 Server");
+    if (fhirVersion == FhirVersionEnum.R4) {
+      JpaCapabilityStatementProvider confProvider = new JpaCapabilityStatementProvider(this, fhirSystemDao,
+      daoConfig, searchParamRegistry, myValidationSupport);
+      confProvider.setImplementationDescription("HAPI FHIR R4 Server");
       setServerConformanceProvider(confProvider);
     } else {
-      if (fhirVersion == FhirVersionEnum.DSTU3) {
-
-        JpaConformanceProviderDstu3 confProvider = new JpaConformanceProviderDstu3(this, fhirSystemDao,
-          daoConfig, searchParamRegistry);
-        confProvider.setImplementationDescription("HAPI FHIR DSTU3 Server");
-        setServerConformanceProvider(confProvider);
-      } else if (fhirVersion == FhirVersionEnum.R4) {
-
-				JpaCapabilityStatementProvider confProvider = new JpaCapabilityStatementProvider(this, fhirSystemDao,
-					daoConfig, searchParamRegistry, myValidationSupport);
-        confProvider.setImplementationDescription("HAPI FHIR R4 Server");
-        setServerConformanceProvider(confProvider);
-      } else if (fhirVersion == FhirVersionEnum.R5) {
-
-				JpaCapabilityStatementProvider confProvider = new JpaCapabilityStatementProvider(this, fhirSystemDao,
-					daoConfig, searchParamRegistry, myValidationSupport);
-        confProvider.setImplementationDescription("HAPI FHIR R5 Server");
-        setServerConformanceProvider(confProvider);
-      } else {
-        throw new IllegalStateException();
-      }
+      throw new IllegalStateException();
     }
+    
 
     /*
      * ETag Support
