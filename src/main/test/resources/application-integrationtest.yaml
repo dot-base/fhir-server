@@ -1,9 +1,12 @@
 spring:
   datasource:
-    url: 'jdbc:h2:file:./target/database/h2'
-    username: sa
-    password: null
-    driverClassName: org.h2.Driver
+    # These are default values which are only used in development
+    # mode. In production environments they are overwritten by
+    # environment variables.
+    url: jdbc:postgresql://localhost:5432/hapi_r4
+    username: admin
+    password: admin
+    driverClassName: org.postgresql.Driver
     max-active: 15
   profiles:
     ### This is the FHIR version.  
