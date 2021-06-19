@@ -1,0 +1,76 @@
+version: "3.8"
+services:
+  fhir-server:
+    image: "ghcr.io/dot-base/fhir-server:next"
+    environment:
+      HAPI_DATASOURCE_URL: "jdbc:postgresql://fhir-postgres:5432/hapi_r4"
+      HAPI_DATASOURCE_USERNAME: "${FHIR_DB_USER:-admin}"
+      HAPI_DATASOURCE_PASSWORD: "${FHIR_DB_PASSWORD:-admin}"
+      HAPI_ERROR_MONITORING_ENABLED: "false"
+      HAPI_AUTHENTICATION_INTERCEPTOR_ENABLED: "true"
+      HAPI_SSO_REALM_ADDRESS: "http://keycloak:8080/auth/realms/master"
+
+    ports:
+      - "8080:8080"
+    networks:
+      - backend
+    depends_on:
+      - "keycloak"
+
+    deploy:
+      replicas: 1
+      update_config:
+        parallelism: 2
+        delay: 10s
+      restart_policy:
+        condition: on-failure
+
+  fhir-postgres:
+    image: postgres:alpine
+    environment:
+      POSTGRES_USER: "${FHIR_DB_USER:-admin}"
+      POSTGRES_PASSWORD: "${FHIR_DB_PASSWORD:-admin}"
+      POSTGRES_DB: "hapi_r4"
+
+    ports:
+      - "5432:5432"
+    networks:
+      - backend
+    volumes:
+      - fhir-postgres-data:/var/lib/postgresql/data
+    deploy:
+      placement:
+        max_replicas_per_node: 1
+
+  keycloak:
+    image: jboss/keycloak:12.0.4
+    networks:
+      - backend
+    environment:
+      - DB_ADDR=keycloak-db
+      - DB_DATABASE=keycloak
+      - DB_USER=admin
+      - DB_PASSWORD=admin
+      - DB_VENDOR=postgres
+      - KEYCLOAK_USER=admin
+      - KEYCLOAK_PASSWORD=admin
+    ports:
+      - 8090:8080
+
+  keycloak-db:
+    image: postgres:alpine
+    networks:
+      - backend
+    volumes:
+      - keycloak-data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=keycloak
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=admin
+
+networks:
+  backend:
+
+volumes:
+  fhir-postgres-data:
+  keycloak-data:
