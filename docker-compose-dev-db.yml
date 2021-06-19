@@ -1,0 +1,18 @@
+version: "3.8"
+services:
+  fhir-postgres:
+    image: postgres:alpine
+    environment:
+      POSTGRES_USER: "${FHIR_DB_USER:-admin}"
+      POSTGRES_PASSWORD: "${FHIR_DB_PASSWORD:-admin}"
+      POSTGRES_DB: "hapi_r4"
+    ports:
+      - "5432:5432"
+    volumes:
+      - fhir-postgres-data:/var/lib/postgresql/data
+    deploy:
+      placement:
+        max_replicas_per_node: 1
+
+volumes:
+  fhir-postgres-data:
