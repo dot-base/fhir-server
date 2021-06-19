@@ -1,10 +1,12 @@
 spring:
   datasource:
-    url: 'jdbc:h2:file:./target/database/h2'
-    #url: jdbc:h2:mem:test_mem
-    username: sa
-    password: null
-    driverClassName: org.h2.Driver
+    # These are default values which are only used in development
+    # mode. In production environments they are overwritten by
+    # environment variables.
+    url: jdbc:postgresql://localhost:5432/hapi_r4
+    username: admin
+    password: admin
+    driverClassName: org.postgresql.Driver
     max-active: 15
 
     # database connection pool size
@@ -14,7 +16,7 @@ spring:
     properties:
       hibernate.format_sql: false
       hibernate.show_sql: false
-#      hibernate.dialect: org.hibernate.dialect.h2dialect
+      hibernate.dialect: org.hibernate.dialect.PostgreSQL95Dialect
 #      hibernate.hbm2ddl.auto: update
 #      hibernate.jdbc.batch_size: 20
 #      hibernate.cache.use_query_cache: false
