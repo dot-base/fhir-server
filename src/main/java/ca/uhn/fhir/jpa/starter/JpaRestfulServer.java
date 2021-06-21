@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 
 import ca.uhn.fhir.jpa.starter.dotbase.DotbaseProperties;
+import ca.uhn.fhir.jpa.starter.dotbase.PlainSystemProviderR4;
 
 import javax.servlet.ServletException;
 import io.sentry.Sentry;
@@ -44,6 +45,9 @@ public class JpaRestfulServer extends BaseJpaRestfulServer {
         options.setReadTimeoutMillis(10000);
       });
     }
+
+    registerProvider(new PlainSystemProviderR4());
+
   }
 
 }
