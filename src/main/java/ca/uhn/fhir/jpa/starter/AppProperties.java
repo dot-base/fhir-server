@@ -462,7 +462,7 @@ public class AppProperties {
   	 this.search_coord_queue_capacity = search_coord_queue_capacity;
   }
 
-public static class Cors {
+  public static class Cors {
     private Boolean allow_Credentials = true;
     private List<String> allowed_origin = ImmutableList.of("*");
 
