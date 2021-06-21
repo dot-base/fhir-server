@@ -1,21 +1,50 @@
-version: "3"
+version: "3.8"
 services:
-  hapi-fhir-jpaserver-start:
-    build: .
-    container_name: hapi-fhir-jpaserver-start
-    restart: on-failure
+  fhir-server:
+    image: "ghcr.io/dot-base/fhir-server:latest"
+    environment:
+      HAPI_DATASOURCE_URL: "jdbc:postgresql://fhir-postgres:5432/hapi_r4"
+      HAPI_DATASOURCE_USERNAME: "${FHIR_DB_USER:-admin}"
+      HAPI_DATASOURCE_PASSWORD: "${FHIR_DB_PASSWORD:-admin}"
+      HAPI_ERROR_MONITORING_ENABLED: "true"
+      SENTRY_ENVIRONMENT: "${SENTRY_ENVIRONMENT}"
+      SENTRY_DSN : "${SENTRY_DSN}"
+      PROXY_ADDRESS: "${PROXY_ADDRESS}"
+      PROXY_PORT : "${PROXY_PORT}"
+      HAPI_AUTHENTICATION_INTERCEPTOR_ENABLED: "true"
+      HAPI_SSO_REALM_ADDRESS: "${SSO_REALM_ADRESS}"
+
     ports:
       - "8080:8080"
-  hapi-fhir-mysql:
-    image: mysql:latest
-    container_name: hapi-fhir-mysql
-    restart: always
+    networks:
+      - backend
+    deploy:
+      replicas: 1
+      update_config:
+        parallelism: 2
+        delay: 10s
+      restart_policy:
+        condition: on-failure
+
+  fhir-postgres:
+    image: postgres:alpine
     environment:
-      MYSQL_DATABASE: 'hapi'
-      MYSQL_USER: 'admin'
-      MYSQL_PASSWORD: 'admin'
-      MYSQL_ROOT_PASSWORD: 'admin'
+      POSTGRES_USER: "${FHIR_DB_USER:-admin}"
+      POSTGRES_PASSWORD: "${FHIR_DB_PASSWORD:-admin}"
+      POSTGRES_DB: "hapi_r4"
+      
+    ports:
+      - "5432:5432"
+    networks:
+      - backend
     volumes:
-      - hapi-fhir-mysql:/var/lib/mysql
+      - fhir-postgres-data:/var/lib/postgresql/data
+    deploy:
+      placement:
+        max_replicas_per_node: 1
+
+networks:
+  backend:
+
 volumes:
-  hapi-fhir-mysql:
+  fhir-postgres-data:
