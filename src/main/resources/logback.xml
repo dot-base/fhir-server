@@ -9,6 +9,14 @@
 		</encoder>
 	</appender>
 
+	<!-- Configure the Sentry appender, overriding the logging threshold to the WARN level -->
+	<appender name="Sentry" class="io.sentry.logback.SentryAppender">
+		<!-- Optionally change minimum Event level. Default for Events is ERROR -->
+		<minimumEventLevel>WARN</minimumEventLevel>
+		<!-- Optionally change minimum Breadcrumbs level. Default for Breadcrumbs is INFO -->
+		<minimumBreadcrumbLevel>DEBUG</minimumBreadcrumbLevel>
+	</appender>
+
 	<logger name="org.springframework.beans" level="INFO">
 		<appender-ref ref="STDOUT" />
 	</logger>
