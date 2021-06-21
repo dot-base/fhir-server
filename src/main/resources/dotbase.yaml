@@ -1,0 +1,3 @@
+dotbase:
+  server_name: dotbase Clinical FHIR Server
+  error_monitoring_enabled: true
