@@ -312,7 +312,7 @@ public class HapiProperties {
   }
 
   public static Integer getDefaultPageSize() {
-    return HapiProperties.getIntegerProperty(DEFAULT_PAGE_SIZE, 20);
+    return HapiProperties.getIntegerProperty(DEFAULT_PAGE_SIZE, 50);
   }
 
   public static Integer getMaximumPageSize() {
