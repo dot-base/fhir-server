@@ -3,7 +3,6 @@ package ca.uhn.fhir.jpa.starter.dotBase.interceptors;
 import ca.uhn.fhir.jpa.starter.HapiProperties;
 import ca.uhn.fhir.jpa.starter.dotBase.DotbaseProperties;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.auth.IAuthRule;
 import ca.uhn.fhir.rest.server.interceptor.auth.RuleBuilder;
@@ -14,6 +13,10 @@ import java.util.List;
  * access accordingly.
  */
 public class UserAuthorizationInterceptor extends AuthorizationInterceptor {
+  private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(
+    UserAuthorizationInterceptor.class
+  );
+
   private static final String[] RESTRICTED_ENDPOINTS = {
     "$logs",
     "$mark-all-resources-for-reindexing",
@@ -44,8 +47,8 @@ public class UserAuthorizationInterceptor extends AuthorizationInterceptor {
 
   private boolean isAdmin(String username) {
     String adminUserName = DotbaseProperties.get("Dotbase.AdminUserName");
-    if (adminUserName == null || adminUserName.equals("")) System.out.println(
-      "WARN: No admin user set in dotbase.properties"
+    if (adminUserName == null || adminUserName.equals("")) ourLog.warn(
+      "Missing property admin username."
     );
     return username.equals(adminUserName);
   }
