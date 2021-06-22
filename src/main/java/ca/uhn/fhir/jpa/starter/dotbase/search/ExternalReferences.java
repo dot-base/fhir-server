@@ -59,7 +59,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  * included in the response are handled by this SearchBuilder. See also:
  * ResponseInterceptor
  */
-public class ExternalResources extends SearchBuilder {
+public class ExternalReferences extends SearchBuilder {
   @Autowired
   private ISearchParamRegistry mySearchParamRegistry;
   @Autowired
@@ -67,7 +67,7 @@ public class ExternalResources extends SearchBuilder {
 
   private static final Logger ourLog = LoggerFactory.getLogger(SearchBuilder.class);
 
-  public ExternalResources(IDao theDao, String theResourceName, Class<? extends IBaseResource> theResourceType) {
+  public ExternalReferences(IDao theDao, String theResourceName, Class<? extends IBaseResource> theResourceType) {
     super(theDao, theResourceName, theResourceType);
   }
 
