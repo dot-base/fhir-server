@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Import;
 
 import ca.uhn.fhir.jpa.starter.dotbase.DotbaseProperties;
 import ca.uhn.fhir.jpa.starter.dotbase.PlainSystemProviderR4;
+import ca.uhn.fhir.jpa.starter.dotbase.interceptor.ResponseInterceptor;
 
 import javax.servlet.ServletException;
 import io.sentry.Sentry;
@@ -47,6 +48,7 @@ public class JpaRestfulServer extends BaseJpaRestfulServer {
     }
 
     registerProvider(new PlainSystemProviderR4());
+    registerInterceptor(new ResponseInterceptor());
 
   }
 
