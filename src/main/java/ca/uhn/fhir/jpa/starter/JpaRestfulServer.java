@@ -28,6 +28,15 @@ public class JpaRestfulServer extends BaseJpaRestfulServer {
   @Autowired
   DotbaseProperties dotbaseProperties;
 
+  @Autowired
+  ResponseInterceptor responseInterceptor;
+  @Autowired
+  AuditTrailInterceptor auditTrailInterceptor;
+  @Autowired
+  UserRoleInterceptor userRoleInterceptor;
+  @Autowired
+  AuthenticationInterceptor authenticationInterceptor;
+
   private static final long serialVersionUID = 1L;
   private static final String SENTRY_DSN = System.getenv("SENTRY_DSN") == null ? "" : System.getenv("SENTRY_DSN");
   private static final String SENTRY_ENV = System.getenv("SENTRY_ENVIRONMENT");
@@ -59,15 +68,15 @@ public class JpaRestfulServer extends BaseJpaRestfulServer {
     registerProvider(new PlainSystemProviderR4());
     registerProvider(new AccessLogProvider());
 
-    registerInterceptor(new ResponseInterceptor());
-    registerInterceptor(new AuditTrailInterceptor());
+    registerInterceptor(responseInterceptor);
+    registerInterceptor(auditTrailInterceptor);
 
     if (dotbaseProperties.getAuthenticationInterceptorEnabled()) {
       String realmPubKey = IdentityProvider.getRealmPublicKey(dotbaseProperties.getIdentityProviderRealm());
       dotbaseProperties.setRealmPublicKey(realmPubKey);
 
-      registerInterceptor(new AuthenticationInterceptor());
-      registerInterceptor(new UserRoleInterceptor());
+      registerInterceptor(authenticationInterceptor);
+      registerInterceptor(userRoleInterceptor);
 
       IConsentService authorizationService = new Authorization();
       ConsentInterceptor consentInterceptor = new ConsentInterceptor();
