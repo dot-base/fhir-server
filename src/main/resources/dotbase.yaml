@@ -1,6 +1,0 @@
-dotbase:
-  server_name: dotbase Clinical FHIR Server
-  error_monitoring_enabled: true
-  # this property should only be set to true if enable_external_references is set to true
-  resolve_external_references: true 
-
