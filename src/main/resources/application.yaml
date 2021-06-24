@@ -6,6 +6,12 @@ dotbase:
   # this property should only be set to true if allow_external_references is set to true
   resolve_external_references: true 
   
+  resource_urls:
+      namingsystem_dotbase_username: "https://dotbase.org/fhir/NamingSystem/dotbase-username"
+      namingsystem_creation_datetime: "https://dotbase.org/fhir/NamingSystem/creation-datetime"
+      structuredefinition_resource_editor: "https://dotbase.org/fhir/StructureDefinition/resource-editor" 
+      structuredefinition_document_draft_action: "https://dotbase.org/fhir/StructureDefinition/document-draft-action"             
+  
 spring:
   datasource:
     # These are default values which are only used in development

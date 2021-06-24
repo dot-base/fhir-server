@@ -34,7 +34,7 @@ public class PlainSystemProviderR4 extends JpaSystemProviderR4 {
     if (resourceType == null) throw new InvalidRequestException(
       "Parameter '_type' must be provided"
     );
-    IFhirResourceDao<T> resourceDAO = new DaoUtils().getDao(resourceType);
+    IFhirResourceDao<T> resourceDAO = DaoUtils.getDao(resourceType);
 
     if (resourceId != null) {
       return this.instanceHistory(requestDetails, resourceDAO, resourceId);
