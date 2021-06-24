@@ -47,7 +47,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Custom SearchBuilder that overrides SearchBuilder.loadIncludes() to handle
- * external references: Due to using separate FHIR servers for clinical,study
+ * resolving external references: Due to using separate FHIR servers for clinical,study
  * and core data in dot.base, external references should be resolved and
  * returned as well.
  *
@@ -58,8 +58,10 @@ import org.springframework.beans.factory.annotation.Autowired;
  * Requests with _include params that result in a external reference to be
  * included in the response are handled by this SearchBuilder. See also:
  * ResponseInterceptor
+ * 
+ * ALL CUSTOM CHANGES ARE COMMENTED WITH -- DOTBASE -- TO FACILITATE EASIER UPDATING
  */
-public class ExternalReferences extends SearchBuilder {
+public class SearchBuilderExternalReferences extends SearchBuilder {
   @Autowired
   private ISearchParamRegistry mySearchParamRegistry;
   @Autowired
@@ -67,7 +69,7 @@ public class ExternalReferences extends SearchBuilder {
 
   private static final Logger ourLog = LoggerFactory.getLogger(SearchBuilder.class);
 
-  public ExternalReferences(IDao theDao, String theResourceName, Class<? extends IBaseResource> theResourceType) {
+  public SearchBuilderExternalReferences(IDao theDao, String theResourceName, Class<? extends IBaseResource> theResourceType) {
     super(theDao, theResourceName, theResourceType);
   }
 
@@ -119,8 +121,13 @@ public class ExternalReferences extends SearchBuilder {
 
         boolean matchAll = "*".equals(nextInclude.getValue());
         if (matchAll) {
+
           StringBuilder sqlBuilder = new StringBuilder();
           sqlBuilder.append("SELECT r.").append(findPidFieldName);
+          /**
+           * -- DOTBASE -- added r.myTargetResourceUrl to queries
+           */
+          sqlBuilder.append(", r.myTargetResourceUrl");
           if (findVersionFieldName != null) {
             sqlBuilder.append(", r." + findVersionFieldName);
           }
@@ -141,13 +148,18 @@ public class ExternalReferences extends SearchBuilder {
                 continue;
               }
 
+              /**
+              * -- DOTBASE -- 
+              * Changed else clause due to resourceLink always being of type Object[]
+              * as a result of the changed query
+              */
               Long resourceLink;
               Long version = null;
               if (findVersionFieldName != null) {
                 resourceLink = (Long) ((Object[]) nextRow)[0];
                 version = (Long) ((Object[]) nextRow)[1];
               } else {
-                resourceLink = (Long) nextRow;
+                resourceLink = (Long) ((Object[]) nextRow)[0];
               }
 
               pidsToInclude.add(new ResourcePersistentId(resourceLink, version));
@@ -191,19 +203,19 @@ public class ExternalReferences extends SearchBuilder {
             }
 
             /**
-             * -- DOTBASE -- added ,r.myTargetResourceUrl to queries
+             * -- DOTBASE -- added , r.myTargetResourceUrl to queries
              */
             if (targetResourceType != null) {
               sql = "SELECT " + fieldsToLoad
-                  + " ,r.myTargetResourceUrl FROM ResourceLink r WHERE r.mySourcePath = :src_path AND r."
+                  + " , r.myTargetResourceUrl FROM ResourceLink r WHERE r.mySourcePath = :src_path AND r."
                   + searchPidFieldName + " IN (:target_pids) AND r.myTargetResourceType = :target_resource_type";
             } else if (haveTargetTypesDefinedByParam) {
               sql = "SELECT " + fieldsToLoad
-                  + " ,r.myTargetResourceUrl FROM ResourceLink r WHERE r.mySourcePath = :src_path AND r."
+                  + " , r.myTargetResourceUrl FROM ResourceLink r WHERE r.mySourcePath = :src_path AND r."
                   + searchPidFieldName + " IN (:target_pids) AND r.myTargetResourceType in (:target_resource_types)";
             } else {
               sql = "SELECT " + fieldsToLoad
-                  + " ,r.myTargetResourceUrl FROM ResourceLink r WHERE r.mySourcePath = :src_path AND r."
+                  + " , r.myTargetResourceUrl FROM ResourceLink r WHERE r.mySourcePath = :src_path AND r."
                   + searchPidFieldName + " IN (:target_pids)";
             }
 
@@ -222,8 +234,10 @@ public class ExternalReferences extends SearchBuilder {
                 if (resourceLink != null) {
                   ResourcePersistentId persistentId;
                   /**
-                   * -- DOTBASE -- add if clause with method externalReferenceToInclude and moved
-                   * original hapi fhir code into else clause
+                   * -- DOTBASE -- 
+                   * add if clause with method 'externalReferenceToInclude' and moved
+                   * original hapi fhir code into else clause. Nested else also changed
+                   * due to resourceLink always being of type Object[] as a result of the changed query
                    */
                   if (resourceLink instanceof Object[] && this.isExternalReference((Object[]) resourceLink)) {
                     this.externalReferenceToInclude((Object[]) resourceLink, theRequest);
@@ -232,7 +246,7 @@ public class ExternalReferences extends SearchBuilder {
                       persistentId = new ResourcePersistentId(((Object[]) resourceLink)[0]);
                       persistentId.setVersion((Long) ((Object[]) resourceLink)[1]);
                     } else {
-                      persistentId = new ResourcePersistentId(resourceLink);
+                      persistentId = new ResourcePersistentId(((Object[]) resourceLink)[0]);
                     }
                     assert persistentId.getId() instanceof Long;
                     pidsToInclude.add(persistentId);
