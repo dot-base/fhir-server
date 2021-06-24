@@ -11,12 +11,21 @@ public class DotbaseProperties {
 
   private ResourceUrls resource_urls = null;
 
+  private String admin_username= "";
   private Boolean authentication_interceptor_enabled = true;
   private Boolean error_monitoring_enabled = true;
   private String identity_provider_realm = "";
   private String realm_public_key = "";
   private Boolean resolve_external_references = true;
   private String server_name= "dotbase FHIR Server";
+
+  public String getAdminUsername() {
+    return admin_username;
+  }
+
+  public void setAdminUsername(String admin_username) {
+    this.admin_username = admin_username;
+  }
 
 
   public ResourceUrls getResourceUrls() {
