@@ -7,6 +7,7 @@ import ca.uhn.fhir.jpa.starter.dotbase.DotbaseProperties;
 import ca.uhn.fhir.jpa.starter.dotbase.PlainSystemProviderR4;
 import ca.uhn.fhir.jpa.starter.dotbase.api.IdentityProvider;
 import ca.uhn.fhir.jpa.starter.dotbase.interceptor.AuthenticationInterceptor;
+import ca.uhn.fhir.jpa.starter.dotbase.interceptor.AuditTrailInterceptor;
 import ca.uhn.fhir.jpa.starter.dotbase.interceptor.ResponseInterceptor;
 
 import javax.servlet.ServletException;
@@ -18,7 +19,7 @@ public class JpaRestfulServer extends BaseJpaRestfulServer {
 
   @Autowired
   AppProperties appProperties;
-  
+
   @Autowired
   DotbaseProperties dotbaseProperties;
 
@@ -57,6 +58,7 @@ public class JpaRestfulServer extends BaseJpaRestfulServer {
       String realmPubKey = IdentityProvider.getRealmPublicKey(dotbaseProperties.getIdentityProviderRealm());
       dotbaseProperties.setRealmPublicKey(realmPubKey);
       registerInterceptor(new AuthenticationInterceptor());
+      registerInterceptor(new AuditTrailInterceptor());
     }
 
   }

@@ -9,12 +9,23 @@ import org.springframework.context.annotation.Configuration;
 @EnableConfigurationProperties
 public class DotbaseProperties {
 
+  private ResourceUrls resource_urls = null;
+
   private Boolean authentication_interceptor_enabled = true;
   private Boolean error_monitoring_enabled = true;
   private String identity_provider_realm = "";
   private String realm_public_key = "";
   private Boolean resolve_external_references = true;
   private String server_name= "dotbase FHIR Server";
+
+
+  public ResourceUrls getResourceUrls() {
+    return resource_urls;
+  }
+
+  public void setResourceUrls(ResourceUrls resource_urls) {
+    this.resource_urls = resource_urls;
+  }
 
   public Boolean  getAuthenticationInterceptorEnabled() {
     return authentication_interceptor_enabled;
@@ -61,5 +72,13 @@ public class DotbaseProperties {
 
   public void setServer_name(String server_name) {
     this.server_name = server_name;
+  }
+
+  public static class ResourceUrls {
+    public static String namingsystem_dotbase_username= "https://dotbase.org/fhir/NamingSystem/dotbase-username";
+    public static String namingsystem_creation_datetime= "https://dotbase.org/fhir/NamingSystem/creation-datetime";
+    public static String structuredefinition_resource_editor= "https://dotbase.org/fhir/StructureDefinition/resource-editor"; 
+    public static String structuredefinition_document_draft_action= "https://dotbase.org/fhir/StructureDefinition/document-draft-action";  
+
   }
 }
