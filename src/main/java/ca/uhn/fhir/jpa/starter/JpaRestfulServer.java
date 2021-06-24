@@ -57,13 +57,13 @@ public class JpaRestfulServer extends BaseJpaRestfulServer {
 
     registerProvider(new PlainSystemProviderR4());
     registerInterceptor(new ResponseInterceptor());
+    registerInterceptor(new AuditTrailInterceptor());
 
     if (dotbaseProperties.getAuthenticationInterceptorEnabled()) {
       String realmPubKey = IdentityProvider.getRealmPublicKey(dotbaseProperties.getIdentityProviderRealm());
       dotbaseProperties.setRealmPublicKey(realmPubKey);
 
       registerInterceptor(new AuthenticationInterceptor());
-      registerInterceptor(new AuditTrailInterceptor());
       registerInterceptor(new UserRoleInterceptor());
 
       IConsentService authorizationService = new Authorization();
