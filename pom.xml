@@ -62,6 +62,13 @@
             <version>42.2.19</version>
         </dependency>
 
+        <!-- Needed for Authentication - https://mvnrepository.com/artifact/io.jsonwebtoken/jjwt -->
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt</artifactId>
+            <version>0.2</version>
+        </dependency>
+
         <!-- Needed for Email subscriptions
         <dependency>
             <groupId>com.sun.mail</groupId>
