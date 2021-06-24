@@ -1,11 +1,20 @@
 package ca.uhn.fhir.jpa.starter;
 
 import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.dao.IDao;
 import ca.uhn.fhir.jpa.config.BaseJavaConfigR4;
+import ca.uhn.fhir.jpa.dao.ISearchBuilder;
+import ca.uhn.fhir.jpa.dao.LegacySearchBuilder;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
+import ca.uhn.fhir.jpa.search.builder.SearchBuilder;
 import ca.uhn.fhir.jpa.search.lastn.ElasticsearchSvcImpl;
 import ca.uhn.fhir.jpa.starter.annotations.OnR4Condition;
 import ca.uhn.fhir.jpa.starter.cql.StarterCqlR4Config;
+import ca.uhn.fhir.jpa.starter.dotbase.DotbaseProperties;
+import ca.uhn.fhir.jpa.starter.dotbase.search.SearchBuilderExternalReferences;
+
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.*;
 import org.springframework.core.env.ConfigurableEnvironment;
@@ -31,6 +40,8 @@ public class FhirServerConfigR4 extends BaseJavaConfigR4 {
    */
   @Autowired
   AppProperties appProperties;
+  @Autowired
+  DotbaseProperties dotbaseProperties;
 
   @PostConstruct
   public void initSettings() {
@@ -55,6 +66,19 @@ public class FhirServerConfigR4 extends BaseJavaConfigR4 {
 
   @Autowired
   private ConfigurableEnvironment configurableEnvironment;
+
+  @Override
+  @Bean(name = SEARCH_BUILDER)
+	@Scope("prototype")
+	public ISearchBuilder newSearchBuilder(IDao theDao, String theResourceName, Class<? extends IBaseResource> theResourceType, DaoConfig theDaoConfig) {
+		if (theDaoConfig.isUseLegacySearchBuilder()) {
+			return new LegacySearchBuilder(theDao, theResourceName, theResourceType);
+		}
+    if(dotbaseProperties.getResolveExternalReferences()){
+      return new SearchBuilderExternalReferences(theDao, theResourceName, theResourceType);
+    }
+    return new SearchBuilder(theDao, theResourceName, theResourceType);
+	}
 
   @Override
   @Bean()
