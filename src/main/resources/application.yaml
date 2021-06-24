@@ -1,3 +1,11 @@
+dotbase:
+  server_name: dotbase Clinical FHIR Server
+  error_monitoring_enabled: true
+  authentication_interceptor_enabled: true
+  identity_provider_realm: "http://localhost:8081/auth/realms/master"
+  # this property should only be set to true if enable_external_references is set to true
+  resolve_external_references: true 
+  
 spring:
   datasource:
     # These are default values which are only used in development
