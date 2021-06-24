@@ -12,6 +12,7 @@ import io.jsonwebtoken.Claims;
 import io.sentry.Sentry;
 import io.sentry.protocol.User;
 
+@Component
 public class AuthenticationInterceptor {
   private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(
     AuthenticationInterceptor.class
