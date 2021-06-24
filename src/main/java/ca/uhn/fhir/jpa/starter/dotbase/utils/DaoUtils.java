@@ -12,8 +12,7 @@ public class DaoUtils {
   private static final ApplicationContext APP_CTX = ApplicationContextProvider.getApplicationContext();
   
   @SuppressWarnings("unchecked")
-  public <T extends IBaseResource> IFhirResourceDao<T> getDao(StringType resourceType) {
+  public static <T extends IBaseResource> IFhirResourceDao<T> getDao(StringType resourceType) {
     return APP_CTX.getBean("my" + resourceType + "DaoR4", IFhirResourceDao.class);
   }
-
 }
