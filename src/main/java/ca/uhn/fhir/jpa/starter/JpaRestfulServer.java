@@ -9,6 +9,9 @@ import ca.uhn.fhir.jpa.starter.dotbase.api.IdentityProvider;
 import ca.uhn.fhir.jpa.starter.dotbase.interceptor.AuthenticationInterceptor;
 import ca.uhn.fhir.jpa.starter.dotbase.interceptor.AuditTrailInterceptor;
 import ca.uhn.fhir.jpa.starter.dotbase.interceptor.ResponseInterceptor;
+import ca.uhn.fhir.jpa.starter.dotbase.services.Authorization;
+import ca.uhn.fhir.rest.server.interceptor.consent.ConsentInterceptor;
+import ca.uhn.fhir.rest.server.interceptor.consent.IConsentService;
 
 import javax.servlet.ServletException;
 import io.sentry.Sentry;
@@ -57,8 +60,14 @@ public class JpaRestfulServer extends BaseJpaRestfulServer {
     if (dotbaseProperties.getAuthenticationInterceptorEnabled()) {
       String realmPubKey = IdentityProvider.getRealmPublicKey(dotbaseProperties.getIdentityProviderRealm());
       dotbaseProperties.setRealmPublicKey(realmPubKey);
+
       registerInterceptor(new AuthenticationInterceptor());
       registerInterceptor(new AuditTrailInterceptor());
+
+      IConsentService authorizationService = new Authorization();
+      ConsentInterceptor consentInterceptor = new ConsentInterceptor();
+      consentInterceptor.setConsentService(authorizationService);
+      registerInterceptor(consentInterceptor);
     }
 
   }
