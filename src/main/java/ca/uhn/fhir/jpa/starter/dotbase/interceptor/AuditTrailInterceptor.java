@@ -6,6 +6,7 @@ import ca.uhn.fhir.jpa.starter.dotbase.services.AuditTrail;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
+@Component
 public class AuditTrailInterceptor {
   private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(
     AuditTrailInterceptor.class
