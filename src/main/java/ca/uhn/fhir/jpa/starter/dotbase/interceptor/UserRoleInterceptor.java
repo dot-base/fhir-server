@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.starter.dotbase.interceptor;
 
+import ca.uhn.fhir.jpa.starter.AppProperties;
 import ca.uhn.fhir.jpa.starter.dotbase.DotbaseProperties;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
@@ -9,11 +10,13 @@ import ca.uhn.fhir.rest.server.interceptor.auth.RuleBuilder;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * Determines the requesters userrole (admin or normal user) and authorizes
  * access accordingly.
  */
+@Component
 public class UserRoleInterceptor extends AuthorizationInterceptor {
   private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(UserRoleInterceptor.class);
 
@@ -35,6 +38,9 @@ public class UserRoleInterceptor extends AuthorizationInterceptor {
   @Autowired
   DotbaseProperties dotbaseProperties;
 
+  @Autowired
+  AppProperties appProperties;
+
   private String getUsername(RequestDetails theRequestDetails) {
     String username = theRequestDetails.getAttribute("_username").toString();
     if (username == null) {
@@ -44,7 +50,7 @@ public class UserRoleInterceptor extends AuthorizationInterceptor {
   }
 
   private boolean isAdmin(String username) {
-    String adminUserName = dotbaseProperties.getAdminUsername();
+    String adminUserName = "dotbaseProperties.getAdminUsername()";
     if (adminUserName == null || adminUserName.equals("")) {
       ourLog.warn("Missing property admin username.");
     }
