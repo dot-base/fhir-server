@@ -7,6 +7,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.ResponseDetails;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
+import org.springframework.stereotype.Component;
 
 /**
  * This interceptor handles Search request with * <code>_include</code> or <code>_include</code> that
@@ -19,6 +20,7 @@ import org.hl7.fhir.r4.model.Bundle;
  *      - Response Customization: Evaluate FHIRPath</a>
  * @since 5.0.0
  */
+@Component
 public class ResponseInterceptor {
   private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(
     ResponseInterceptor.class
