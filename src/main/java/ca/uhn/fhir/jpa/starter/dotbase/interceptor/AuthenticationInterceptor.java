@@ -2,6 +2,8 @@ package ca.uhn.fhir.jpa.starter.dotbase.interceptor;
 
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+// import ca.uhn.fhir.jpa.starter.dotbase.services.AccessLog;
+// import ca.uhn.fhir.jpa.starter.dotbase.services.AuditTrail;
 import ca.uhn.fhir.jpa.starter.dotbase.services.Authentication;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -15,6 +17,8 @@ public class AuthenticationInterceptor {
   private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(
     AuthenticationInterceptor.class
   );
+//   private static final String PROCESSING_SUB_REQUEST = "BaseHapiFhirDao.processingSubRequest";
+
   @Hook(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED)
   public void preHandleIncomingRequest(
     RequestDetails theRequestDetails,
@@ -22,13 +26,23 @@ public class AuthenticationInterceptor {
     RestOperationTypeEnum restOperationType
   ) {
     String username = "unknown";
+    // boolean isTransaction = restOperationType.equals(RestOperationTypeEnum.TRANSACTION);
+    // boolean isSubRequest =
+    //   theRequestDetails.getUserData().get(PROCESSING_SUB_REQUEST) == Boolean.TRUE;
     boolean isAuthenticated = theRequestDetails.getAttribute("_username") != null;
 
     if (!isAuthenticated) {
       username = getAuthenticatedUser(theRequestDetails);
       theRequestDetails.setAttribute("_username", username);
       setSentryUser(username);
+    //   AccessLog.logRequest(username, theRequestDetails, restOperationType);
     }
+
+    //
+    // if (isTransaction && !isSubRequest) {
+    //   AuditTrail.handleTransaction(theRequestDetails);
+    //   AccessLog.handleTransaction(username, theRequestDetails);
+    // }
   }
 
   /**
