@@ -13,18 +13,19 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.dao.IDao;
 import ca.uhn.fhir.jpa.interceptor.JpaPreResourceAccessDetails;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.search.builder.SearchBuilder;
-import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.api.server.IPreResourceAccessDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -65,6 +66,8 @@ public class SearchBuilderExternalReferences extends SearchBuilder {
   @Autowired
   private ISearchParamRegistry mySearchParamRegistry;
   @Autowired
+	protected IInterceptorBroadcaster myInterceptorBroadcaster;
+  @Autowired
   private ModelConfig myModelConfig;
 
   private static final Logger ourLog = LoggerFactory.getLogger(SearchBuilder.class);
@@ -73,240 +76,265 @@ public class SearchBuilderExternalReferences extends SearchBuilder {
     super(theDao, theResourceName, theResourceType);
   }
 
-  /**
-   * @Autowired private ISearchParamRegistry mySearchParamRegistry;
-   * 
-   *            private static final org.slf4jcallPreAccessResourcesHook.Logger
-   *            ourLog = org.slf4j.LoggerFactory.getLogger(
-   *            SearchBuilderIncludes.class ); THIS SHOULD RETURN HASHSET and not
-   *            just Set because we add to it later so it can't be
-   *            Collections.emptySet() or some such thing
-   */
-  @Override
-  public HashSet<ResourcePersistentId> loadIncludes(FhirContext theContext, EntityManager theEntityManager,
-      Collection<ResourcePersistentId> theMatches, Set<Include> theRevIncludes, boolean theReverseMode,
-      DateRangeParam theLastUpdated, String theSearchIdOrDescription, RequestDetails theRequest) {
-    if (theMatches.size() == 0) {
-      return new HashSet<>();
-    }
-    if (theRevIncludes == null || theRevIncludes.isEmpty()) {
-      return new HashSet<>();
-    }
-    String searchPidFieldName = theReverseMode ? "myTargetResourcePid" : "mySourceResourcePid";
-    String findPidFieldName = theReverseMode ? "mySourceResourcePid" : "myTargetResourcePid";
-    String findVersionFieldName = null;
-    if (!theReverseMode && myModelConfig.isRespectVersionsForSearchIncludes()) {
-      findVersionFieldName = "myTargetResourceVersion";
-    }
+	/**
+	 * THIS SHOULD RETURN HASHSET and not just Set because we add to it later
+	 * so it can't be Collections.emptySet() or some such thing
+	 */
+	@Override
+	public Set<ResourcePersistentId> loadIncludes(FhirContext theContext, EntityManager theEntityManager, Collection<ResourcePersistentId> theMatches, Set<Include> theIncludes,
+																 boolean theReverseMode, DateRangeParam theLastUpdated, String theSearchIdOrDescription, RequestDetails theRequest, Integer theMaxCount) {
+		if (theMatches.size() == 0) {
+			return new HashSet<>();
+		}
+		if (theIncludes == null || theIncludes.isEmpty()) {
+			return new HashSet<>();
+		}
+		String searchPidFieldName = theReverseMode ? "myTargetResourcePid" : "mySourceResourcePid";
+		String findPidFieldName = theReverseMode ? "mySourceResourcePid" : "myTargetResourcePid";
+		String findVersionFieldName = null;
+		if (!theReverseMode && myModelConfig.isRespectVersionsForSearchIncludes()) {
+			findVersionFieldName = "myTargetResourceVersion";
+		}
 
-    List<ResourcePersistentId> nextRoundMatches = new ArrayList<>(theMatches);
-    HashSet<ResourcePersistentId> allAdded = new HashSet<>();
-    HashSet<ResourcePersistentId> original = new HashSet<>(theMatches);
-    ArrayList<Include> includes = new ArrayList<>(theRevIncludes);
+		List<ResourcePersistentId> nextRoundMatches = new ArrayList<>(theMatches);
+		HashSet<ResourcePersistentId> allAdded = new HashSet<>();
+		HashSet<ResourcePersistentId> original = new HashSet<>(theMatches);
+		ArrayList<Include> includes = new ArrayList<>(theIncludes);
 
-    int roundCounts = 0;
-    StopWatch w = new StopWatch();
+		int roundCounts = 0;
+		StopWatch w = new StopWatch();
 
-    boolean addedSomeThisRound;
-    do {
-      roundCounts++;
+		boolean addedSomeThisRound;
+		do {
+			roundCounts++;
 
-      HashSet<ResourcePersistentId> pidsToInclude = new HashSet<>();
+			HashSet<ResourcePersistentId> pidsToInclude = new HashSet<>();
 
-      for (Iterator<Include> iter = includes.iterator(); iter.hasNext();) {
-        Include nextInclude = iter.next();
-        if (nextInclude.isRecurse() == false) {
-          iter.remove();
-        }
+			for (Iterator<Include> iter = includes.iterator(); iter.hasNext(); ) {
+				Include nextInclude = iter.next();
+				if (nextInclude.isRecurse() == false) {
+					iter.remove();
+				}
 
-        boolean matchAll = "*".equals(nextInclude.getValue());
-        if (matchAll) {
+				// Account for _include=*
+				boolean matchAll = "*".equals(nextInclude.getValue());
 
-          StringBuilder sqlBuilder = new StringBuilder();
-          sqlBuilder.append("SELECT r.").append(findPidFieldName);
+				// Account for _include=[resourceType]:*
+				String wantResourceType = null;
+				if (!matchAll) {
+					if (nextInclude.getParamName().equals("*")) {
+						wantResourceType = nextInclude.getParamType();
+						matchAll = true;
+					}
+				}
+
+				if (matchAll) {
+					StringBuilder sqlBuilder = new StringBuilder();
+					sqlBuilder.append("SELECT r.").append(findPidFieldName);
           /**
-           * -- DOTBASE -- added r.myTargetResourceUrl to queries
-           */
+          * -- DOTBASE -- added r.myTargetResourceUrl to queries
+          */
           sqlBuilder.append(", r.myTargetResourceUrl");
-          if (findVersionFieldName != null) {
-            sqlBuilder.append(", r." + findVersionFieldName);
-          }
-          sqlBuilder.append(" FROM ResourceLink r WHERE r.");
-          sqlBuilder.append(searchPidFieldName);
-          sqlBuilder.append(" IN (:target_pids)");
-          String sql = sqlBuilder.toString();
-          List<Collection<ResourcePersistentId>> partitions = partition(nextRoundMatches, getMaximumPageSize());
-          for (Collection<ResourcePersistentId> nextPartition : partitions) {
-            TypedQuery<?> q = theEntityManager.createQuery(sql, Object[].class);
-            q.setParameter("target_pids", ResourcePersistentId.toLongList(nextPartition));
-            List<?> results = q.getResultList();
-            for (Object nextRow : results) {
-              if (nextRow == null) {
-                // This can happen if there are outgoing references which are canonical or point
-                // to
-                // other servers
-                continue;
-              }
+					if (findVersionFieldName != null) {
+						sqlBuilder.append(", r." + findVersionFieldName);
+					}
+					sqlBuilder.append(" FROM ResourceLink r WHERE r.");
+					sqlBuilder.append(searchPidFieldName);
+					sqlBuilder.append(" IN (:target_pids)");
+
+					// Technically if the request is a qualified star (e.g. _include=Observation:*) we
+					// should always be checking the source resource type on the resource link. We don't
+					// actually index that column though by default, so in order to try and be efficient
+					// we don't actually include it for includes (but we do for revincludes). This is
+					// because for an include it doesn't really make sense to include a different
+					// resource type than the one you are searching on.
+					if (wantResourceType != null && theReverseMode) {
+						sqlBuilder.append(" AND r.mySourceResourceType = :want_resource_type");
+					} else {
+						wantResourceType = null;
+					}
+
+					String sql = sqlBuilder.toString();
+					List<Collection<ResourcePersistentId>> partitions = partition(nextRoundMatches, getMaximumPageSize());
+					for (Collection<ResourcePersistentId> nextPartition : partitions) {
+						TypedQuery<?> q = theEntityManager.createQuery(sql, Object[].class);
+						q.setParameter("target_pids", ResourcePersistentId.toLongList(nextPartition));
+						if (wantResourceType != null) {
+							q.setParameter("want_resource_type", wantResourceType);
+						}
+						if (theMaxCount != null) {
+							q.setMaxResults(theMaxCount);
+						}
+						List<?> results = q.getResultList();
+						for (Object nextRow : results) {
+							if (nextRow == null) {
+								// This can happen if there are outgoing references which are canonical or point to
+								// other servers
+								continue;
+							}
 
               /**
               * -- DOTBASE -- 
               * Changed else clause due to resourceLink always being of type Object[]
               * as a result of the changed query
               */
-              Long resourceLink;
-              Long version = null;
-              if (findVersionFieldName != null) {
+							Long resourceLink;
+							Long version = null;
+							if (findVersionFieldName != null) {
+								resourceLink = (Long) ((Object[]) nextRow)[0];
+								version = (Long) ((Object[]) nextRow)[1];
+							} else {
                 resourceLink = (Long) ((Object[]) nextRow)[0];
-                version = (Long) ((Object[]) nextRow)[1];
-              } else {
-                resourceLink = (Long) ((Object[]) nextRow)[0];
-              }
+							}
 
-              pidsToInclude.add(new ResourcePersistentId(resourceLink, version));
-            }
-          }
-        } else {
+							pidsToInclude.add(new ResourcePersistentId(resourceLink, version));
+						}
+					}
+				} else {
 
-          List<String> paths;
-          RuntimeSearchParam param;
-          String resType = nextInclude.getParamType();
-          if (isBlank(resType)) {
-            continue;
-          }
-          RuntimeResourceDefinition def = theContext.getResourceDefinition(resType);
-          if (def == null) {
-            ourLog.warn("Unknown resource type in include/revinclude=" + nextInclude.getValue());
-            continue;
-          }
+					List<String> paths;
+					RuntimeSearchParam param;
+					String resType = nextInclude.getParamType();
+					if (isBlank(resType)) {
+						continue;
+					}
+					RuntimeResourceDefinition def = theContext.getResourceDefinition(resType);
+					if (def == null) {
+						ourLog.warn("Unknown resource type in include/revinclude=" + nextInclude.getValue());
+						continue;
+					}
 
-          String paramName = nextInclude.getParamName();
-          if (isNotBlank(paramName)) {
-            param = mySearchParamRegistry.getActiveSearchParam(resType, paramName);
-          } else {
-            param = null;
-          }
-          if (param == null) {
-            ourLog.warn("Unknown param name in include/revinclude=" + nextInclude.getValue());
-            continue;
-          }
+					String paramName = nextInclude.getParamName();
+					if (isNotBlank(paramName)) {
+						param = mySearchParamRegistry.getActiveSearchParam(resType, paramName);
+					} else {
+						param = null;
+					}
+					if (param == null) {
+						ourLog.warn("Unknown param name in include/revinclude=" + nextInclude.getValue());
+						continue;
+					}
 
-          paths = param.getPathsSplit();
+					paths = param.getPathsSplit();
 
-          String targetResourceType = defaultString(nextInclude.getParamTargetType(), null);
-          for (String nextPath : paths) {
-            String sql;
+					String targetResourceType = defaultString(nextInclude.getParamTargetType(), null);
+					for (String nextPath : paths) {
+						String sql;
 
-            boolean haveTargetTypesDefinedByParam = param.hasTargets();
-            String fieldsToLoad = "r." + findPidFieldName;
-            if (findVersionFieldName != null) {
-              fieldsToLoad += ", r." + findVersionFieldName;
-            }
+						boolean haveTargetTypesDefinedByParam = param.hasTargets();
+						String fieldsToLoad = "r." + findPidFieldName;
+						if (findVersionFieldName != null) {
+							fieldsToLoad += ", r." + findVersionFieldName;
+						}
 
             /**
-             * -- DOTBASE -- added , r.myTargetResourceUrl to queries
-             */
-            if (targetResourceType != null) {
-              sql = "SELECT " + fieldsToLoad
-                  + " , r.myTargetResourceUrl FROM ResourceLink r WHERE r.mySourcePath = :src_path AND r."
-                  + searchPidFieldName + " IN (:target_pids) AND r.myTargetResourceType = :target_resource_type";
-            } else if (haveTargetTypesDefinedByParam) {
-              sql = "SELECT " + fieldsToLoad
-                  + " , r.myTargetResourceUrl FROM ResourceLink r WHERE r.mySourcePath = :src_path AND r."
-                  + searchPidFieldName + " IN (:target_pids) AND r.myTargetResourceType in (:target_resource_types)";
-            } else {
-              sql = "SELECT " + fieldsToLoad
-                  + " , r.myTargetResourceUrl FROM ResourceLink r WHERE r.mySourcePath = :src_path AND r."
-                  + searchPidFieldName + " IN (:target_pids)";
-            }
+            * -- DOTBASE -- added , r.myTargetResourceUrl to queries
+            */
+						if (targetResourceType != null) {
+							sql = "SELECT " + fieldsToLoad + " , r.myTargetResourceUrl FROM ResourceLink r WHERE r.mySourcePath = :src_path AND r." + searchPidFieldName + " IN (:target_pids) AND r.myTargetResourceType = :target_resource_type";
+						} else if (haveTargetTypesDefinedByParam) {
+							sql = "SELECT " + fieldsToLoad + " , r.myTargetResourceUrl FROM ResourceLink r WHERE r.mySourcePath = :src_path AND r." + searchPidFieldName + " IN (:target_pids) AND r.myTargetResourceType in (:target_resource_types)";
+						} else {
+							sql = "SELECT " + fieldsToLoad + " , r.myTargetResourceUrl FROM ResourceLink r WHERE r.mySourcePath = :src_path AND r." + searchPidFieldName + " IN (:target_pids)";
+						}
 
-            List<Collection<ResourcePersistentId>> partitions = partition(nextRoundMatches, getMaximumPageSize());
-            for (Collection<ResourcePersistentId> nextPartition : partitions) {
-              TypedQuery<?> q = theEntityManager.createQuery(sql, Object[].class);
-              q.setParameter("src_path", nextPath);
-              q.setParameter("target_pids", ResourcePersistentId.toLongList(nextPartition));
-              if (targetResourceType != null) {
-                q.setParameter("target_resource_type", targetResourceType);
-              } else if (haveTargetTypesDefinedByParam) {
-                q.setParameter("target_resource_types", param.getTargets());
-              }
-              List<?> results = q.getResultList();
-              for (Object resourceLink : results) {
-                if (resourceLink != null) {
-                  ResourcePersistentId persistentId;
+						List<Collection<ResourcePersistentId>> partitions = partition(nextRoundMatches, getMaximumPageSize());
+						for (Collection<ResourcePersistentId> nextPartition : partitions) {
+							TypedQuery<?> q = theEntityManager.createQuery(sql, Object[].class);
+							q.setParameter("src_path", nextPath);
+							q.setParameter("target_pids", ResourcePersistentId.toLongList(nextPartition));
+							if (targetResourceType != null) {
+								q.setParameter("target_resource_type", targetResourceType);
+							} else if (haveTargetTypesDefinedByParam) {
+								q.setParameter("target_resource_types", param.getTargets());
+							}
+							List<?> results = q.getResultList();
+							if (theMaxCount != null) {
+								q.setMaxResults(theMaxCount);
+							}
+							for (Object resourceLink : results) {
+								if (resourceLink != null) {
+									ResourcePersistentId persistentId;
                   /**
-                   * -- DOTBASE -- 
-                   * add if clause with method 'externalReferenceToInclude' and moved
-                   * original hapi fhir code into else clause. Nested else also changed
-                   * due to resourceLink always being of type Object[] as a result of the changed query
-                   */
+                  * -- DOTBASE -- 
+                  * add if clause with method 'externalReferenceToInclude' and moved
+                  * original hapi fhir code into else clause. Nested else also changed
+                  * due to resourceLink always being of type Object[] as a result of the changed query
+                  */
                   if (resourceLink instanceof Object[] && this.isExternalReference((Object[]) resourceLink)) {
                     this.externalReferenceToInclude((Object[]) resourceLink, theRequest);
                   } else {
-                    if (findVersionFieldName != null) {
+									  if (findVersionFieldName != null) {
+										  persistentId = new ResourcePersistentId(((Object[])resourceLink)[0]);
+										  persistentId.setVersion((Long) ((Object[])resourceLink)[1]);
+									  } else {
                       persistentId = new ResourcePersistentId(((Object[]) resourceLink)[0]);
-                      persistentId.setVersion((Long) ((Object[]) resourceLink)[1]);
-                    } else {
-                      persistentId = new ResourcePersistentId(((Object[]) resourceLink)[0]);
-                    }
-                    assert persistentId.getId() instanceof Long;
-                    pidsToInclude.add(persistentId);
+									  }
+									  assert persistentId.getId() instanceof Long;
+									  pidsToInclude.add(persistentId);
                   }
-                }
-              }
-            }
-          }
-        }
-      }
+								}
+							}
+						}
+					}
+				}
+			}
 
-      if (theReverseMode) {
-        if (theLastUpdated != null
-            && (theLastUpdated.getLowerBoundAsInstant() != null || theLastUpdated.getUpperBoundAsInstant() != null)) {
-          pidsToInclude = new HashSet<>(
-              filterResourceIdsByLastUpdated(theEntityManager, theLastUpdated, pidsToInclude));
-        }
-      }
+			if (theReverseMode) {
+				if (theLastUpdated != null && (theLastUpdated.getLowerBoundAsInstant() != null || theLastUpdated.getUpperBoundAsInstant() != null)) {
+					pidsToInclude = new HashSet<>(filterResourceIdsByLastUpdated(theEntityManager, theLastUpdated, pidsToInclude));
+				}
+			}
 
-      nextRoundMatches.clear();
-      for (ResourcePersistentId next : pidsToInclude) {
-        if (original.contains(next) == false && allAdded.contains(next) == false) {
-          theMatches.add(next);
-          nextRoundMatches.add(next);
-        }
-      }
+			nextRoundMatches.clear();
+			for (ResourcePersistentId next : pidsToInclude) {
+				if (original.contains(next) == false && allAdded.contains(next) == false) {
+					nextRoundMatches.add(next);
+				}
+			}
 
-      addedSomeThisRound = allAdded.addAll(pidsToInclude);
-    } while (includes.size() > 0 && nextRoundMatches.size() > 0 && addedSomeThisRound);
+			addedSomeThisRound = allAdded.addAll(pidsToInclude);
 
-    allAdded.removeAll(original);
+			if (theMaxCount != null && allAdded.size() >= theMaxCount) {
+				break;
+			}
 
-    ourLog.info("Loaded {} {} in {} rounds and {} ms for search {}", allAdded.size(),
-        theReverseMode ? "_revincludes" : "_includes", roundCounts, w.getMillisAndRestart(), theSearchIdOrDescription);
+		} while (includes.size() > 0 && nextRoundMatches.size() > 0 && addedSomeThisRound);
 
-    // Interceptor call: STORAGE_PREACCESS_RESOURCES
-    // This can be used to remove results from the search result details before
-    // the user has a chance to know that they were in the results
-    if (allAdded.size() > 0) {
-      List<ResourcePersistentId> includedPidList = new ArrayList<>(allAdded);
-      JpaPreResourceAccessDetails accessDetails = new JpaPreResourceAccessDetails(includedPidList, () -> this);
-      HookParams params = new HookParams().add(IPreResourceAccessDetails.class, accessDetails)
-          .add(RequestDetails.class, theRequest).addIfMatchesType(ServletRequestDetails.class, theRequest);
-      JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PREACCESS_RESOURCES,
-          params);
+		allAdded.removeAll(original);
 
-      for (int i = includedPidList.size() - 1; i >= 0; i--) {
-        if (accessDetails.isDontReturnResourceAtIndex(i)) {
-          ResourcePersistentId value = includedPidList.remove(i);
-          if (value != null) {
-            theMatches.remove(value);
-          }
-        }
-      }
+		ourLog.info("Loaded {} {} in {} rounds and {} ms for search {}", allAdded.size(), theReverseMode ? "_revincludes" : "_includes", roundCounts, w.getMillisAndRestart(), theSearchIdOrDescription);
 
-      allAdded = new HashSet<>(includedPidList);
-    }
+		// Interceptor call: STORAGE_PREACCESS_RESOURCES
+		// This can be used to remove results from the search result details before
+		// the user has a chance to know that they were in the results
+		if (allAdded.size() > 0) {
 
-    return allAdded;
-  }
+			if (CompositeInterceptorBroadcaster.hasHooks(Pointcut.STORAGE_PREACCESS_RESOURCES, myInterceptorBroadcaster, theRequest)) {
+				List<ResourcePersistentId> includedPidList = new ArrayList<>(allAdded);
+				JpaPreResourceAccessDetails accessDetails = new JpaPreResourceAccessDetails(includedPidList, () -> this);
+				HookParams params = new HookParams()
+					.add(IPreResourceAccessDetails.class, accessDetails)
+					.add(RequestDetails.class, theRequest)
+					.addIfMatchesType(ServletRequestDetails.class, theRequest);
+			CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PREACCESS_RESOURCES, params);
+
+				for (int i = includedPidList.size() - 1; i >= 0; i--) {
+					if (accessDetails.isDontReturnResourceAtIndex(i)) {
+						ResourcePersistentId value = includedPidList.remove(i);
+						if (value != null) {
+							allAdded.remove(value);
+						}
+					}
+				}
+			}
+		}
+
+		return allAdded;
+	}
+  
+   
+
 
   private List<Collection<ResourcePersistentId>> partition(Collection<ResourcePersistentId> theNextRoundMatches,
       int theMaxLoad) {
