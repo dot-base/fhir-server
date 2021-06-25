@@ -2,7 +2,7 @@ dotbase:
   server_name: dotbase Clinical FHIR Server
   error_monitoring_enabled: true
   authentication_interceptor_enabled: true
-  identity_provider_realm: "${identity_provider_realm}"
+  identity_provider_realm: "${IDENTITY_PROVIDER_REALM}"
   # this property should only be set to true if allow_external_references is set to true
   resolve_external_references: true 
   
