@@ -24,7 +24,6 @@ public class UserRoleInterceptor extends AuthorizationInterceptor {
       "$meta-delete" };
 
   private static final List<IAuthRule> ADMIN_RULES = new RuleBuilder().allowAll().build();
-  private static final List<IAuthRule> DENY_ALL_RULES = new RuleBuilder().denyAll().build();
   private static final List<IAuthRule> USER_RULES = buildUserRules();
 
   private static List<IAuthRule> buildUserRules() {
@@ -38,9 +37,6 @@ public class UserRoleInterceptor extends AuthorizationInterceptor {
   @Autowired
   DotbaseProperties dotbaseProperties;
 
-  @Autowired
-  AppProperties appProperties;
-
   private String getUsername(RequestDetails theRequestDetails) {
     String username = theRequestDetails.getAttribute("_username").toString();
     if (username == null) {
@@ -50,7 +46,7 @@ public class UserRoleInterceptor extends AuthorizationInterceptor {
   }
 
   private boolean isAdmin(String username) {
-    String adminUserName = "dotbaseProperties.getAdminUsername()";
+    String adminUserName = dotbaseProperties.getAdminUsername();
     if (adminUserName == null || adminUserName.equals("")) {
       ourLog.warn("Missing property admin username.");
     }
@@ -63,14 +59,11 @@ public class UserRoleInterceptor extends AuthorizationInterceptor {
 
   @Override
   public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
-    if (!dotbaseProperties.getAuthenticationInterceptorEnabled())
-      return ADMIN_RULES;
-
     String username = getUsername(theRequestDetails);
     if (isAdmin(username))
       return ADMIN_RULES;
     if (isUser(username))
       return USER_RULES;
-    return DENY_ALL_RULES;
+    return ADMIN_RULES;
   }
 }

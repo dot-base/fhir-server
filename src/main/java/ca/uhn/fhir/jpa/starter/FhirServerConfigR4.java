@@ -131,16 +131,4 @@ public class FhirServerConfigR4 extends BaseJavaConfigR4 {
       return null;
     }
   }
-
-  /**
-   * -- DOTBASE --
-   * ACCESS LOG REPOSITORY
-   * @return
-   */
-  @Bean(name = "access_log_model")
-  @Primary
-  public AccessLogModel accessLogRepository() {
-    return new AccessLogModel();
-  }
-
 }
