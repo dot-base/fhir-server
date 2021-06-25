@@ -4,7 +4,7 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.starter.dotbase.PlainSystemProviderR4;
 import ca.uhn.fhir.jpa.starter.dotbase.DotbaseProperties.ResourceUrls;
 import ca.uhn.fhir.jpa.starter.dotbase.interceptor.AuditTrailInterceptor;
-import ca.uhn.fhir.jpa.starter.dotbase.utils.DaoUtils;
+import ca.uhn.fhir.jpa.starter.dotbase.utils.BeanUtils;
 import ca.uhn.fhir.jpa.starter.dotbase.utils.DateUtils;
 import ca.uhn.fhir.jpa.starter.dotbase.utils.ExtensionUtils;
 import ca.uhn.fhir.jpa.starter.dotbase.utils.MetaUtils;
@@ -81,7 +81,9 @@ public class AuditTrail {
   private static <T extends IBaseResource> IBaseResource resourcePreVersion(RequestDetails theRequest,
       Resource resource) {
     try {
-      IFhirResourceDao<T> resourceDAO = DaoUtils.getDao(new StringType(resource.getResourceType().name()));
+      IFhirResourceDao<T> resourceDAO = BeanUtils.getResourceDao(
+        new StringType(resource.getResourceType().name())
+      );
       IdType resourceId = new IdType(resource.getIdElement().getIdPart());
       IBundleProvider preExist = new PlainSystemProviderR4().instanceHistory(theRequest, resourceDAO, resourceId);
 
