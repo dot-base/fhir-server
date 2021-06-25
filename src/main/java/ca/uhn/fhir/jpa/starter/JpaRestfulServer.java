@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Import;
 
 import ca.uhn.fhir.jpa.starter.dotbase.DotbaseProperties;
 import ca.uhn.fhir.jpa.starter.dotbase.PlainSystemProviderR4;
+import ca.uhn.fhir.jpa.starter.dotbase.accesslog.AccessLogProvider;
 import ca.uhn.fhir.jpa.starter.dotbase.api.IdentityProvider;
 import ca.uhn.fhir.jpa.starter.dotbase.interceptor.AuthenticationInterceptor;
 import ca.uhn.fhir.jpa.starter.dotbase.interceptor.AuditTrailInterceptor;
@@ -65,6 +66,7 @@ public class JpaRestfulServer extends BaseJpaRestfulServer {
     }
 
     registerProvider(new PlainSystemProviderR4());
+    registerProvider(new AccessLogProvider());
 
     registerInterceptor(responseInterceptor);
     registerInterceptor(auditTrailInterceptor);
