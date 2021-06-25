@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.starter.dotbase.interceptor;
 
+import org.springframework.stereotype.Component;
+
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.starter.dotbase.services.AuditTrail;
