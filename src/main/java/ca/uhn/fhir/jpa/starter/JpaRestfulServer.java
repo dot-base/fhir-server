@@ -54,13 +54,13 @@ public class JpaRestfulServer extends BaseJpaRestfulServer {
     registerInterceptor(new ResponseInterceptor());
 
     if (dotbaseProperties.getAuthenticationInterceptorEnabled()) {
-      setdentityProviderConfig();
+      setIdentityProviderConfig();
       registerInterceptor(new AuthenticationInterceptor());
     }
 
   }
 
-  private void setdentityProviderConfig(){
+  private void setIdentityProviderConfig(){
     String realm = dotbaseProperties.getIdentityProviderRealm();
     if(realm == null || realm == "") {
       throw new NullPointerException("Authentication Setup failed - Missing a valid IdentityProvider realm url.");
