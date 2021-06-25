@@ -26,23 +26,13 @@ public class AuthenticationInterceptor {
     RestOperationTypeEnum restOperationType
   ) {
     String username = "unknown";
-    // boolean isTransaction = restOperationType.equals(RestOperationTypeEnum.TRANSACTION);
-    // boolean isSubRequest =
-    //   theRequestDetails.getUserData().get(PROCESSING_SUB_REQUEST) == Boolean.TRUE;
     boolean isAuthenticated = theRequestDetails.getAttribute("_username") != null;
 
     if (!isAuthenticated) {
       username = getAuthenticatedUser(theRequestDetails);
       theRequestDetails.setAttribute("_username", username);
       setSentryUser(username);
-    //   AccessLog.logRequest(username, theRequestDetails, restOperationType);
     }
-
-    //
-    // if (isTransaction && !isSubRequest) {
-    //   AuditTrail.handleTransaction(theRequestDetails);
-    //   AccessLog.handleTransaction(username, theRequestDetails);
-    // }
   }
 
   /**
