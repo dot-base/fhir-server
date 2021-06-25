@@ -5,6 +5,7 @@ dotbase:
   identity_provider_realm: "${IDENTITY_PROVIDER_REALM}"
   # this property should only be set to true if allow_external_references is set to true
   resolve_external_references: true 
+  admin_username: "${ADMIN_USERNAME}"
   
   resource_urls:
       namingsystem_dotbase_username: "https://dotbase.org/fhir/NamingSystem/dotbase-username"
