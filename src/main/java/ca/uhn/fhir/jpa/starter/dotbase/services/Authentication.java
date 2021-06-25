@@ -37,10 +37,10 @@ public class Authentication {
   
     private String getAuthToken(RequestDetails theRequestDetails) {
       String authHeader = theRequestDetails.getHeader("Authorization");
-      if (authHeader != null) {
-        return getBearerToken(authHeader);
+      if (authHeader == null) {
+        throw new AuthenticationException("Request must include authorization header.");
       }
-      throw new AuthenticationException("Request must include authorization header.");
+      return getBearerToken(authHeader);
     }
   
     private String getBearerToken(String authHeader) {
