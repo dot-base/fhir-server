@@ -59,19 +59,16 @@ public class AuditTrail {
   private static void transactionEntry(RequestDetails theRequest, BundleEntryComponent entry) {
     boolean isPut = entry.getRequest().getMethod().equals(HTTPVerb.PUT);
     boolean isPost = entry.getRequest().getMethod().equals(HTTPVerb.POST);
-    if (isPut || isPost) {
-      setAuditTrail(theRequest, entry);
+    if (!isPut && !isPost) {
+      return;
     }
+    setAuditTrail(theRequest, entry);
   }
 
   private static void setAuditTrail(RequestDetails theRequest, BundleEntryComponent entry) {
     IBaseResource oldResource = resourcePreVersion(theRequest, entry.getResource());
     IBaseResource newResource = entry.getResource();
-    boolean resourceDiff = ResourceComparator.hasDiff(
-      theRequest.getFhirContext(),
-      newResource,
-      oldResource
-    );
+    boolean resourceDiff = ResourceComparator.hasDiff(theRequest.getFhirContext(), newResource, oldResource);
 
     if (resourceDiff) {
       new AuditTrailInterceptor().resourcePreUpdate(theRequest, oldResource, newResource);
@@ -81,37 +78,29 @@ public class AuditTrail {
     }
   }
 
-  private static <T extends IBaseResource> IBaseResource resourcePreVersion(
-    RequestDetails theRequest,
-    Resource resource
-  ) {
+  private static <T extends IBaseResource> IBaseResource resourcePreVersion(RequestDetails theRequest,
+      Resource resource) {
     try {
-      IFhirResourceDao<T> resourceDAO = DaoUtils.getDao(
-        new StringType(resource.getResourceType().name())
-      );
+      IFhirResourceDao<T> resourceDAO = DaoUtils.getDao(new StringType(resource.getResourceType().name()));
       IdType resourceId = new IdType(resource.getIdElement().getIdPart());
-      IBundleProvider preExist = new PlainSystemProviderR4()
-      .instanceHistory(theRequest, resourceDAO, resourceId);
+      IBundleProvider preExist = new PlainSystemProviderR4().instanceHistory(theRequest, resourceDAO, resourceId);
 
-      if (preExist.size() != null || preExist.size() > 0) {
-        return getLatestVersion(preExist.getResources(0, preExist.size()));
+      if (preExist.size() == null || preExist.size() <= 0) {
+        return null;
       }
-      return null;
+      return getLatestVersion(preExist.getResources(0, preExist.size()));
     } catch (ResourceNotFoundException ex) {
       return null;
     }
   }
 
   private static IBaseResource getLatestVersion(List<IBaseResource> preExistResources) {
-    Collections.sort(
-      preExistResources,
-      new Comparator<IBaseResource>() {
+    Collections.sort(preExistResources, new Comparator<IBaseResource>() {
 
-        public int compare(IBaseResource resA, IBaseResource resB) {
-          return resB.getMeta().getVersionId().compareTo(resA.getMeta().getVersionId());
-        }
+      public int compare(IBaseResource resA, IBaseResource resB) {
+        return resB.getMeta().getVersionId().compareTo(resA.getMeta().getVersionId());
       }
-    );
+    });
     return preExistResources.get(preExistResources.size() - 1);
   }
 

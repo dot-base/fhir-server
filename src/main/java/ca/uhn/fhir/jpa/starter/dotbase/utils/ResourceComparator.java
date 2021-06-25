@@ -17,47 +17,30 @@ public class ResourceComparator extends FhirPatch {
     super(theContext);
   }
 
-  public static boolean hasDiff(
-    FhirContext fhirContext,
-    IBaseResource newResource,
-    IBaseResource oldResource
-  ) {
-    if (oldResource != null) {
-      IBaseParameters resourceDiff = ResourceComparator.resourceDiff(
-        new BooleanType(false),
-        fhirContext,
-        newResource,
-        oldResource
-      );
-      return !resourceDiff.isEmpty();
+  public static boolean hasDiff(FhirContext fhirContext, IBaseResource newResource, IBaseResource oldResource) {
+    if (oldResource == null) {
+      return false;
     }
-    return false;
+    IBaseParameters resourceDiff = ResourceComparator.resourceDiff(new BooleanType(false), fhirContext, newResource,
+        oldResource);
+    return !resourceDiff.isEmpty();
   }
 
-  private static IBaseParameters resourceDiff(
-    IPrimitiveType<Boolean> theIncludeMeta,
-    FhirContext myContext,
-    IBaseResource sourceResource,
-    IBaseResource targetResource
-  ) {
+  private static IBaseParameters resourceDiff(IPrimitiveType<Boolean> theIncludeMeta, FhirContext myContext,
+      IBaseResource sourceResource, IBaseResource targetResource) {
     ResourceComparator comparator = setResourceComparator(theIncludeMeta, myContext);
     return comparator.diff(sourceResource, targetResource);
   }
 
   @Nonnull
-  private static ResourceComparator setResourceComparator(
-    IPrimitiveType<Boolean> theIncludeMeta,
-    FhirContext myContext
-  ) {
+  private static ResourceComparator setResourceComparator(IPrimitiveType<Boolean> theIncludeMeta,
+      FhirContext myContext) {
     ResourceComparator fhirPatch = new ResourceComparator(myContext);
     fhirPatch.setIncludePreviousValueInDiff(true);
     fhirPatch.addIgnorePath("*.text");
-    if (theIncludeMeta != null && theIncludeMeta.getValue()) {
-      ourLog.trace("Including resource metadata in patch");
-    } else {
+    if (!theIncludeMeta.getValue() || theIncludeMeta == null) {
       fhirPatch.addIgnorePath("*.meta");
     }
-
     return fhirPatch;
   }
 }
