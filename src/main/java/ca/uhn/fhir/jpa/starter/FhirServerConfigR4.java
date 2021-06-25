@@ -34,9 +34,9 @@ public class FhirServerConfigR4 extends BaseJavaConfigR4 {
   private DataSource myDataSource;
 
   /**
-   * We override the paging provider definition so that we can customize
-   * the default/max page sizes for search results. You can set these however
-   * you want, although very large page sizes will require a lot of RAM.
+   * We override the paging provider definition so that we can customize the
+   * default/max page sizes for search results. You can set these however you
+   * want, although very large page sizes will require a lot of RAM.
    */
   @Autowired
   AppProperties appProperties;
@@ -45,15 +45,15 @@ public class FhirServerConfigR4 extends BaseJavaConfigR4 {
 
   @PostConstruct
   public void initSettings() {
-    if(appProperties.getSearch_coord_core_pool_size() != null) {
-		 setSearchCoordCorePoolSize(appProperties.getSearch_coord_core_pool_size());
-	 }
-	  if(appProperties.getSearch_coord_max_pool_size() != null) {
-		  setSearchCoordMaxPoolSize(appProperties.getSearch_coord_max_pool_size());
-	  }
-	  if(appProperties.getSearch_coord_queue_capacity() != null) {
-		  setSearchCoordQueueCapacity(appProperties.getSearch_coord_queue_capacity());
-	  }
+    if (appProperties.getSearch_coord_core_pool_size() != null) {
+      setSearchCoordCorePoolSize(appProperties.getSearch_coord_core_pool_size());
+    }
+    if (appProperties.getSearch_coord_max_pool_size() != null) {
+      setSearchCoordMaxPoolSize(appProperties.getSearch_coord_max_pool_size());
+    }
+    if (appProperties.getSearch_coord_queue_capacity() != null) {
+      setSearchCoordQueueCapacity(appProperties.getSearch_coord_queue_capacity());
+    }
   }
 
   @Override
@@ -69,16 +69,17 @@ public class FhirServerConfigR4 extends BaseJavaConfigR4 {
 
   @Override
   @Bean(name = SEARCH_BUILDER)
-	@Scope("prototype")
-	public ISearchBuilder newSearchBuilder(IDao theDao, String theResourceName, Class<? extends IBaseResource> theResourceType, DaoConfig theDaoConfig) {
-		if (theDaoConfig.isUseLegacySearchBuilder()) {
-			return new LegacySearchBuilder(theDao, theResourceName, theResourceType);
-		}
-    if(dotbaseProperties.getResolveExternalReferences()){
+  @Scope("prototype")
+  public ISearchBuilder newSearchBuilder(IDao theDao, String theResourceName,
+      Class<? extends IBaseResource> theResourceType, DaoConfig theDaoConfig) {
+    if (theDaoConfig.isUseLegacySearchBuilder()) {
+      return new LegacySearchBuilder(theDao, theResourceName, theResourceType);
+    }
+    if (dotbaseProperties.getResolveExternalReferences()) {
       return new SearchBuilderExternalReferences(theDao, theResourceName, theResourceType);
     }
     return new SearchBuilder(theDao, theResourceName, theResourceType);
-	}
+  }
 
   @Override
   @Bean()
@@ -107,18 +108,20 @@ public class FhirServerConfigR4 extends BaseJavaConfigR4 {
   @Bean()
   public ElasticsearchSvcImpl elasticsearchSvc() {
     if (EnvironmentHelper.isElasticsearchEnabled(configurableEnvironment)) {
-		 String elasticsearchUrl = EnvironmentHelper.getElasticsearchServerUrl(configurableEnvironment);
-		 String elasticsearchHost;
-		 if (elasticsearchUrl.startsWith("http")) {
-			 elasticsearchHost = elasticsearchUrl.substring(elasticsearchUrl.indexOf("://") + 3, elasticsearchUrl.lastIndexOf(":"));
-		 } else {
-			 elasticsearchHost = elasticsearchUrl.substring(0, elasticsearchUrl.indexOf(":"));
-		 }
+      String elasticsearchUrl = EnvironmentHelper.getElasticsearchServerUrl(configurableEnvironment);
+      String elasticsearchHost;
+      if (elasticsearchUrl.startsWith("http")) {
+        elasticsearchHost = elasticsearchUrl.substring(elasticsearchUrl.indexOf("://") + 3,
+            elasticsearchUrl.lastIndexOf(":"));
+      } else {
+        elasticsearchHost = elasticsearchUrl.substring(0, elasticsearchUrl.indexOf(":"));
+      }
 
       String elasticsearchUsername = EnvironmentHelper.getElasticsearchServerUsername(configurableEnvironment);
       String elasticsearchPassword = EnvironmentHelper.getElasticsearchServerPassword(configurableEnvironment);
-      int elasticsearchPort = Integer.parseInt(elasticsearchUrl.substring(elasticsearchUrl.lastIndexOf(":")+1));
-      return new ElasticsearchSvcImpl(elasticsearchHost, elasticsearchPort, elasticsearchUsername, elasticsearchPassword);
+      int elasticsearchPort = Integer.parseInt(elasticsearchUrl.substring(elasticsearchUrl.lastIndexOf(":") + 1));
+      return new ElasticsearchSvcImpl(elasticsearchHost, elasticsearchPort, elasticsearchUsername,
+          elasticsearchPassword);
     } else {
       return null;
     }
