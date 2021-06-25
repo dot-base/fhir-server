@@ -10,7 +10,6 @@ import org.springframework.context.annotation.Configuration;
 public class DotbaseProperties {
 
   private ResourceUrls resource_urls = null;
-
   private Boolean authentication_interceptor_enabled = true;
   private Boolean error_monitoring_enabled = true;
   private String identity_provider_realm;
