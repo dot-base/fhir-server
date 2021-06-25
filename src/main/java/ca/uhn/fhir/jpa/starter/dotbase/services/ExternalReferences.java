@@ -45,19 +45,21 @@ public class ExternalReferences {
   private static BundleEntryComponent includeEntry(String externalReference, RequestDetails theRequestDetails) {
     BundleEntryComponent entry = new BundleEntryComponent();
     Resource resource = getExternalResource(externalReference, theRequestDetails);
-    if (resource != null) {
-      return entry.setResource(resource).setFullUrl(externalReference)
-          .setSearch(new BundleEntrySearchComponent().setMode(SearchEntryMode.INCLUDE));
+    if (resource == null){
+      return null;
     }
-    return null;
+    return entry
+      .setResource(resource)
+      .setFullUrl(externalReference)
+      .setSearch(new BundleEntrySearchComponent().setMode(SearchEntryMode.INCLUDE));
   }
 
   private static Resource getExternalResource(String url, RequestDetails theRequestDetails) {
     String resource = FhirServer.getExternalResource(url, theRequestDetails);
-    if (resource != null) {
-      return parseToR4Resource(resource);
+    if (resource == null) {
+      return null;
     }
-    return null;
+    return parseToR4Resource(resource);
   }
 
   private static Resource parseToR4Resource(String resource) {
