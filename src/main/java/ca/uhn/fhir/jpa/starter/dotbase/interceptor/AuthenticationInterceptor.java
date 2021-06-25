@@ -2,7 +2,6 @@ package ca.uhn.fhir.jpa.starter.dotbase.interceptor;
 
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-// import ca.uhn.fhir.jpa.starter.dotbase.services.AccessLog;
 import ca.uhn.fhir.jpa.starter.dotbase.services.AuditTrail;
 import ca.uhn.fhir.jpa.starter.dotbase.services.Authentication;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
@@ -35,13 +34,11 @@ public class AuthenticationInterceptor {
       username = getAuthenticatedUser(theRequestDetails);
       theRequestDetails.setAttribute("_username", username);
       setSentryUser(username);
-    //   AccessLog.logRequest(username, theRequestDetails, restOperationType);
     }
 
     
     if (isTransaction && !isSubRequest) {
       AuditTrail.handleTransaction(theRequestDetails);
-      // AccessLog.handleTransaction(username, theRequestDetails);
     }
   }
 
