@@ -18,7 +18,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.StringType;
 
-import ca.uhn.fhir.jpa.starter.dotbase.utils.DaoUtils;
+import ca.uhn.fhir.jpa.starter.dotbase.utils.BeanUtils;
 
 public class PlainSystemProviderR4 extends JpaSystemProviderR4 {
 
@@ -34,7 +34,7 @@ public class PlainSystemProviderR4 extends JpaSystemProviderR4 {
     if (resourceType == null) throw new InvalidRequestException(
       "Parameter '_type' must be provided"
     );
-    IFhirResourceDao<T> resourceDAO = DaoUtils.getDao(resourceType);
+    IFhirResourceDao<T> resourceDAO = BeanUtils.getResourceDao(resourceType);
 
     if (resourceId != null) {
       return this.instanceHistory(requestDetails, resourceDAO, resourceId);
