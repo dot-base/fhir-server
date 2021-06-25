@@ -11,11 +11,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 
 public class ExtensionUtils {
 
-  public static void addExtension(
-    IBaseResource theResource,
-    String theUrl,
-    IBaseDatatype theValue
-  ) {
+  public static void addExtension(IBaseResource theResource, String theUrl, IBaseDatatype theValue) {
     try {
       IBaseHasExtensions baseHasExtensions = validateExtensionSupport(theResource);
       IBaseExtension<?, ?> extension = baseHasExtensions.addExtension();
@@ -26,11 +22,7 @@ public class ExtensionUtils {
     }
   }
 
-  public static boolean hasExtension(
-    IBase theBase,
-    String theExtensionUrl,
-    String theExtensionValue
-  ) {
+  public static boolean hasExtension(IBase theBase, String theExtensionUrl, String theExtensionValue) {
     if (!hasExtension(theBase, theExtensionUrl)) {
       return false;
     }
@@ -48,7 +40,6 @@ public class ExtensionUtils {
     } catch (Exception e) {
       return false;
     }
-
     return getExtensionByUrl(baseHasExtensions, theExtensionUrl) != null;
   }
 
@@ -59,26 +50,18 @@ public class ExtensionUtils {
     } else {
       filter = (e -> theExtensionUrl.equals(e.getUrl()));
     }
-
     return getExtensionsMatchingPredicate(theBase, filter).stream().findFirst().orElse(null);
   }
 
-  public static List<IBaseExtension<?, ?>> getExtensionsMatchingPredicate(
-    IBase theBase,
-    Predicate<? super IBaseExtension<?, ?>> theFilter
-  ) {
-    return validateExtensionSupport(theBase)
-      .getExtension()
-      .stream()
-      .filter(theFilter)
-      .collect(Collectors.toList());
+  public static List<IBaseExtension<?, ?>> getExtensionsMatchingPredicate(IBase theBase,
+      Predicate<? super IBaseExtension<?, ?>> theFilter) {
+    return validateExtensionSupport(theBase).getExtension().stream().filter(theFilter).collect(Collectors.toList());
   }
 
   private static IBaseHasExtensions validateExtensionSupport(IBase theBase) {
     if (!(theBase instanceof IBaseHasExtensions)) {
       throw new IllegalArgumentException(
-        String.format("Expected instance that supports extensions, but got %s", theBase)
-      );
+          String.format("Expected instance that supports extensions, but got %s", theBase));
     }
     return (IBaseHasExtensions) theBase;
   }
