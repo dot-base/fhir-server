@@ -11,8 +11,8 @@ public class DotbaseProperties {
 
   private Boolean authentication_interceptor_enabled = true;
   private Boolean error_monitoring_enabled = true;
-  private String identity_provider_realm = "";
-  private String realm_public_key = "";
+  private String identity_provider_realm;
+  private String realm_public_key;
   private Boolean resolve_external_references = true;
   private String server_name= "dotbase FHIR Server";
 
