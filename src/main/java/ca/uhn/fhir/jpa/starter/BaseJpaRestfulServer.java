@@ -308,7 +308,7 @@ public class BaseJpaRestfulServer extends RestfulServer {
     }
 
     if (HapiProperties.getClientIdStrategy() == DaoConfig.ClientIdStrategyEnum.ANY) {
-      daoConfig.setResourceServerIdStrategy(DaoConfig.IdStrategyEnum.UUID);
+      daoConfig.setResourceServerIdStrategy(HapiProperties.getServerIdStrategy());
       daoConfig.setResourceClientIdStrategy(HapiProperties.getClientIdStrategy());
     }
   }

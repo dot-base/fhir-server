@@ -88,6 +88,7 @@ public class HapiProperties {
   private static final String PARTITIONING_INCLUDE_PARTITION_IN_SEARCH_HASHES =
     "partitioning.partitioning_include_in_search_hashes";
   static final String CLIENT_ID_STRATEGY = "daoconfig.client_id_strategy";
+  static final String SERVER_ID_STRATEGY = "daoconfig.server_id_strategy";
   private static Properties ourProperties;
 
   public static boolean isElasticSearchEnabled() {
@@ -289,6 +290,15 @@ public class HapiProperties {
     return DaoConfig.ClientIdStrategyEnum.ALPHANUMERIC;
   }
 
+  public static DaoConfig.IdStrategyEnum getServerIdStrategy() {
+    String idStrategy = HapiProperties.getProperty(SERVER_ID_STRATEGY);
+
+    if (idStrategy != null && idStrategy.length() > 0) {
+      return DaoConfig.IdStrategyEnum.valueOf(idStrategy);
+    }
+
+    return DaoConfig.IdStrategyEnum.UUID;
+  }
   public static EncodingEnum getDefaultEncoding() {
     String defaultEncodingString = HapiProperties.getProperty(DEFAULT_ENCODING);
 
