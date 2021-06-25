@@ -54,10 +54,21 @@ public class JpaRestfulServer extends BaseJpaRestfulServer {
     registerInterceptor(new ResponseInterceptor());
 
     if (dotbaseProperties.getAuthenticationInterceptorEnabled()) {
-      String realmPubKey = IdentityProvider.getRealmPublicKey(dotbaseProperties.getIdentityProviderRealm());
-      dotbaseProperties.setRealmPublicKey(realmPubKey);
+      setdentityProviderConfig();
       registerInterceptor(new AuthenticationInterceptor());
     }
 
+  }
+
+  private void setdentityProviderConfig(){
+    String realm = dotbaseProperties.getIdentityProviderRealm();
+    if(realm == null || realm == "") {
+      throw new NullPointerException("Authentication Setup failed - Missing a valid IdentityProvider realm url.");
+    }
+    String realmPubKey = IdentityProvider.getRealmPublicKey(realm);
+    if(realmPubKey == null) {
+      throw new NullPointerException("Authentication Setup failed - Could not retrive the IdentityProvider's realm public key.");
+    }
+    dotbaseProperties.setRealmPublicKey(realmPubKey);
   }
 }
