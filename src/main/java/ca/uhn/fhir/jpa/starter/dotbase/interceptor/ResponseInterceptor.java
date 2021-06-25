@@ -31,19 +31,21 @@ public class ResponseInterceptor {
   ) {
     IBaseResource responseResource = theResponseDetails.getResponseResource();
 
-    if (responseResource != null && this.hasExternalReference(theRequestDetails)) {
-      Bundle responseBundle = ExternalReferences.resolve(
-        (Bundle) responseResource,
-        theRequestDetails
-      );
-      theResponseDetails.setResponseResource(responseBundle);
-    }
+    if (responseResource == null || !this.hasExternalReference(theRequestDetails)) {
+     return;
+    }  
+
+    Bundle responseBundle = ExternalReferences.resolve(
+      (Bundle) responseResource,
+      theRequestDetails
+    );
+    theResponseDetails.setResponseResource(responseBundle);
   }
 
   private boolean hasExternalReference(RequestDetails theRequestDetails) {
-    if (theRequestDetails.getAttribute("_includeIsExternalReference") != null) {
-      return true;
+    if (theRequestDetails.getAttribute("_includeIsExternalReference") == null) {
+      return false;
     }
-    return false;
+    return true;
   }
 }
