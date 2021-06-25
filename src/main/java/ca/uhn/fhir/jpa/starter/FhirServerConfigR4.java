@@ -12,6 +12,7 @@ import ca.uhn.fhir.jpa.search.lastn.ElasticsearchSvcImpl;
 import ca.uhn.fhir.jpa.starter.annotations.OnR4Condition;
 import ca.uhn.fhir.jpa.starter.cql.StarterCqlR4Config;
 import ca.uhn.fhir.jpa.starter.dotbase.DotbaseProperties;
+import ca.uhn.fhir.jpa.starter.dotbase.accesslog.AccessLogModel;
 import ca.uhn.fhir.jpa.starter.dotbase.search.SearchBuilderExternalReferences;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -67,6 +68,10 @@ public class FhirServerConfigR4 extends BaseJavaConfigR4 {
   @Autowired
   private ConfigurableEnvironment configurableEnvironment;
 
+  /**
+   * -- DOTBASE --
+   * Extended searchBuilder that allows to resolve and include external resources
+   */
   @Override
   @Bean(name = SEARCH_BUILDER)
   @Scope("prototype")
@@ -125,6 +130,17 @@ public class FhirServerConfigR4 extends BaseJavaConfigR4 {
     } else {
       return null;
     }
+  }
+
+  /**
+   * -- DOTBASE --
+   * ACCESS LOG REPOSITORY
+   * @return
+   */
+  @Bean(name = "access_log_model")
+  @Primary
+  public AccessLogModel accessLogRepository() {
+    return new AccessLogModel();
   }
 
 }
