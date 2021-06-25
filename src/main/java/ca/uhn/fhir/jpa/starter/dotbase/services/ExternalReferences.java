@@ -15,50 +15,39 @@ import org.hl7.fhir.r4.model.Bundle.SearchEntryMode;
 import org.hl7.fhir.r4.model.Resource;
 
 public class ExternalReferences {
-  private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(
-    ExternalReferences.class
-  );
-  
+  private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ExternalReferences.class);
+
   private static final IParser r4Parser = FhirContext.forR4().newJsonParser();
-  
+
   public static Bundle resolve(Bundle responseBundle, RequestDetails theRequestDetails) {
-      HashSet<String> externalReferences = getExternalReferences(theRequestDetails);
-      List<BundleEntryComponent> includeEntries = includeEntries(
-          externalReferences,
-          theRequestDetails
-          );
-          includeEntries.forEach(entry -> responseBundle.addEntry(entry));
-          return responseBundle;
-        }
-        
+    HashSet<String> externalReferences = getExternalReferences(theRequestDetails);
+    List<BundleEntryComponent> includeEntries = includeEntries(externalReferences, theRequestDetails);
+    includeEntries.forEach(entry -> responseBundle.addEntry(entry));
+    return responseBundle;
+  }
+
   @SuppressWarnings("unchecked")
   private static HashSet<String> getExternalReferences(RequestDetails theRequestDetails) {
     return (HashSet<String>) theRequestDetails.getAttribute("_includeIsExternalReference");
   }
 
-  private static List<BundleEntryComponent> includeEntries(
-    HashSet<String> externalReferences,
-    RequestDetails theRequestDetails
-  ) {
+  private static List<BundleEntryComponent> includeEntries(HashSet<String> externalReferences,
+      RequestDetails theRequestDetails) {
     List<BundleEntryComponent> entries = new LinkedList<BundleEntryComponent>();
     for (String externalReference : externalReferences) {
       BundleEntryComponent entry = includeEntry(externalReference, theRequestDetails);
-      if (entry != null) entries.add(entry);
+      if (entry != null)
+        entries.add(entry);
     }
     return entries;
   }
 
-  private static BundleEntryComponent includeEntry(
-    String externalReference,
-    RequestDetails theRequestDetails
-  ) {
+  private static BundleEntryComponent includeEntry(String externalReference, RequestDetails theRequestDetails) {
     BundleEntryComponent entry = new BundleEntryComponent();
     Resource resource = getExternalResource(externalReference, theRequestDetails);
     if (resource != null) {
-      return entry
-        .setResource(resource)
-        .setFullUrl(externalReference)
-        .setSearch(new BundleEntrySearchComponent().setMode(SearchEntryMode.INCLUDE));
+      return entry.setResource(resource).setFullUrl(externalReference)
+          .setSearch(new BundleEntrySearchComponent().setMode(SearchEntryMode.INCLUDE));
     }
     return null;
   }
