@@ -131,4 +131,11 @@ public class FhirServerConfigR4 extends BaseJavaConfigR4 {
       return null;
     }
   }
+
+
+  @Bean(name = "access_log_model")
+  @Primary
+  public AccessLogModel accessLogModel() {
+    return new AccessLogModel();
+  }
 }
