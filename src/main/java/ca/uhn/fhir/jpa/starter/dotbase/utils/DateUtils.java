@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.starter.dotbase.utils;
 
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 
@@ -22,8 +23,9 @@ public class DateUtils {
   }
 
   private static String getOffSet_UTC(TimeZone localTimeZone) {
-    int rawOffSet = localTimeZone.getRawOffset() / 3600000;
-    String operator = rawOffSet >= 0 ? "+" : "-";
-    return operator + String.format("%02d", rawOffSet) + ":00";
+    Calendar cal = Calendar.getInstance();
+    int offSet = (cal.get(Calendar.ZONE_OFFSET) + cal.get(Calendar.DST_OFFSET))/ 3600000;
+    String operator = offSet >= 0 ? "+" : "-";
+    return operator + String.format("%02d", offSet) + ":00";
   }
 }
