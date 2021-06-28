@@ -11,6 +11,8 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.transaction.Transactional;
+
+import org.apache.commons.lang3.ObjectUtils.Null;
 import org.hl7.fhir.r4.model.StringType;
 import org.springframework.stereotype.Repository;
 
@@ -43,9 +45,10 @@ public class AccessLogModel {
   public List<AccessLog> getLogs(Map<String, StringType> queryParams, StringType limit) {
     CriteriaQuery<AccessLog> cQuery = getQuery(queryParams);
     Query query = em.createQuery(cQuery);
-
-    if (toNumeric(limit) > 0) query.setMaxResults(Integer.valueOf(limit.toString()));
-
+    try {
+      query.setMaxResults(toNumeric(limit));
+    } catch (NumberFormatException e) {
+    }
     return query.getResultList();
   }
 
@@ -75,11 +78,7 @@ public class AccessLogModel {
     return cq.select(root).where(cb.and(predicates.toArray(new Predicate[] {})));
   }
 
-  private static int toNumeric(StringType limit) {
-    try {
-      return Integer.parseInt(limit.toString());
-    } catch (NumberFormatException | NullPointerException e) {
-      return -1;
-    }
+  private static Integer toNumeric(StringType limit) throws NumberFormatException {
+    return Integer.parseInt(limit.toString());
   }
 }
