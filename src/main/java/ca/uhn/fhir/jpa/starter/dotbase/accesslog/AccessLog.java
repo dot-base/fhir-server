@@ -9,19 +9,14 @@ import javax.persistence.Index;
 import javax.persistence.Table;
 
 @Entity
-@Table(
-  name = "ACCESS_LOGGING",
-  uniqueConstraints = {},
-  indexes = {
+@Table(name = "ACCESS_LOGGING", uniqueConstraints = {}, indexes = {
     @Index(name = "IDX_LOG_ID", columnList = "LOG_ID", unique = true),
     @Index(name = "IDX_REQUEST_ID", columnList = "REQUEST_ID", unique = false),
     @Index(name = "IDX_METHOD", columnList = "METHOD", unique = false),
     @Index(name = "IDX_USERNAME", columnList = "USERNAME", unique = false),
     @Index(name = "IDX_URL", columnList = "URL", unique = false),
     @Index(name = "IDX_TIMESTAMP", columnList = "TIMESTAMP", unique = false),
-    @Index(name = "IDX_RESOURCETYPE", columnList = "RESOURCETYPE", unique = false)
-  }
-)
+    @Index(name = "IDX_RESOURCETYPE", columnList = "RESOURCETYPE", unique = false) })
 public class AccessLog {
   @Id
   @Column(name = "LOG_ID")
