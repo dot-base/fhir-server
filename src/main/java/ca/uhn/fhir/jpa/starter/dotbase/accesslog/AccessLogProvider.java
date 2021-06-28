@@ -41,6 +41,8 @@ public class AccessLogProvider extends JpaSystemProviderR4 {
       params.put("from", from);
       params.put("to", to);
     }
+    if(limit == null)
+    limit = new StringType("1000");
     List<AccessLog> logs = ACCESS_LOG_MODEL.getLogs(params, limit);
     return responseBundle(logs);
   }
