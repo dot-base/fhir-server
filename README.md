@@ -45,6 +45,7 @@ or to run the project locally:
     ```
     The following environment variables can be set optionally, depending on your setup:
     ```sh
+    export ERROR_MONITORING_ENABLED: "true"
     export SENTRY_ENVIRONMENT: "YOUR_SENTRY_ENVIRONMENT"
     export SENTRY_DSN: "YOUR_SENTRY_DSN"
     export PROXY_ADDRESS: "YOUR_PROXY_ADDRESS"
