@@ -15,6 +15,7 @@ import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.StringType;
 
 public class AccessLogProvider extends JpaSystemProviderR4 {
+  
   private static final AccessLogModel ACCESS_LOG_MODEL = (AccessLogModel) BeanUtils.getBeanByName("access_log_model");
 
 
