@@ -53,6 +53,7 @@ hapi:
     ### This is the FHIR version. 
     allow_external_references: true
     allow_override_default_search_params: true
+    client_id_strategy: ANY
     default_encoding: JSON
     default_pretty_print: true
     default_page_size: 20
