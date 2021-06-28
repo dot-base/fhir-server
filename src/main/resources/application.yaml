@@ -53,6 +53,8 @@ hapi:
     ### This is the FHIR version. 
     fhir_version: R4
     allow_external_references: true
+    server_address: http://localhost:8080/api/fhir
+
 ### enable to use the ApacheProxyAddressStrategy which uses X-Forwarded-* headers
 ### to determine the FHIR server address
 #   use_apache_address_strategy: false
@@ -128,7 +130,7 @@ hapi:
     tester:
         home:
           name: Local Tester
-          server_address: 'http://localhost:8080/fhir'
+          server_address: 'http://localhost:8080/api/fhir'
           refuse_to_fetch_third_party_urls: false
           fhir_version: R4
         global:

@@ -52,7 +52,7 @@ public class Application extends SpringBootServletInitializer {
     JpaRestfulServer jpaRestfulServer = new JpaRestfulServer();
     beanFactory.autowireBean(jpaRestfulServer);
     servletRegistrationBean.setServlet(jpaRestfulServer);
-    servletRegistrationBean.addUrlMappings("/fhir/*");
+    servletRegistrationBean.addUrlMappings("/api/fhir/*");
     servletRegistrationBean.setLoadOnStartup(1);
 
     return servletRegistrationBean;
