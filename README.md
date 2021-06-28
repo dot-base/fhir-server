@@ -37,8 +37,10 @@ or to run the project locally:
     ```
 1. Set the following environment variables on your production system. We advice auto generating a secure password and choosing a different username than `admin` ;).
     ```sh
-    export FHIR_DB_USER="YOUR_DB_USER"
-    export FHIR_DB_PASSWORD="YOUR_DB_PW"
+    export HAPI_FHIR_SERVER_ADDRESS="YOUR_SERVER_ADDRESS"
+    export SPRING_DATASOURCE_URL="YOUR_DB_URL"
+    export SPRING_DATASOURCE_USERNAME="YOUR_DB_USER"
+    export SPRING_DATASOURCE_PASSWORD="YOUR_DB_PW"
     export IDENTITY_PROVIDER_REALM: "YOUR_SSO_REALM_ADRESS"
     ```
     The following environment variables can be set optionally, depending on your setup:
