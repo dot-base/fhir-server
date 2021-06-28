@@ -12,7 +12,6 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.transaction.Transactional;
 
-import org.apache.commons.lang3.ObjectUtils.Null;
 import org.hl7.fhir.r4.model.StringType;
 import org.springframework.stereotype.Repository;
 
