@@ -56,7 +56,7 @@ hapi:
     client_id_strategy: ANY
     default_encoding: JSON
     default_pretty_print: true
-    default_page_size: 20
+    default_page_size: 50
     fhirpath_interceptor_enabled: true
     fhir_version: R4
     server_address: http://localhost:8080/api/fhir
