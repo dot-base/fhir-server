@@ -29,7 +29,7 @@ public class Authorization implements IConsentService {
   @Override
   public ConsentOutcome canSeeResource(RequestDetails theRequestDetails, IBaseResource theResource,
       IConsentContextServices theContextServices) {
-    if (theRequestDetails.getRequestType() == RequestTypeEnum.GET && isDraftResource(theResource)) {
+    if (theRequestDetails.getRequestType() == RequestTypeEnum.GET && isDraft(theResource)) {
       return isAuthorizedRequester(theRequestDetails, theResource) ? ConsentOutcome.AUTHORIZED : ConsentOutcome.REJECT;
     }
     return ConsentOutcome.AUTHORIZED;
@@ -42,15 +42,6 @@ public class Authorization implements IConsentService {
   public ConsentOutcome willSeeResource(RequestDetails theRequestDetails, IBaseResource theResource,
       IConsentContextServices theContextServices) {
     return ConsentOutcome.AUTHORIZED;
-  }
-
-  private static boolean isDraftResource(IBaseResource theResource) {
-    boolean isDraft = isDraft(theResource);
-    if (!isDraft && theResource instanceof Procedure) {
-      Procedure procedure = (Procedure) theResource;
-      return procedure.getStatus() == ProcedureStatus.INPROGRESS;
-    }
-    return isDraft;
   }
 
   private static boolean isDraft(IBaseResource theResource) {
