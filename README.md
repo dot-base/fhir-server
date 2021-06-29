@@ -90,5 +90,6 @@ If ```AUTHENTICATION_INTERCEPTOR_ENABLED``` is set to ```true```, you must speci
     Authorization - Bearer sometoken...
     X-Forwarded-User - username
 
+You can disable this property in the application.yaml
 
 FHIR® is the registered trademark of HL7. Use of the FHIR trademark does not constitute endorsement of this product by HL7.
