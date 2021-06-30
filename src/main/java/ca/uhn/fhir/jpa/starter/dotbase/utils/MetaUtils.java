@@ -29,5 +29,6 @@ public class MetaUtils {
 
     tagElement.setSystem(theSystem);
     tagElement.setCode(theValue);
+    tagElement.setDisplay(theValue + "-" + DateUtils.getCurrentTimestamp());
   }
 }
