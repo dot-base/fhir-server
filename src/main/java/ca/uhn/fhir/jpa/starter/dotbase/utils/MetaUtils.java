@@ -3,6 +3,8 @@ package ca.uhn.fhir.jpa.starter.dotbase.utils;
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.starter.dotbase.DotbaseProperties.ResourceUrls;
+
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
@@ -27,8 +29,23 @@ public class MetaUtils {
       sourceChild.getMutator().setValue(theMeta, tagElement);
     }
 
+
+
+    String theCode = MetaUtils.getTagElementCode(theSystem, theValue);
     tagElement.setSystem(theSystem);
-    tagElement.setCode(theValue);
-    tagElement.setDisplay(theValue + "-" + DateUtils.getCurrentTimestamp());
+    tagElement.setDisplay(theValue);
+    tagElement.setCode(theCode);
   }
+  
+  private static String getTagElementCode(String theSystem, String theValue) {
+    if(enforceUniqueCode(theSystem)) {
+      theValue+="-"+DateUtils.getCurrentTimestamp();
+    }
+    return theValue;
+  }
+
+  private static boolean enforceUniqueCode(String theSystem) {
+    return theSystem.equals(ResourceUrls.namingsystem_dotbase_username);
+  }
+  
 }
