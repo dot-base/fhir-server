@@ -43,7 +43,6 @@ public class AuthenticationInterceptor {
 
     
     if (isTransaction && !isSubRequest) {
-      AuditTrail.handleTransaction(theRequestDetails);
       AccessLog.handleTransaction(username, theRequestDetails);
     }
   }
