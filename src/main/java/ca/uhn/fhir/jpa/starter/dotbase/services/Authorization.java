@@ -8,6 +8,7 @@ import ca.uhn.fhir.rest.server.interceptor.consent.ConsentOutcome;
 import ca.uhn.fhir.rest.server.interceptor.consent.IConsentContextServices;
 import ca.uhn.fhir.rest.server.interceptor.consent.IConsentService;
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Procedure;
 import org.hl7.fhir.r4.model.Procedure.ProcedureStatus;
@@ -64,7 +65,12 @@ public class Authorization implements IConsentService {
   }
 
   private static boolean isResourceCreator(IBaseResource theResource, String requestingUser) {
-    return (theResource.getMeta().getTag(ResourceUrls.namingsystem_dotbase_username, requestingUser) != null);
+    for (IBaseCoding tag : theResource.getMeta().getTag()) {
+      if (tag.getDisplay().equals(requestingUser)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   private static boolean isResourceEditor(IBaseResource theResource, String requestingUser) {
