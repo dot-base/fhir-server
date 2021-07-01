@@ -1,5 +1,5 @@
-# Movebase FHIR Server
-FHIR Server for the Movebase infrastructure.
+# dot.base FHIR Server
+FHIR Server for the dot.base infrastructure.
 
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/dot-base/fhir-server)](https://github.com/dot-base/fhir-server/releases)
 [![GitHub Workflow Status](https://img.shields.io/github/workflow/status/dot-base/fhir-server/Docker?label=Docker%20Build&logo=Docker)](https://github.com/dot-base/fhir-server/packages/331005)
@@ -11,9 +11,9 @@ FHIR Server for the Movebase infrastructure.
 
 
 ## Production Deployment
-Want a FHIR Server that supports profiles established throughout the Movebase project? The easiest way is to deploy our docker stack for that. Just follow the steps below to get started.
+Want a FHIR Server that supports profiles established throughout the dot.base project? The easiest way is to deploy our docker stack for that. Just follow the steps below to get started.
 
-❗ This setup is meant for folks that just want to deploy the Movebase FHIR Server including a database. If you want to deploy an instance of the whole Movebase project see the [central Movebase repository](https://github.com/dot-base/dot-base).
+❗ This setup is meant for folks that just want to deploy the dot.base FHIR Server including a database. If you want to deploy an instance of the whole dot.base project see the [central dot.base repository](https://github.com/dot-base/dot-base).
 
 [![Docker Build Status](https://img.shields.io/badge/We%20love-Docker-blue?style=flat&logo=Docker)](https://github.com/orgs/dot-base/packages)
 
@@ -51,7 +51,7 @@ or to run the project locally:
     export PROXY_ADDRESS: "YOUR_PROXY_ADDRESS"
     export PROXY_PORT: "YOUR_PROXY_PORT"
     ```
-1. Done and dusted 🎉. This will deploy two containers: a Movebase fhir server as well as a postgres database container.
+1. Done and dusted 🎉. This will deploy two containers: a dot.base fhir server as well as a postgres database container.
 1. [optional] Add these containers to your docker swarm or kubernetes config. Hint: You can use the `docker-compose.yml` as a template for this.
 
 ❗ Per default, port 8080 of the FHIR server container is exposed. You can change that, and other deployment options inside the docker-compose.yml. Remember to redeploy the stack after updating that file.
