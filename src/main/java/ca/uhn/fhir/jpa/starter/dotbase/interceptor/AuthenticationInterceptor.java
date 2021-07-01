@@ -5,7 +5,6 @@ import org.springframework.stereotype.Component;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.starter.dotbase.services.AccessLog;
-import ca.uhn.fhir.jpa.starter.dotbase.services.AuditTrail;
 import ca.uhn.fhir.jpa.starter.dotbase.services.Authentication;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
