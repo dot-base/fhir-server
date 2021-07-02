@@ -6,6 +6,8 @@ import ca.uhn.fhir.jpa.starter.dotbase.utils.DateUtils;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import java.util.List;
+
+import org.hl7.fhir.dstu2016may.model.Enumerations.ResourceType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 
@@ -29,7 +31,21 @@ public class AccessLog {
 
   private static void transactionEntry(String username, RequestDetails theRequest, BundleEntryComponent entry) {
     logSubRequest(theRequest.getRequestId(), entry.getRequest().getMethod().toCode(), username,
-        entry.getRequest().getUrl(), entry.getResource().getResourceType().name());
+        entry.getRequest().getUrl(), getResourceType(entry));
+  }
+
+  private static String getResourceType(BundleEntryComponent entry) {
+    if (entry.getResource() != null) {
+      return entry.getResource().getResourceType().name();
+    }
+    String resourceType = entry.getRequest().getUrl().split("/")[0];
+    for (ResourceType currentResourceType : ResourceType.values()) {
+      String resourceTypeString = currentResourceType.toString();
+      if (resourceType.toUpperCase().equals(resourceTypeString)) {
+        return resourceType;
+      }
+    }
+    return null;
   }
 
   public static void logSubRequest(String requestId, String method, String username, String url, String resourceType) {
