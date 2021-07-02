@@ -66,7 +66,7 @@ public class Authorization implements IConsentService {
 
   private static boolean isResourceCreator(IBaseResource theResource, String requestingUser) {
     for (IBaseCoding tag : theResource.getMeta().getTag()) {
-      if (tag.getDisplay().equals(requestingUser)) {
+      if (tag.getDisplay() != null && tag.getDisplay().equals(requestingUser)) {
         return true;
       }
     }
